@@ -40,12 +40,12 @@ def main():
             suffix=[file_name_suffix[key]],
             index=i
         )
+        #
         try:
             df_didim.append(load_xls(full_path_didim))
         except FileNotFoundError:
             print("END of reading files")
             break
-
 
 
     return 0
