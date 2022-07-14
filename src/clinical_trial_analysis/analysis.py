@@ -21,26 +21,26 @@ def get_full_file_path(prefix, suffix, index):
 """
 이민희 잘해라
 """
-def lmh(date, walk_num):
+def lmh(trial_num, walk_num):
     return df_didim_GRF, df_fsr
 
 """
 여기까지
 """
 
-def kjj(date, walk_num):
+def kjj(trial_num, walk_num):
     return df_didim_kinematics
 
 
 def main():
     # Define File Paths
-    path_test = '../../data/220119/'
+    path_test = '../../data/RH-09/'
     index_list = []
 
     # Use key value for purposes.
     # 'device' for our own device data
     # 'motion_capture' for didim data
-    data_type_prefix = {'device': 'data/', 'motion_capture': 'didim/'}
+    data_type_prefix = {'device': 'data/', 'motion_capture': ''}
     file_name_prefix = {'device': 'temp', 'motion_capture': 'TRIMMED_WALK'}
     file_name_suffix = {'device': 'temp', 'motion_capture': '.XLS'}
 
@@ -60,7 +60,7 @@ def main():
         except FileNotFoundError:
             print("END of reading files")
             break
-
+    print(len(df_didim))
     """
     Kinematic Data Plot
     
