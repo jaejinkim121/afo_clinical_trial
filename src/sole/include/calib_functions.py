@@ -14,6 +14,7 @@ import math
 import joblib
 import re
 
+
 prop_title = dict(
     family='Times New Roman',
     style='normal',
@@ -1118,6 +1119,71 @@ def real_time_prediction_GPR(current_string, current_size, current_dir,
     return df_pre_final, df_N_pre, prediction, sum_prediction
 
 
+def GRF_indexing(data, walk_num, col_name, gait_cycle_tol, walk_ref_num):
+
+    # L or R
+    LorR = str(col_name)[0]
+
+    # GRF indexing
+    GRF_index = np.where(data[[col_name]] > 0)[0]
+
+    # setting for previous index
+    index_tmp = np.array(GRF_index, dtype=float)
+    index_tmp = np.insert(index_tmp, 0, np.nan)
+    index_tmp = np.delete(index_tmp, -1)
+
+    # gait index setting (current, previous, del)
+    gait_index = pd.DataFrame()
+    gait_index["current"] = GRF_index
+    gait_index["previous"] = index_tmp
+    gait_index["del"] = gait_index["current"] - gait_index["previous"]
+    gait_index.reset_index(drop=True, inplace=True)
+
+    start_end_index = pd.DataFrame(columns=["walk_num", "start_index",
+                                            "end_index"])
+    final_index = pd.DataFrame(columns=["walk_num", "start_index",
+                                        "end_index"])
+
+    # gait number per each walk
+    within_index = np.where(abs(gait_index["del"]) > gait_cycle_tol*0.4)[0]
+    num_within_walk = len(within_index)
+
+    # start, end index per each walk
+    for n in range(num_within_walk + 1):
+        start_end_index.loc[int(n), "walk_num"] = walk_num
+        # initial walk
+        if n == 0:
+            start_end_index.loc[int(n), "start_index"] = float(GRF_index[0])
+        else:
+            start_end_index.loc[int(n), "start_index"] = np.array(
+                    gait_index.loc[within_index, "current"], dtype="int")[n-1]
+        # final walk
+        if n == num_within_walk:
+            start_end_index.loc[int(n), "end_index"] = float(GRF_index[-1])
+        else:
+            start_end_index.loc[int(n), "end_index"] = np.array(
+                    gait_index.loc[within_index, "previous"], dtype="int")[n]
+
+    # final indexing for gait analysis
+    GRF_num = walk_ref_num[int(walk_num)][str(LorR)]
+    if GRF_num == len(start_end_index):
+        swing_index = start_end_index.loc[
+            int(GRF_num - 1), "start_index"] - (start_end_index.loc[
+                int(GRF_num - 2), "end_index"] + 1)
+        gait_start_index = start_end_index.loc[int(GRF_num - 1), "start_index"]
+        gait_end_index = start_end_index.loc[int(GRF_num - 1),
+                                             "end_index"] + swing_index
+    else:
+        gait_start_index = start_end_index.loc[int(GRF_num - 1), "start_index"]
+        gait_end_index = start_end_index.loc[int(GRF_num), "start_index"] - 1
+
+    final_index.loc[0, "walk_num"] = walk_num
+    final_index.loc[0, "start_index"] = gait_start_index
+    final_index.loc[0, "end_index"] = gait_end_index
+
+    return start_end_index, final_index
+
+
 def possible_sensor_visualization(path, WINDOWS, RH_num, walk_num, R_or_L):
 
     data = pd.read_csv(path, header=0)
@@ -1745,7 +1811,7 @@ def gait_phase_visualization(R_path, R_path_name, walk_force_labeling, desired_c
         y_range = []
 
     # plotting for right data first
-    fig = plt.figure(figsize=(15, 8))
+    fig = plt.figure(figsize=(15, 12))
     # fig.suptitle("RH-%s_%s_right first" %(str(RH_num), str(desired_info_name)), fontsize=15, **prop_title)
     fig.suptitle("RH-%s_%s" % (str(RH_num), str(desired_info_name)),
                  fontsize=15, **prop_title)
@@ -1769,7 +1835,7 @@ def gait_phase_visualization(R_path, R_path_name, walk_force_labeling, desired_c
     plt.errorbar(desired_info_R["gait_cycle_%"], desired_info_R[str(desired_info_name)+"_R_mean"],
                  desired_info_R[str(desired_info_name)+"_R_std"], fmt='-o', ecolor="lightskyblue")
     plt.errorbar(desired_info_R["gait_cycle_%"], desired_info_R[str(
-        desired_info_name)+"_L_mean"], desired_info_R[str(desired_info_name)+"_L_std"], fmt='-o', ecolor="orange")
+        desired_info_name)+"_L_mean"], desired_info_R[str(desired_info_name)+"_L_std"], fmt='-o', ecolor="red")
     plt.xlabel("Gait cycle [%]", **prop_tick)
     plt.ylabel("%s" % (str(desired_info_name)), **prop_tick)
     plt.xticks(np.arange(0, 110, 10), fontsize=15, fontweight='bold')
