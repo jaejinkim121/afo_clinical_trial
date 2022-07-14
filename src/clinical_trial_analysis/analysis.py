@@ -1,6 +1,4 @@
-import pandas as pd
-import numpy as np
-from load_xls import load_xls
+from common.load_xls import load_xls
 
 
 MAX_TRIAL = 100
@@ -11,6 +9,7 @@ def get_full_file_path(prefix, suffix, index):
     for pre in prefix:
         path += pre
 
+    # To make 2 digit number
     path += str(index).zfill(2)
 
     for suf in suffix:
@@ -19,9 +18,24 @@ def get_full_file_path(prefix, suffix, index):
     return path
 
 
+"""
+이민희 잘해라
+"""
+def lmh(date, walk_num):
+    return df_didim_GRF, df_fsr
+
+"""
+여기까지
+"""
+
+def kjj(date, walk_num):
+    return df_didim_kinematics
+
+
 def main():
     # Define File Paths
     path_test = '../../data/220119/'
+    index_list = []
 
     # Use key value for purposes.
     # 'device' for our own device data
@@ -46,6 +60,14 @@ def main():
         except FileNotFoundError:
             print("END of reading files")
             break
+
+    """
+    Kinematic Data Plot
+    
+     1. Roll, Pitch, Yaw Angle of 7 limbs.
+     
+    """
+    #
 
 
     return 0

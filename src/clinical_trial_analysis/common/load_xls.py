@@ -18,7 +18,7 @@ def load_xls(file_path):
 
 # To test load_xls function
 def test():
-    test_file_path = '../../data/220119/didim/TRIMMED_WALK01.XLS'
+    test_file_path = '../../../data/220119/didim/TRIMMED_WALK01.XLS'
     df = load_xls(test_file_path)
     print(df)
 
