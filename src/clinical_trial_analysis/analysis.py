@@ -29,10 +29,6 @@ def lmh(trial_num, walk_num):
 """
 
 def kjj(trial_num, walk_num):
-    return df_didim_kinematics
-
-
-def main():
     # Define File Paths
     path_test = '../../data/RH-09/'
     index_list = []
@@ -63,12 +59,17 @@ def main():
     print(len(df_didim))
     """
     Kinematic Data Plot
-    
+
      1. Roll, Pitch, Yaw Angle of 7 limbs.
-     
+
     """
     #
 
+
+return df_didim_kinematics
+
+
+def main():
 
     return 0
 
