@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 import glob
 import os
+import joblib
+import time
 
 
 def folder_path_name(path, start_or_end=None, char=None, T_F=None):
@@ -114,3 +116,111 @@ def load_SENSOR_vol(path, RH_num):
         data.reset_index(drop=True, inplace=True)
 
     return data
+
+
+def N_data_preprocessing(data, NUM_PRE=30, WINDOWS=30, tol=0.01):
+
+    data.sort_values(by=['time'], axis=0, ascending=True, inplace=True)
+    data.reset_index(drop=True, inplace=True)
+
+    time_tmp = data.time.values.tolist()
+    time_tmp = np.insert(time_tmp, 0, np.nan)
+    time_tmp = np.delete(time_tmp, -1)
+
+    data["pre_time"] = time_tmp
+
+    for h in np.arange(1, NUM_PRE+1, 1):
+        tmp = data.vout.values.tolist()
+        for p in np.arange(0, h, 1):
+            tmp = np.insert(tmp, int(p), np.nan)
+            tmp = np.delete(tmp, -1)
+
+        data["pre_%s" % (str(h))] = tmp
+
+    data = data.astype(float)
+
+    data["del_V"] = (data["vout"] - data["pre_1"])
+    data["del_V"] = data["del_V"].rolling(window=WINDOWS,
+                                          min_periods=1, center=True).mean()
+
+    data["del_time"] = (data["time"] - data["pre_time"])
+
+    data["loading_type"] = 0.0
+
+    for q in np.arange(1, NUM_PRE+1, 1):
+        data["loading_type"] += data["pre_%s" % (str(q))]
+
+    data["loading_type"] = (data["loading_type"])/float(len(
+        np.arange(1, NUM_PRE+1, 1)))
+    data["loading_type"] -= data["vout"]
+    data["loading_type"] = data["loading_type"].rolling(
+        window=WINDOWS, min_periods=1, center=True).mean()
+
+    loading_index1 = []
+    loading_index1 = data[abs(data["loading_type"]) > tol].index
+    # data["loading_type"] = np.sign(-data["loading_type"])
+
+    data["loading_type1"] = 0.0
+    data.loc[loading_index1, "loading_type1"] = np.sign(-data.loc[
+        loading_index1, "loading_type"])
+
+    delV_index1 = []
+    delV_index1 = data[abs(data["del_V"]) > tol].index
+
+    data["loading_type2"] = 0.0
+    data.loc[delV_index1, "loading_type2"] = np.sign(-data.loc[
+        delV_index1, "del_V"])
+
+    delT_index1_1 = []
+    delT_index1_1 = data[data["loading_type1"] != 0.0].index
+
+    data["del_time1"] = 0.0
+    data.loc[delT_index1_1, "del_time1"] = data.loc[delT_index1_1, "del_time"]
+
+    data["elapsed_time1"] = np.cumsum(data["del_time1"])
+
+    delT_index1_2 = []
+    delT_index1_2 = data[data["loading_type2"] != 0.0].index
+
+    data["del_time2"] = 0.0
+    data.loc[delT_index1_2, "del_time2"] = data.loc[delT_index1_2, "del_time"]
+
+    data["elapsed_time2"] = np.cumsum(data["del_time2"])
+
+    data = data.dropna(axis=0)
+    data.reset_index(drop=True, inplace=True)
+
+    return data
+
+
+# def GPR_prediction(df, model_path):
+
+#     X = df["vout"]
+#     ###############################################################
+#     # N-dimensional GPR
+#     ##############################################################
+#     pred_start_time = time()
+
+#     # load GPR model
+#     gaussian_process = joblib.load("GPR_220515_CASE20_280%s_%s"
+#                % (str(current_size), str(current_dir),
+#                   str(seq)))
+#     mean_prediction, std_prediction = gaussian_process.predict(X, return_std=True)
+    
+#     pred_end_time = time()
+#     # save the model
+#     df_test = df_test.append({"case_num": str(case),"RH": str(RH_num), "stance_or_walk": "walk", "stance_or_walk_num": str(walk_num), "sensor_dir": str(sensor_dir[0].upper()),"sensor_num": str(sensor_num),"sample_num": NUM_MIN_SAMPLE, "pred_time":float(pred_end_time - pred_start_time)}, ignore_index=True)
+    
+#     pred_directory = str(walk_final_name_path)+"prediction"
+    
+#     try:
+#         if not os.path.exists(pred_directory):
+#             os.makedirs(pred_directory)
+#     except OSError:
+#         pass
+    
+#     final_test_data = pd.DataFrame(data = reg_test_data, columns = reg_test_data.columns)
+#     final_test_data["mean_prediction"] = mean_prediction
+#     final_test_data["std_prediction"] = std_prediction
+#     final_test_data.to_csv(pred_directory+"/pred_SENSOR_%s.csv" %(str(sensor_num)),sep=',', index = False, header = True)
+                    

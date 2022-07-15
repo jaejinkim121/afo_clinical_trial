@@ -1,6 +1,8 @@
+import pandas as pd
 from common.load_xls import load_xls
 from include.sole_header import folder_path_name, force_sensor_sync
 from include.sole_header import load_GRF, load_SENSOR_vol
+from include.sole_header import N_data_preprocessing
 
 
 MAX_TRIAL = 100
@@ -27,6 +29,9 @@ def get_full_file_path(prefix, suffix, index):
 
 def lmh(trial_num, walk_num):
 
+    # trial number (int -> string)
+    trial_num = str(trial_num).zfill(2)
+
     path = '../../data/RH-%s/' % (str(trial_num))
     force_sync_path = '../../data/analyzed/sole/df_sync_force.csv'
     sensor_sync_path = '../../data/analyzed/sole/df_sync.csv'
@@ -37,10 +42,7 @@ def lmh(trial_num, walk_num):
          force_sync_path, sensor_sync_path, trial_num, walk_num)
 
     # modify walk num (string)
-    if (len(str(walk_num)) == 1):
-        walk_num = "0" + str(walk_num)
-    else:
-        walk_num = str(walk_num)
+    walk_num = str(walk_num).zfill(2)
 
     # GRF dataframe, end time
     (GRF_file, GRF_name) = folder_path_name(path, "end", "WALK%s.XLS" % (
@@ -53,13 +55,6 @@ def lmh(trial_num, walk_num):
     R_sensor_end_time = R_sensor_start_time + float(GRF_end_time)
     # foot pressure sensor data
     volt_header = ['time', 'v0', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7']
-    # Left volt header
-    left_volt_header = ['time']
-    left_volt_header.extend(["left_" + s for s in volt_header[1:]])
-
-    # Right volt header
-    right_volt_header = ['time']
-    right_volt_header.extend(["right_" + s for s in volt_header[1:]])
 
     # sensor L, R path
     (L_walk_data_list,
@@ -71,8 +66,6 @@ def lmh(trial_num, walk_num):
     df_vol_L = load_SENSOR_vol(L_walk_data_list[0], trial_num)
     df_vol_L = df_vol_L.loc[(df_vol_L["time"] >= L_sensor_start_time) & (
         df_vol_L["time"] <= L_sensor_end_time)][volt_header]
-    # change the column name (left)
-    df_vol_L.columns = left_volt_header
     # initialize L time
     df_vol_L["time"] = df_vol_L["time"] - L_sensor_start_time
 
@@ -80,12 +73,34 @@ def lmh(trial_num, walk_num):
     df_vol_R = load_SENSOR_vol(R_walk_data_list[0], trial_num)
     df_vol_R = df_vol_R.loc[(df_vol_R["time"] >= R_sensor_start_time) & (
         df_vol_R["time"] <= R_sensor_end_time)][volt_header]
-    # change the column name (right)
-    df_vol_R.columns = right_volt_header
     # initialize R time
     df_vol_R["time"] = df_vol_R["time"] - R_sensor_start_time
 
+    # ##########################################################
+    # # N-data preprocessing for GPR prediction
+    # ##########################################################
+    # if trial_num == "9":
+
+    #     GPR_path = '../../data/analyzed/sole/RH-%s/model/' % trial_num.zfill(2)
+    #     force_header = ['time', 'f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7']
+    #     df_force_L = pd.DataFrame(columns=force_header)
+    #     df_force_R = pd.DataFrame(columns=force_header)
+    #     for sensor in volt_header[1:]:
+    
+    #         sensor_num = str(sensor[1:])
+    #         # Left sensor
+    #         df_left_sensor = pd.DataFrame(df_vol_L[["time", sensor]])
+    #         df_left_sensor.columns = ["time", "vout"]
+    #         df_left_sensor = N_data_preprocessing(df_left_sensor)
+    #         # Right sensor
+    #         df_right_sensor = pd.DataFrame(df_vol_R[["time", sensor]])
+    #         df_right_sensor.columns = ["time", "vout"]
+    #         df_right_sensor = N_data_preprocessing(df_right_sensor)
+        
+
     return df_didim_GRF, df_vol_L, df_vol_R
+
+    
 
 
 """
@@ -134,7 +149,7 @@ def lmh(trial_num, walk_num):
 
 def main():
 
-    (df_didim_GRF, df_vol_L, df_vol_R) = lmh("07", 20)
+    (df_didim_GRF, df_vol_L, df_vol_R) = lmh(7, 20)
     
     return 0
 
