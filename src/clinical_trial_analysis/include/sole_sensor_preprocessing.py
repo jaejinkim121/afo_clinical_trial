@@ -201,7 +201,7 @@ def GPR_prediction(df, model_path, sensor_dir, sensor_num):
     ##############################################################
     # load GPR model
     gaussian_process = joblib.load(model_path +
-                                   "GPR_220515_CASE20_280%s_%s.sav"
+                                   "GPR_CASE20_%s_%s.sav"
                                    % (str(sensor_dir),
                                       str(int(sensor_num) + 1)))
     # prediction
