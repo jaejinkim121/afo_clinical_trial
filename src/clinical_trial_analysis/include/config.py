@@ -6,3 +6,5 @@ class PlotFlag(Enum):
     USE_FORCE = False
     USE_DIDIM_GRF = True
     USE_DIDIM_ = False
+    USE_DIDIM_FLEXION = True
+

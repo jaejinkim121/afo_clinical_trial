@@ -193,34 +193,33 @@ def N_data_preprocessing(data, NUM_PRE=30, WINDOWS=30, tol=0.01):
     return data
 
 
-# def GPR_prediction(df, model_path):
+def GPR_prediction(df, model_path, sensor_dir, sensor_num):
 
-#     X = df["vout"]
-#     ###############################################################
-#     # N-dimensional GPR
-#     ##############################################################
-#     pred_start_time = time()
+    X = df["vout"]
+    ###############################################################
+    # N-dimensional GPR
+    ##############################################################
+    pred_start_time = time()
 
-#     # load GPR model
-#     gaussian_process = joblib.load("GPR_220515_CASE20_280%s_%s"
-#                % (str(current_size), str(current_dir),
-#                   str(seq)))
-#     mean_prediction, std_prediction = gaussian_process.predict(X, return_std=True)
+    # load GPR model
+    gaussian_process = joblib.load(model_path + "GPR_220515_CASE20_280%s_%s"
+                                   % (str(sensor_dir), str(sensor_num)))
+    mean_prediction, std_prediction = gaussian_process.predict(X, return_std=True)
     
-#     pred_end_time = time()
-#     # save the model
-#     df_test = df_test.append({"case_num": str(case),"RH": str(RH_num), "stance_or_walk": "walk", "stance_or_walk_num": str(walk_num), "sensor_dir": str(sensor_dir[0].upper()),"sensor_num": str(sensor_num),"sample_num": NUM_MIN_SAMPLE, "pred_time":float(pred_end_time - pred_start_time)}, ignore_index=True)
+    pred_end_time = time()
+    # save the model
+    df_test = df_test.append({"case_num": str(case),"RH": str(RH_num), "stance_or_walk": "walk", "stance_or_walk_num": str(walk_num), "sensor_dir": str(sensor_dir[0].upper()),"sensor_num": str(sensor_num),"sample_num": NUM_MIN_SAMPLE, "pred_time":float(pred_end_time - pred_start_time)}, ignore_index=True)
     
-#     pred_directory = str(walk_final_name_path)+"prediction"
+    pred_directory = str(walk_final_name_path)+"prediction"
     
-#     try:
-#         if not os.path.exists(pred_directory):
-#             os.makedirs(pred_directory)
-#     except OSError:
-#         pass
+    try:
+        if not os.path.exists(pred_directory):
+            os.makedirs(pred_directory)
+    except OSError:
+        pass
     
-#     final_test_data = pd.DataFrame(data = reg_test_data, columns = reg_test_data.columns)
-#     final_test_data["mean_prediction"] = mean_prediction
-#     final_test_data["std_prediction"] = std_prediction
-#     final_test_data.to_csv(pred_directory+"/pred_SENSOR_%s.csv" %(str(sensor_num)),sep=',', index = False, header = True)
+    final_test_data = pd.DataFrame(data = reg_test_data, columns = reg_test_data.columns)
+    final_test_data["mean_prediction"] = mean_prediction
+    final_test_data["std_prediction"] = std_prediction
+    final_test_data.to_csv(pred_directory+"/pred_SENSOR_%s.csv" %(str(sensor_num)),sep=',', index = False, header = True)
                     
