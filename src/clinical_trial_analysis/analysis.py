@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 from include.load_imu_data import load_xls, load_imu
 from include.sole_sensor_preprocessing import folder_path_name, force_sensor_sync
 from include.sole_sensor_preprocessing import load_GRF, load_SENSOR_vol
@@ -21,7 +22,6 @@ def get_full_file_path(prefix, suffix, index):
 
 
 def get_dataframe_sole_sensor(trial_num, walk_num):
-
     path = '../../data/RH-%s/' % (str(trial_num))
     force_sync_path = '../../data/analyzed/sole/df_sync_force.csv'
     sensor_sync_path = '../../data/analyzed/sole/df_sync.csv'
@@ -101,7 +101,7 @@ def get_dataframe_imu(trial_num, walk_num):
 
 
 def main():
-    trial_num, walk_num = 8, 15
+    trial_num, walk_num = 7, 20
 
     # ----------------- DATA LOADING ------------------- #
 
@@ -110,9 +110,42 @@ def main():
     df_didim_GRF, df_vol_L, df_vol_R = \
         get_dataframe_sole_sensor(trial_num, walk_num)
 
-    # -------------------  PLOT  ----------------------- #
-    
 
+    # ------------------ FLAG HANDLING ----------------- #
+    data = []
+    if PlotFlag.USE_DIDIM_GRF:
+        data.append([
+            df_didim_GRF['time'], df_didim_GRF['L_GRF_VRT'],
+            'GRF_normalized', 'Left foot normalized GRF'])
+
+    if PlotFlag.USE_DIDIM_FLEXION:
+        for key in df_didim_kinematics:
+            print(key)
+            if key == 'time':
+                continue
+            data.append([
+                df_didim_kinematics['time'], df_didim_kinematics[key], key, key
+            ])
+
+    # if PlotFlag.USE_VOLT:
+    #     list_current_flag = list()
+    #     for
+    #     list_current_flag.append([
+    #         df_vol_L['time'], df_vol_L['v0'],
+    #         'GRF_normalized', 'Left foot normalized GRF'])
+    #     data.append(list_current_flag)
+
+    data_type_length = len(data)    # TEMP
+
+    # -------------------  PLOT  ----------------------- #
+    fig = plt.figure()
+    ax = [fig.add_subplot(data_type_length, 1, i) for i in range(1, data_type_length + 1)]
+    for i in range(data_type_length):
+        current_ax = ax[i]
+        current_ax.plot(data[i][0], data[i][1])
+        current_ax.set_ylabel(data[i][2])
+        current_ax.set_title(data[i][3])
+    plt.show()
     return 0
 
 
