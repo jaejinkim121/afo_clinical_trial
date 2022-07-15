@@ -1,15 +1,13 @@
 
 
 import pandas as pd
-from common.load_xls import load_xls
-from include.sole_header import folder_path_name, force_sensor_sync
-from include.sole_header import load_GRF, load_SENSOR_vol
-from include.sole_header import N_data_preprocessing
-
 import matplotlib.pyplot as plt
 from include.load_imu_data import load_xls, load_imu
-from include.sole_sensor_preprocessing import folder_path_name, force_sensor_sync
+from include.sole_sensor_preprocessing import folder_path_name
+from include.sole_sensor_preprocessing import force_sensor_sync
 from include.sole_sensor_preprocessing import load_GRF, load_SENSOR_vol
+from include.sole_sensor_preprocessing import N_data_preprocessing
+from include.sole_sensor_preprocessing import GPR_prediction
 from include.config import PlotFlag
 
 
@@ -84,28 +82,46 @@ def get_dataframe_sole_sensor(trial_num, walk_num):
     # ##########################################################
     # # N-data preprocessing for GPR prediction
     # ##########################################################
-    # if trial_num == "9":
+    if trial_num == "09":
 
-    #     GPR_path = '../../data/analyzed/sole/RH-%s/model/' % trial_num.zfill(2)
-    #     force_header = ['time', 'f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7']
-    #     df_force_L = pd.DataFrame(columns=force_header)
-    #     df_force_R = pd.DataFrame(columns=force_header)
-    #     for sensor in volt_header[1:]:
-    
-    #         sensor_num = str(sensor[1:])
-    #         # Left sensor
-    #         df_left_sensor = pd.DataFrame(df_vol_L[["time", sensor]])
-    #         df_left_sensor.columns = ["time", "vout"]
-    #         df_left_sensor = N_data_preprocessing(df_left_sensor)
-    #         # Right sensor
-    #         df_right_sensor = pd.DataFrame(df_vol_R[["time", sensor]])
-    #         df_right_sensor.columns = ["time", "vout"]
-    #         df_right_sensor = N_data_preprocessing(df_right_sensor)
-        
+        model_path = '../../data/analyzed/sole/RH-%s/model/' % trial_num
+        force_header = ['time', 'f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7']
+        df_force_L = pd.DataFrame(columns=force_header)
+        df_force_L["time"] = df_vol_L["time"]
 
-    return df_didim_GRF, df_vol_L, df_vol_R
+        df_force_R = pd.DataFrame(columns=force_header)
+        df_force_R["time"] = df_vol_R["time"]
 
-    
+        for sensor in volt_header[1:]:
+
+            sensor_num = str(sensor[1:])
+            # Left sensor
+            df_left_sensor = pd.DataFrame(df_vol_L[["time", sensor]])
+            df_left_sensor.columns = ["time", "vout"]
+            # N data preprocessing
+            # df_left_sensor = N_data_preprocessing(df_left_sensor)
+            # GPR prediction
+            df_force_L['f%d' % int(sensor_num)] = \
+                GPR_prediction(
+                    df_left_sensor,
+                    model_path, "Left", sensor_num)
+
+            # Right sensor
+            df_right_sensor = pd.DataFrame(df_vol_R[["time", sensor]])
+            df_right_sensor.columns = ["time", "vout"]
+            # N data preprocessing
+            # df_right_sensor = N_data_preprocessing(df_right_sensor)
+            # GPR prediction
+            df_force_R['f%d' % int(sensor_num)] = \
+                GPR_prediction(
+                    df_right_sensor,
+                    model_path, "Right", sensor_num)
+
+        return df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R
+
+    else:
+
+        return df_didim_GRF, df_vol_L, df_vol_R
 
 
 def get_dataframe_imu(trial_num, walk_num):
@@ -134,7 +150,7 @@ def main():
         get_dataframe_sole_sensor(trial_num, walk_num)
 
 
-    (df_didim_GRF, df_vol_L, df_vol_R) = get_dataframe_sole_sensor(7, 20)
+    (df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R) = get_dataframe_sole_sensor(9, 15)
 
     # -------------------  PLOT  ----------------------- #
 
