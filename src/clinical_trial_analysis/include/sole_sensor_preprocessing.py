@@ -77,7 +77,7 @@ def load_GRF(GRF_path):
     GRF_data = GRF_data.astype(float)
 
     index_data = list(GRF_data.index)
-    df_index = pd.DataFrame(index_data, columns=["GRF_time"])
+    df_index = pd.DataFrame(index_data, columns=["time"])
     df_index = (df_index * 5) / 600
     end_time = df_index.iloc[-1, 0]
     R_GRF_data = GRF_data[["R_GRF_VRT"]]
