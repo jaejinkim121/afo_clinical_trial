@@ -476,6 +476,7 @@ def GRF_data_read_plot(path, name, RH_num, save_path, csv_path):
 
     index_data = list(GRF_data.index)
     df_index = pd.DataFrame(index_data, columns=["index data"])
+    df_index = (df_index * 5) / 600
     R_GRF_data = GRF_data[["R_GRF_FWD", "R_GRF_LAT", "R_GRF_VRT"]]
     L_GRF_data = GRF_data[["L_GRF_FWD", "L_GRF_LAT", "L_GRF_VRT"]]
     ##############################################################
@@ -484,12 +485,12 @@ def GRF_data_read_plot(path, name, RH_num, save_path, csv_path):
     fig.suptitle("%s" % (name), fontsize=15)
 
     cx1 = plt.subplot(2, 1, 1)
-    plt.plot(index_data, R_GRF_data)
+    plt.plot(df_index["index data"], R_GRF_data)
     plt.title("Right GRF")
     cx1.legend(list(R_GRF_data.columns))
 
     cx2 = plt.subplot(2, 1, 2, sharex=cx1)
-    plt.plot(index_data, L_GRF_data)
+    plt.plot(df_index["index data"], L_GRF_data)
     plt.title("Left GRF")
     plt.xlabel("Index")
     cx2.legend(list(L_GRF_data.columns))
