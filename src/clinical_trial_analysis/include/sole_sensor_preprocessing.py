@@ -208,3 +208,62 @@ def GPR_prediction(df, model_path, sensor_dir, sensor_num):
     mean_pred, std_pred = gaussian_process.predict(X, return_std=True)
 
     return mean_pred
+
+
+def GPR_df_save(RH_num, df_vol_L, df_vol_R, volt_header, save_path):
+
+    # create csv path
+    try:
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+    except OSError:
+        pass
+
+    model_path = '../../data/analyzed/sole/RH-%s/model/' % RH_num
+    force_header = ['time', 'f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7']
+    df_force_L = pd.DataFrame(columns=force_header)
+    df_force_L["time"] = df_vol_L["time"]
+
+    df_force_R = pd.DataFrame(columns=force_header)
+    df_force_R["time"] = df_vol_R["time"]
+
+    for sensor in volt_header[1:]:
+
+        sensor_num = str(sensor[1:])
+        # Left sensor
+        df_left_sensor = pd.DataFrame(df_vol_L[["time", sensor]])
+        df_left_sensor.columns = ["time", "vout"]
+        # N data preprocessing
+        # df_left_sensor = N_data_preprocessing(df_left_sensor)
+        # GPR prediction
+        df_force_L['f%d' % int(sensor_num)] = \
+            GPR_prediction(
+                df_left_sensor,
+                model_path, "Left", sensor_num)
+        # save GPR df
+        df_force_L.to_csv(str(save_path) + "/df_force_L.csv",
+                          header=True, index=False, sep=',')
+
+        # Right sensor
+        df_right_sensor = pd.DataFrame(df_vol_R[["time", sensor]])
+        df_right_sensor.columns = ["time", "vout"]
+        # N data preprocessing
+        # df_right_sensor = N_data_preprocessing(df_right_sensor)
+        # GPR prediction
+        df_force_R['f%d' % int(sensor_num)] = \
+            GPR_prediction(
+                df_right_sensor,
+                model_path, "Right", sensor_num)
+        # save GPR df
+        df_force_R.to_csv(str(save_path) + "/df_force_R.csv",
+                          header=True, index=False, sep=',')
+
+    return 0
+
+
+def load_GPR(path):
+
+    df_force_L = pd.read_csv(path + "/df_force_L.csv", sep=",", header=0)
+    df_force_R = pd.read_csv(path + "/df_force_R.csv", sep=",", header=0)
+
+    return df_force_L, df_force_R
