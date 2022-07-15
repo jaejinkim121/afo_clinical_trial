@@ -43,7 +43,7 @@ for (RH_list, RH_name) in zip(exp_list, exp_name_list):
     # for loop - calibration case
     for calib_name in calib_case:
 
-        RH_name_path = str(anal_path) + "RH-%s" %(RH_num) +str(calib_name)
+        RH_name_path = str(anal_path) + "RH-%s" % (RH_num) + str(calib_name)
         # read folder name - size direction number
         (calib_test_list, calib_name_list) = folder_path_name(
             RH_name_path, "end", "txt", 0)
