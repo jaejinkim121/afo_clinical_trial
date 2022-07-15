@@ -52,7 +52,7 @@ def lmh(trial_num, walk_num):
     L_sensor_end_time = L_sensor_start_time + float(GRF_end_time)
     R_sensor_end_time = R_sensor_start_time + float(GRF_end_time)
     # foot pressure sensor data
-    vol = ['v0', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7']
+    vol = ['time', 'v0', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7']
 
     # sensor L, R path
     (L_walk_data_list,
@@ -62,17 +62,17 @@ def lmh(trial_num, walk_num):
 
     # L dataframe
     df_vol_L = load_SENSOR_vol(L_walk_data_list[0], trial_num)
-    df_vol_L = df_vol_L.loc[(df_vol_L.time >= L_sensor_start_time) & (
-        df_vol_L.time <= L_sensor_end_time)][vol]
+    df_vol_L = df_vol_L.loc[(df_vol_L["time"] >= L_sensor_start_time) & (
+        df_vol_L["time"] <= L_sensor_end_time)][vol]
     # initialize L time
-    df_vol_L.time -= L_sensor_start_time
+    df_vol_L["time"] = df_vol_L["time"] - L_sensor_start_time
 
     # R dataframe
     df_vol_R = load_SENSOR_vol(R_walk_data_list[0], trial_num)
-    df_vol_R = df_vol_R.loc[(df_vol_R.time >= R_sensor_start_time) & (
-        df_vol_R.time <= R_sensor_end_time)][vol]
+    df_vol_R = df_vol_R.loc[(df_vol_R["time"] >= R_sensor_start_time) & (
+        df_vol_R["time"] <= R_sensor_end_time)][vol]
     # initialize R time
-    df_vol_R.time -= R_sensor_start_time
+    df_vol_R["time"] = df_vol_R["time"] - R_sensor_start_time
 
     return df_didim_GRF, df_vol_L, df_vol_R
 
@@ -81,49 +81,49 @@ def lmh(trial_num, walk_num):
 여기까지
 """
 
-def kjj(trial_num, walk_num):
-    # Define File Paths
-    path_test = '../../data/RH-09/'
-    index_list = []
+# def kjj(trial_num, walk_num):
+#     # Define File Paths
+#     path_test = '../../data/RH-09/'
+#     index_list = []
 
-    # Use key value for purposes.
-    # 'device' for our own device data
-    # 'motion_capture' for didim data
-    data_type_prefix = {'device': 'data/', 'motion_capture': ''}
-    file_name_prefix = {'device': 'temp', 'motion_capture': 'TRIMMED_WALK'}
-    file_name_suffix = {'device': 'temp', 'motion_capture': '.XLS'}
+#     # Use key value for purposes.
+#     # 'device' for our own device data
+#     # 'motion_capture' for didim data
+#     data_type_prefix = {'device': 'data/', 'motion_capture': ''}
+#     file_name_prefix = {'device': 'temp', 'motion_capture': 'TRIMMED_WALK'}
+#     file_name_suffix = {'device': 'temp', 'motion_capture': '.XLS'}
 
-    # Load data and make dataframe
-    df_didim = []
-    key = 'motion_capture'
+#     # Load data and make dataframe
+#     df_didim = []
+#     key = 'motion_capture'
 
-    for i in range(1, MAX_TRIAL):
-        full_path_didim = get_full_file_path(
-            prefix=[path_test, data_type_prefix[key], file_name_prefix[key]],
-            suffix=[file_name_suffix[key]],
-            index=i
-        )
-        #
-        try:
-            df_didim.append(load_xls(full_path_didim))
-        except FileNotFoundError:
-            print("END of reading files")
-            break
-    print(len(df_didim))
-    """
-    Kinematic Data Plot
+#     for i in range(1, MAX_TRIAL):
+#         full_path_didim = get_full_file_path(
+#             prefix=[path_test, data_type_prefix[key], file_name_prefix[key]],
+#             suffix=[file_name_suffix[key]],
+#             index=i
+#         )
+#         #
+#         try:
+#             df_didim.append(load_xls(full_path_didim))
+#         except FileNotFoundError:
+#             print("END of reading files")
+#             break
+#     print(len(df_didim))
+#     """
+#     Kinematic Data Plot
 
-      1. Roll, Pitch, Yaw Angle of 7 limbs.
+#       1. Roll, Pitch, Yaw Angle of 7 limbs.
 
-    """
-    #
+#     """
+#     #
 
-    return df_didim_kinematics
+#     return df_didim_kinematics
 
 
 def main():
 
-    lmh("07", 12)
+    (df_didim_GRF, df_vol_L, df_vol_R) = lmh("07", 20)
     
     return 0
 
