@@ -52,7 +52,14 @@ def lmh(trial_num, walk_num):
     L_sensor_end_time = L_sensor_start_time + float(GRF_end_time)
     R_sensor_end_time = R_sensor_start_time + float(GRF_end_time)
     # foot pressure sensor data
-    vol = ['time', 'v0', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7']
+    volt_header = ['time', 'v0', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7']
+    # Left volt header
+    left_volt_header = ['time']
+    left_volt_header.extend(["left_" + s for s in volt_header[1:]])
+
+    # Right volt header
+    right_volt_header = ['time']
+    right_volt_header.extend(["right_" + s for s in volt_header[1:]])
 
     # sensor L, R path
     (L_walk_data_list,
@@ -63,14 +70,18 @@ def lmh(trial_num, walk_num):
     # L dataframe
     df_vol_L = load_SENSOR_vol(L_walk_data_list[0], trial_num)
     df_vol_L = df_vol_L.loc[(df_vol_L["time"] >= L_sensor_start_time) & (
-        df_vol_L["time"] <= L_sensor_end_time)][vol]
+        df_vol_L["time"] <= L_sensor_end_time)][volt_header]
+    # change the column name (left)
+    df_vol_L.columns = left_volt_header
     # initialize L time
     df_vol_L["time"] = df_vol_L["time"] - L_sensor_start_time
 
     # R dataframe
     df_vol_R = load_SENSOR_vol(R_walk_data_list[0], trial_num)
     df_vol_R = df_vol_R.loc[(df_vol_R["time"] >= R_sensor_start_time) & (
-        df_vol_R["time"] <= R_sensor_end_time)][vol]
+        df_vol_R["time"] <= R_sensor_end_time)][volt_header]
+    # change the column name (right)
+    df_vol_R.columns = right_volt_header
     # initialize R time
     df_vol_R["time"] = df_vol_R["time"] - R_sensor_start_time
 
