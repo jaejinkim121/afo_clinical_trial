@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib
 from include.load_imu_data import load_xls, load_imu
 from include.sole_sensor_preprocessing import folder_path_name, force_sensor_sync
 from include.sole_sensor_preprocessing import load_GRF, load_SENSOR_vol
@@ -22,6 +23,7 @@ def get_full_file_path(prefix, suffix, index):
 
 
 def get_dataframe_sole_sensor(trial_num, walk_num):
+    trial_num = str(trial_num).zfill(2)
     path = '../../data/RH-%s/' % (str(trial_num))
     force_sync_path = '../../data/analyzed/sole/df_sync_force.csv'
     sensor_sync_path = '../../data/analyzed/sole/df_sync.csv'
@@ -138,6 +140,7 @@ def main():
     data_type_length = len(data)    # TEMP
 
     # -------------------  PLOT  ----------------------- #
+    matplotlib.rcParams['figure.figsize'] = 20, 50
     fig = plt.figure()
     ax = [fig.add_subplot(data_type_length, 1, i) for i in range(1, data_type_length + 1)]
     for i in range(data_type_length):
@@ -145,7 +148,10 @@ def main():
         current_ax.plot(data[i][0], data[i][1])
         current_ax.set_ylabel(data[i][2])
         current_ax.set_title(data[i][3])
-    plt.show()
+        current_ax.grid(axis='x',
+                        linestyle='--')
+    plt.tight_layout()
+    plt.savefig('test.png')
     return 0
 
 
