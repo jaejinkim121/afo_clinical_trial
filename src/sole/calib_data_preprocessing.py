@@ -89,7 +89,9 @@ anal_path = "D:/OneDrive - SNU/AFO_analysis/" + \
 #             synced = sync_data[sync_data[["Sync"]] > 500]
 #             synced.dropna(inplace=True)
 #             synced_index = list(synced.index)
-
+#         ##############################################################
+#         # synced index : 싱크 들어간 index
+#         ##############################################################
 #         synced_data_plot(
 #             force1_data, force2_data, time_data, synced,
 #             synced_index, RH_num, walk_name[:-4],
@@ -128,7 +130,7 @@ anal_path = "D:/OneDrive - SNU/AFO_analysis/" + \
 
 #             GRF_data_read_plot(GRF_file, GRF_name[:-4], RH_num,
 #                                str(anal_path) + "RH-%s/Graph/GRF" % (
-#                                    str(RH_num)), str(anal_path) +
+#                                     str(RH_num)), str(anal_path) +
 #                                "RH-%s/GRF_data" % (str(RH_num)))
 
 # df_sync_force.to_csv(str(anal_path) + "df_sync_force.csv", sep=",",
@@ -152,7 +154,7 @@ for (RH_list, RH_name) in zip(exp_list, exp_name_list):
     walk_path = str(RH_list) + "/RasPi/sole/"
 
     (L_walk_data_list,
-     L_walk_name_list) = folder_path_name(
+      L_walk_name_list) = folder_path_name(
           walk_path, "start", "L", 1)
     (R_walk_data_list, R_walk_name_list) = folder_path_name(
         walk_path, "start", "R", 1)
@@ -164,7 +166,7 @@ for (RH_list, RH_name) in zip(exp_list, exp_name_list):
         str(anal_path) + "RH-%s/synced_data" % (str(RH_num)))
 
 df_sync.to_csv(str(anal_path) + "/df_sync.csv", sep=",",
-               index=False, header=True)
+                index=False, header=True)
 
 # ##############################################
 # # # re sync for sensor data
