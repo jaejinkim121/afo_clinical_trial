@@ -171,75 +171,75 @@ anal_path = "D:/OneDrive - SNU/AFO_analysis/" + \
 # ##############################################
 # # # re sync for sensor data
 # ##############################################
-for (RH_list, RH_name) in zip(exp_list, exp_name_list):
+# for (RH_list, RH_name) in zip(exp_list, exp_name_list):
 
-    # RH-##
-    RH_num = RH_name[-2:]
-    ##############################################################
-    #               FOOT PRESSURE SENSOR DATA             ########
-    ##############################################################
-    # foot pressure sensor data
-    if RH_num == "02":
-        pass
-    elif RH_num == "04":
-        pass
-    else:
-        ##########################################################
-        ##########################################################
-        # walk data
-        (walk_data_list, walk_data_name_list) = folder_path_name(
-            str(folder_list) + "/walk_data/", "start", "walk", 1)
+#     # RH-##
+#     RH_num = RH_name[-2:]
+#     ##############################################################
+#     #               FOOT PRESSURE SENSOR DATA             ########
+#     ##############################################################
+#     # foot pressure sensor data
+#     if RH_num == "02":
+#         pass
+#     elif RH_num == "04":
+#         pass
+#     else:
+#         ##########################################################
+#         ##########################################################
+#         # walk data
+#         (walk_data_list, walk_data_name_list) = folder_path_name(
+#             str(folder_list) + "/walk_data/", "start", "walk", 1)
 
-        for (walk_file, walk_name) in zip(walk_data_list,
-                                          walk_data_name_list):
+#         for (walk_file, walk_name) in zip(walk_data_list,
+#                                           walk_data_name_list):
 
-            walk_num = walk_name[5:]
-            if (len(str(walk_num)) > 1) & (str(walk_num)[0] == "0"):
-                walk_num = str(walk_num)[1]
-            else:
-                pass
+#             walk_num = walk_name[5:]
+#             if (len(str(walk_num)) > 1) & (str(walk_num)[0] == "0"):
+#                 walk_num = str(walk_num)[1]
+#             else:
+#                 pass
 
-            # reference index, time from force plate data
-            ref_start_index_W, ref_end_index_W, \
-                true_start_index_W, ref_start_time_W, \
-                ref_end_time_W, ref_del_time_W = force_sync_indexing(
-                        df_sync_force, RH_num, "walk", walk_num)
-            ######################################################
-            # L data
-            (Lwalk_data_list,
-              Lwalk_data_name_list) = folder_path_name(str(
-                  walk_file) + "/L/", "start", "RH", 1)
+#             # reference index, time from force plate data
+#             ref_start_index_W, ref_end_index_W, \
+#                 true_start_index_W, ref_start_time_W, \
+#                 ref_end_time_W, ref_del_time_W = force_sync_indexing(
+#                         df_sync_force, RH_num, "walk", walk_num)
+#             ######################################################
+#             # L data
+#             (Lwalk_data_list,
+#               Lwalk_data_name_list) = folder_path_name(str(
+#                   walk_file) + "/L/", "start", "RH", 1)
 
-            for (Lwalk_final_file, Lwalk_final_name) in zip(
-                    Lwalk_data_list, Lwalk_data_name_list):
+#             for (Lwalk_final_file, Lwalk_final_name) in zip(
+#                     Lwalk_data_list, Lwalk_data_name_list):
 
-                sensor_num = str(Lwalk_final_name[-5:-4])
-                Lsensor_walk_file = Lwalk_final_file
+#                 sensor_num = str(Lwalk_final_name[-5:-4])
+#                 Lsensor_walk_file = Lwalk_final_file
 
-                # re sync
-                sensor_re_sync(Lsensor_walk_file, sensor_num, str(
-                  walk_file) + "/L/", ref_start_index_W,
-                    ref_end_index_W, true_start_index_W,
-                    ref_start_time_W, ref_end_time_W,
-                    ref_del_time_W)
-            ######################################################
-            # R data
-            (Rwalk_data_list,
-              Rwalk_data_name_list) = folder_path_name(str(
-                  walk_file) + "/R/", "start", "RH", 1)
+#                 # re sync
+#                 sensor_re_sync(Lsensor_walk_file, sensor_num, str(
+#                   walk_file) + "/L/", ref_start_index_W,
+#                     ref_end_index_W, true_start_index_W,
+#                     ref_start_time_W, ref_end_time_W,
+#                     ref_del_time_W)
+#             ######################################################
+#             # R data
+#             (Rwalk_data_list,
+#               Rwalk_data_name_list) = folder_path_name(str(
+#                   walk_file) + "/R/", "start", "RH", 1)
 
-            for (Rwalk_final_file, Rwalk_final_name) in zip(
-                    Rwalk_data_list, Rwalk_data_name_list):
+#             for (Rwalk_final_file, Rwalk_final_name) in zip(
+#                     Rwalk_data_list, Rwalk_data_name_list):
 
-                sensor_num = str(Rwalk_final_name[-5:-4])
-                Rsensor_walk_file = Rwalk_final_file
+#                 sensor_num = str(Rwalk_final_name[-5:-4])
+#                 Rsensor_walk_file = Rwalk_final_file
 
-                # re sync
-                sensor_re_sync(Rsensor_walk_file, sensor_num, str(
-                  walk_file) + "/R/", ref_start_index_W,
-                    ref_end_index_W, true_start_index_W,
-                    ref_start_time_W, ref_end_time_W,
-                    ref_del_time_W)
+#                 # re sync
+#                 sensor_re_sync(Rsensor_walk_file, sensor_num, str(
+#                   walk_file) + "/R/", ref_start_index_W,
+#                     ref_end_index_W, true_start_index_W,
+#                     ref_start_time_W, ref_end_time_W,
+#                     ref_del_time_W)
 
 # ##############################################
 # # interpolation
@@ -316,81 +316,41 @@ for (RH_list, RH_name) in zip(exp_list, exp_name_list):
 # ##############################################
 # # N_data preprocessing
 # ##############################################
-# for (RH_list, RH_name) in zip(exp_list, exp_name_list):
+for (RH_list, RH_name) in zip(exp_list, exp_name_list):
 
-#     (RH_int_list, RH_int_name_list) = folder_path_name(RH_list + "/")
-#     # RH-##
-#     RH_num = [file for file in RH_int_name_list if file.startswith("RH") == 1]
-#     RH_num = RH_num[0][3:]
-#     ##############################################################
-#     #               FOOT PRESSURE SENSOR DATA             ########
-#     ##############################################################
-#     # exception for stance data
-#     if (RH_num == "02") | (RH_num == "04"):
-#         pass
-#     else:
-#         # RasPi stance path
-#         (stance_list, stance_name_list) = folder_path_name(
-#             RH_list + "/RasPi/stance_data/", "start", "stance", 1)
-#         # experiment folder internal for loop
-#         for (folder_list, folder_name) in zip(stance_list, stance_name_list):
-#             # stance number
-#             stance_num = folder_name[-2:]
+    # RH-##
+    RH_num = RH_name[-2:]
+    ##############################################################
+    #               FOOT PRESSURE SENSOR DATA             ########
+    ##############################################################
+    # RasPi walk path
+    (walk_list, walk_name_list) = folder_path_name(
+        RH_list + "/RasPi/walk_data/", "start", "walk", 1)
+    # experiment folder internal for loop
+    for (folder_list, folder_name) in zip(walk_list, walk_name_list):
+        # walk number
+        walk_num = folder_name[-2:]
 
-#             # Left sensor
-#             L_csv_path = folder_list + "/L/"
-#             (L_path, L_name) = folder_path_name(L_csv_path,
-#                                                 "start", "interp", 1)
-#             for (L_data, L_data_name) in zip(L_path, L_name):
+        # Left sensor
+        L_csv_path = folder_list + "/L/"
+        (L_path, L_name) = folder_path_name(L_csv_path, "start", "interp", 1)
+        for (L_data, L_data_name) in zip(L_path, L_name):
 
-#                 L_interp_data = pd.read_csv(L_data, sep=",", header=0)
-#                 L_data_N = N_data_preprocessing(L_interp_data, NUM_PRE,
-#                                                 WINDOWS, tol)
-#                 L_data_N.to_csv(L_csv_path + "N_data_SENSOR_%s.csv" %
-#                                 (L_data_name[-5:-4]), header=True,
-#                                 index=False, sep=',')
+            L_interp_data = pd.read_csv(L_data, sep=",", header=0)
+            L_data_N = N_data_preprocessing(L_interp_data, NUM_PRE,
+                                            WINDOWS, tol)
+            L_data_N.to_csv(L_csv_path + "N_data_SENSOR_%s.csv" %
+                            (L_data_name[-5:-4]), header=True,
+                            index=False, sep=',')
 
-#             # Right sensor
-#             R_csv_path = folder_list + "/R/"
-#             (R_path, R_name) = folder_path_name(R_csv_path,
-#                                                 "start", "interp", 1)
-#             for (R_data, R_data_name) in zip(R_path, R_name):
+        # Right sensor
+        R_csv_path = folder_list + "/R/"
+        (R_path, R_name) = folder_path_name(R_csv_path, "start", "interp", 1)
+        for (R_data, R_data_name) in zip(R_path, R_name):
 
-#                 R_interp_data = pd.read_csv(R_data, sep=",", header=0)
-#                 R_data_N = N_data_preprocessing(R_interp_data, NUM_PRE,
-#                                                 WINDOWS, tol)
-#                 R_data_N.to_csv(R_csv_path + "N_data_SENSOR_%s.csv" %
-#                                 (R_data_name[-5:-4]), header=True,
-#                                 index=False, sep=',')
-
-#     # RasPi walk path
-#     (walk_list, walk_name_list) = folder_path_name(
-#         RH_list + "/RasPi/walk_data/", "start", "walk", 1)
-#     # experiment folder internal for loop
-#     for (folder_list, folder_name) in zip(walk_list, walk_name_list):
-#         # walk number
-#         walk_num = folder_name[-2:]
-
-#         # Left sensor
-#         L_csv_path = folder_list + "/L/"
-#         (L_path, L_name) = folder_path_name(L_csv_path, "start", "interp", 1)
-#         for (L_data, L_data_name) in zip(L_path, L_name):
-
-#             L_interp_data = pd.read_csv(L_data, sep=",", header=0)
-#             L_data_N = N_data_preprocessing(L_interp_data, NUM_PRE,
-#                                             WINDOWS, tol)
-#             L_data_N.to_csv(L_csv_path + "N_data_SENSOR_%s.csv" %
-#                             (L_data_name[-5:-4]), header=True,
-#                             index=False, sep=',')
-
-#         # Right sensor
-#         R_csv_path = folder_list + "/R/"
-#         (R_path, R_name) = folder_path_name(R_csv_path, "start", "interp", 1)
-#         for (R_data, R_data_name) in zip(R_path, R_name):
-
-#             R_interp_data = pd.read_csv(R_data, sep=",", header=0)
-#             R_data_N = N_data_preprocessing(R_interp_data, NUM_PRE,
-#                                             WINDOWS, tol)
-#             R_data_N.to_csv(R_csv_path + "N_data_SENSOR_%s.csv" %
-#                             (R_data_name[-5:-4]), header=True,
-#                             index=False, sep=',')
+            R_interp_data = pd.read_csv(R_data, sep=",", header=0)
+            R_data_N = N_data_preprocessing(R_interp_data, NUM_PRE,
+                                            WINDOWS, tol)
+            R_data_N.to_csv(R_csv_path + "N_data_SENSOR_%s.csv" %
+                            (R_data_name[-5:-4]), header=True,
+                            index=False, sep=',')

@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 import glob
 import os
+import joblib
+import time
 
 
 def folder_path_name(path, start_or_end=None, char=None, T_F=None):
@@ -114,3 +116,154 @@ def load_SENSOR_vol(path, RH_num):
         data.reset_index(drop=True, inplace=True)
 
     return data
+
+
+def N_data_preprocessing(data, NUM_PRE=30, WINDOWS=30, tol=0.01):
+
+    data.sort_values(by=['time'], axis=0, ascending=True, inplace=True)
+    data.reset_index(drop=True, inplace=True)
+
+    time_tmp = data.time.values.tolist()
+    time_tmp = np.insert(time_tmp, 0, np.nan)
+    time_tmp = np.delete(time_tmp, -1)
+
+    data["pre_time"] = time_tmp
+
+    for h in np.arange(1, NUM_PRE+1, 1):
+        tmp = data.vout.values.tolist()
+        for p in np.arange(0, h, 1):
+            tmp = np.insert(tmp, int(p), np.nan)
+            tmp = np.delete(tmp, -1)
+
+        data["pre_%s" % (str(h))] = tmp
+
+    data = data.astype(float)
+
+    data["del_V"] = (data["vout"] - data["pre_1"])
+    data["del_V"] = data["del_V"].rolling(window=WINDOWS,
+                                          min_periods=1, center=True).mean()
+
+    data["del_time"] = (data["time"] - data["pre_time"])
+
+    data["loading_type"] = 0.0
+
+    for q in np.arange(1, NUM_PRE+1, 1):
+        data["loading_type"] += data["pre_%s" % (str(q))]
+
+    data["loading_type"] = (data["loading_type"])/float(len(
+        np.arange(1, NUM_PRE+1, 1)))
+    data["loading_type"] -= data["vout"]
+    data["loading_type"] = data["loading_type"].rolling(
+        window=WINDOWS, min_periods=1, center=True).mean()
+
+    loading_index1 = []
+    loading_index1 = data[abs(data["loading_type"]) > tol].index
+    # data["loading_type"] = np.sign(-data["loading_type"])
+
+    data["loading_type1"] = 0.0
+    data.loc[loading_index1, "loading_type1"] = np.sign(-data.loc[
+        loading_index1, "loading_type"])
+
+    delV_index1 = []
+    delV_index1 = data[abs(data["del_V"]) > tol].index
+
+    data["loading_type2"] = 0.0
+    data.loc[delV_index1, "loading_type2"] = np.sign(-data.loc[
+        delV_index1, "del_V"])
+
+    delT_index1_1 = []
+    delT_index1_1 = data[data["loading_type1"] != 0.0].index
+
+    data["del_time1"] = 0.0
+    data.loc[delT_index1_1, "del_time1"] = data.loc[delT_index1_1, "del_time"]
+
+    data["elapsed_time1"] = np.cumsum(data["del_time1"])
+
+    delT_index1_2 = []
+    delT_index1_2 = data[data["loading_type2"] != 0.0].index
+
+    data["del_time2"] = 0.0
+    data.loc[delT_index1_2, "del_time2"] = data.loc[delT_index1_2, "del_time"]
+
+    data["elapsed_time2"] = np.cumsum(data["del_time2"])
+
+    data = data.dropna(axis=0)
+    data.reset_index(drop=True, inplace=True)
+
+    return data
+
+
+def GPR_prediction(df, model_path, sensor_dir, sensor_num):
+
+    X = df[["vout"]]
+    ###############################################################
+    # N-dimensional GPR
+    ##############################################################
+    # load GPR model
+    gaussian_process = joblib.load(model_path +
+                                   "GPR_CASE20_%s_%s.sav"
+                                   % (str(sensor_dir),
+                                      str(int(sensor_num) + 1)))
+    # prediction
+    mean_pred, std_pred = gaussian_process.predict(X, return_std=True)
+
+    return mean_pred
+
+
+def GPR_df_save(RH_num, df_vol_L, df_vol_R, volt_header, save_path):
+
+    # create csv path
+    try:
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+    except OSError:
+        pass
+
+    model_path = '../../data/analyzed/sole/RH-%s/model/' % RH_num
+    force_header = ['time', 'f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7']
+    df_force_L = pd.DataFrame(columns=force_header)
+    df_force_L["time"] = df_vol_L["time"]
+
+    df_force_R = pd.DataFrame(columns=force_header)
+    df_force_R["time"] = df_vol_R["time"]
+
+    for sensor in volt_header[1:]:
+
+        sensor_num = str(sensor[1:])
+        # Left sensor
+        df_left_sensor = pd.DataFrame(df_vol_L[["time", sensor]])
+        df_left_sensor.columns = ["time", "vout"]
+        # N data preprocessing
+        # df_left_sensor = N_data_preprocessing(df_left_sensor)
+        # GPR prediction
+        df_force_L['f%d' % int(sensor_num)] = \
+            GPR_prediction(
+                df_left_sensor,
+                model_path, "Left", sensor_num)
+        # save GPR df
+        df_force_L.to_csv(str(save_path) + "/df_force_L.csv",
+                          header=True, index=False, sep=',')
+
+        # Right sensor
+        df_right_sensor = pd.DataFrame(df_vol_R[["time", sensor]])
+        df_right_sensor.columns = ["time", "vout"]
+        # N data preprocessing
+        # df_right_sensor = N_data_preprocessing(df_right_sensor)
+        # GPR prediction
+        df_force_R['f%d' % int(sensor_num)] = \
+            GPR_prediction(
+                df_right_sensor,
+                model_path, "Right", sensor_num)
+        # save GPR df
+        df_force_R.to_csv(str(save_path) + "/df_force_R.csv",
+                          header=True, index=False, sep=',')
+
+    return 0
+
+
+def load_GPR(path):
+
+    df_force_L = pd.read_csv(path + "/df_force_L.csv", sep=",", header=0)
+    df_force_R = pd.read_csv(path + "/df_force_R.csv", sep=",", header=0)
+
+    return df_force_L, df_force_R
