@@ -1,8 +1,15 @@
 import os
+import sys
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib
 import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+
+
+path_configfile1 = 'D:/OneDrive - SNU/AFO_analysis/afo_clinical_trial/src/clinical_trial_analysis/include'
+sys.path.append(os.path.dirname(os.path.expanduser(path_configfile1)))
+
+
 from include.load_imu_data import load_xls, load_imu
 from include.sole_sensor_preprocessing import folder_path_name
 from include.sole_sensor_preprocessing import force_sensor_sync
@@ -89,18 +96,13 @@ def get_dataframe_sole_sensor(trial_num, walk_num):
     # ##########################################################
     GPR_save_path = '../../data/analyzed/sole/RH-%s/converted_data' % (
         trial_num)
-    if trial_num == "19":
 
-        # Model loading and GPR force df save (ONLY USE FOR SAVING !!!!!)
-        # GPR_df_save(trial_num, df_vol_L, df_vol_R, volt_header, GPR_save_path)
-        # Load GPR force df
-        (df_force_L, df_force_R) = load_GPR(GPR_save_path)
+    # Model loading and GPR force df save (ONLY USE FOR SAVING !!!!!)
+    # GPR_df_save(trial_num, df_vol_L, df_vol_R, volt_header, GPR_save_path)
+    # Load GPR force df
+    (df_force_L, df_force_R) = load_GPR(GPR_save_path)
 
-        return df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R, GRF_end_time
-
-    else:
-
-        return df_didim_GRF, df_vol_L, df_vol_R, GRF_end_time
+    return df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R, GRF_end_time
 
 
 def get_dataframe_imu(trial_num, walk_num):
@@ -114,9 +116,23 @@ def get_dataframe_imu(trial_num, walk_num):
     )
 
     df_imu = load_imu(path_trimmed_imu + "v2_trimmed_walk{}_with_imu.xlsx".format(str(walk_num)))
-    print(df_imu)
+
     return df_didim_kinematics, df_imu
 
+def GPR_save():
+
+    walk_num = {"02": 9, "03": 10, "04": 12, "05": 14, "06": 16, "07": 16,
+                "08": 10, "09": 10, "10": 12}
+    walk_end = {"02": 15, "03": 18, "04": 18, "05": 19, "06": 20, "07": 24,
+                "08": 16, "09": 20, "10": 21}
+    
+    for trial_num in range(2,11,1):
+        for walk_num in range(walk_num[str(trial_num).zfill(2)],
+                              walk_end[str(trial_num).zfill(2)], 1):
+            df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R, end_time = \
+                get_dataframe_sole_sensor(trial_num, walk_num)
+
+    return 0
 
 def plot_walk(trial_num, walk_num):
     output_name = '/tn{}_wn{}.png'.format(trial_num, walk_num)
@@ -125,7 +141,7 @@ def plot_walk(trial_num, walk_num):
 
     df_didim_kinematics, df_imu = \
         get_dataframe_imu(trial_num, walk_num)
-    df_didim_GRF, df_vol_L, df_vol_R, end_time = \
+    df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R, end_time = \
         get_dataframe_sole_sensor(trial_num, walk_num)
 
     # ------------------ FLAG HANDLING ----------------- #
@@ -223,9 +239,9 @@ def plot_walk(trial_num, walk_num):
         current_ax.grid(axis='x',
                         linestyle='--')
 
-    # plt.tight_layout()
-    # os.makedirs(output_prefix, exist_ok=True)
-    # plt.savefig(output_prefix + output_name)
+    plt.tight_layout()
+    os.makedirs(output_prefix, exist_ok=True)
+    plt.savefig(output_prefix + output_name)
     return 0
 
 
@@ -235,6 +251,7 @@ def main():
     for tn in range(2, 11):
         for wn in range(wn_list[tn][0], wn_list[tn][1]+1):
             plot_walk(tn, wn)
+
 
 if __name__ == "__main__":
     main()
