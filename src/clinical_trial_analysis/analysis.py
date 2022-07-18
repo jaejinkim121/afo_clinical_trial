@@ -121,17 +121,13 @@ def get_dataframe_imu(trial_num, walk_num):
 
 
 def save_GPR_predicted_data():
-    walk_num = {"02": 9, "03": 10, "04": 12, "05": 14, "06": 16, "07": 16,
-                "08": 10, "09": 10, "10": 12}
-    walk_end = {"02": 15, "03": 18, "04": 18, "05": 19, "06": 20, "07": 24,
-                "08": 16, "09": 20, "10": 21}
-    
-    for trial_num in range(2,11,1):
-        for walk_num in range(walk_num[str(trial_num).zfill(2)],
-                              walk_end[str(trial_num).zfill(2)], 1):
-            df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R, end_time = \
-                get_dataframe_sole_sensor(trial_num, walk_num)
-
+    wn_list = {2: [9, 15], 3: [10, 18], 4: [12, 18], 5: [14, 19],
+               6: [16, 20], 7: [16, 24], 8: [10, 16], 9: [10, 20],
+               10: [12, 21]}
+    for tn in range(2, 11):
+        for wn in range(wn_list[tn][0], wn_list[tn][1]+1):
+            df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R, _ = \
+               get_dataframe_sole_sensor(tn, wn)
     return 0
 
 def plot_walk(trial_num, walk_num):
