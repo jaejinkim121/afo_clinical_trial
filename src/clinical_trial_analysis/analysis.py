@@ -119,8 +119,8 @@ def get_dataframe_imu(trial_num, walk_num):
 
     return df_didim_kinematics, df_imu
 
-def GPR_save():
 
+def save_GPR_predicted_data():
     walk_num = {"02": 9, "03": 10, "04": 12, "05": 14, "06": 16, "07": 16,
                 "08": 10, "09": 10, "10": 12}
     walk_end = {"02": 15, "03": 18, "04": 18, "05": 19, "06": 20, "07": 24,
