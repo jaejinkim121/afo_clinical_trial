@@ -27,20 +27,6 @@ class DataSet:
         self.title = title
 
 
-def get_full_file_path(prefix, suffix, index):
-    path = ""
-    for pre in prefix:
-        path += pre
-
-    # To make 2 digit number
-    path += str(index).zfill(2)
-
-    for suf in suffix:
-        path += suf
-
-    return path
-
-
 def get_dataframe_sole_sensor(trial_num, walk_num):
     # trial number (int -> string)
     trial_num = str(trial_num).zfill(2)

@@ -30,21 +30,22 @@ def load_imu(file_path):
     df_imu = [
         pd.read_excel(file_path, sheet_name=sheet_name, usecols="B, D:N")
         for sheet_name in imu_sheet_name]
+
     for i in range(len(df_imu)):
         imu = df_imu[i]
         ser_accel = pd.Series(name='abs_accel')
         ser_gyro = pd.Series(name='abs_gyro')
+
         for index, row in imu.iterrows():
             abs_accel = math.sqrt(row.iloc[-1] ** 2 + row.iloc[-2] ** 2 + row.iloc[-3] ** 2)
             abs_gyro = math.sqrt(row.iloc[-4] ** 2 + row.iloc[-5] ** 2 + row.iloc[-6] ** 2)
-            # print(abs_accel, abs_gyro)
             ser_accel = pd.concat([ser_accel, pd.Series(abs_accel)])
             ser_gyro = pd.concat([ser_gyro, pd.Series(abs_gyro)])
+
         ser_accel = ser_accel.reset_index()
         ser_gyro = ser_gyro.reset_index()
-        print(ser_accel)
         df_imu[i] = pd.concat([imu, ser_accel], axis=1)
-    print(df_imu)
+
     return df_imu
 
 
