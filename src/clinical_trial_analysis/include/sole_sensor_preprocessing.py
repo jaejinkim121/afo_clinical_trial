@@ -321,18 +321,22 @@ def force_sensor_sync(force_sync_path, sensor_sync_path, RH_num, walk_num):
     return force_start_time, L_sensor_start_time, R_sensor_start_time
 
 
-def load_GRF(GRF_path):
-
-    GRF_data = pd.read_csv(GRF_path, delimiter="\t", header=23)
+def load_GRF(path, walk_num, ):
+    # Find GRF path of given walk_num
+    (GRF_path, _) = folder_path_name(
+        path, "end", "WALK%s.XLS" % str(walk_num).zfill(2), T_F=1
+        )
+    # GRF data reading
+    GRF_data = pd.read_csv(GRF_path[0], delimiter="\t", header=23)
     GRF_data = GRF_data.astype(float)
-
+    # GRF column labelling: FWD, LAT, VRT
     index_data = list(GRF_data.index)
     df_index = pd.DataFrame(index_data, columns=["time"])
     df_index = (df_index * 5) / 600
     end_time = df_index.iloc[-1, 0]
-    R_GRF_data = GRF_data[["R_GRF_VRT"]]
-    L_GRF_data = GRF_data[["L_GRF_VRT"]]
-
+    R_GRF_data = GRF_data[["R_GRF_FWD", "R_GRF_LAT", "R_GRF_VRT"]]
+    L_GRF_data = GRF_data[["L_GRF_FWD", "L_GRF_LAT", "L_GRF_VRT"]]
+    # Total GRF dataframe
     walk_GRF = pd.concat([df_index, L_GRF_data], axis=1)
     walk_GRF = pd.concat([walk_GRF, R_GRF_data], axis=1)
 
