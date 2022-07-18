@@ -5,12 +5,260 @@ Created on Fri Jul 15 16:14:22 2022
 @author: mleem
 """
 
+import json
 import numpy as np
 import pandas as pd
 import glob
 import os
 import joblib
 import time
+
+
+def basic_info_save_json():
+    file_path = "../../../data/basic_info.json"
+    basic_info = {
+        "RH-02": {
+            "size": 260,
+            "affected side": "left",
+            "stage": "chronic",
+            "left cane": False,
+            "right cane": False
+            },
+        "RH-03": {
+            "size": 270,
+            "affected side": "right",
+            "stage": "chronic",
+            "left cane": False,
+            "right cane": False
+            },
+        "RH-04": {
+            "size": 270,
+            "affected side": "left",
+            "stage": "chronic",
+            "left cane": False,
+            "right cane": False
+            },
+        "RH-05": {
+            "size": 260,
+            "affected side": "right",
+            "stage": "acute",
+            "left cane": False,
+            "right cane": False
+            },
+        "RH-06": {
+            "size": 250,
+            "affected side": "right",
+            "stage": "chronic",
+            "left cane": False,
+            "right cane": True
+            },
+        "RH-07": {
+            "size": 270,
+            "affected side": "right",
+            "stage": "chronic",
+            "left cane": False,
+            "right cane": False
+            },
+        "RH-08": {
+            "size": 260,
+            "affected side": "right",
+            "stage": "chronic",
+            "left cane": True,
+            "right cane": False
+            },
+        "RH-09": {
+            "size": 290,
+            "affected side": "left",
+            "stage": "chronic",
+            "left cane": False,
+            "right cane": False
+            },
+        "RH-10": {
+            "size": 280,
+            "affected side": "right",
+            "stage": "chronic",
+            "left cane": False,
+            "right cane": False
+            }
+        }
+
+    with open(file_path, "w", encoding='utf-8') as file:
+        json.dump(basic_info, file)
+
+    return 0
+
+
+def sole_header_info_save_json():
+    file_path = "../../../data/sole_header_info.json"
+    sole_header = {
+        "RH-02": {
+            "L first toe": 4,
+            "L second toe": 2,
+            "L first metatarsal head": 5,
+            "L third metatarsal head": 3,
+            "L fifth metatarsal head": 1,
+            "L lateral calcaneal tuberosity": 0,
+            "L medial calcaneal tuberosity": 6,
+            "L calcaneal tuberosity": 7,
+            "R first toe": 4,
+            "R second toe": 2,
+            "R first metatarsal head": 5,
+            "R third metatarsal head": 3,
+            "R fifth metatarsal head": 1,
+            "R lateral calcaneal tuberosity": 6,
+            "R medial calcaneal tuberosity": 0,
+            "R calcaneal tuberosity": 7
+            },
+        "RH-03": {
+            "L first toe": 4,
+            "L second toe": 3,
+            "L first metatarsal head": 5,
+            "L third metatarsal head": 2,
+            "L fifth metatarsal head": 1,
+            "L lateral calcaneal tuberosity": 0,
+            "L medial calcaneal tuberosity": 6,
+            "L calcaneal tuberosity": 7,
+            "R first toe": 4,
+            "R second toe": 3,
+            "R first metatarsal head": 5,
+            "R third metatarsal head": 2,
+            "R fifth metatarsal head": 1,
+            "R lateral calcaneal tuberosity": 0,
+            "R medial calcaneal tuberosity": 6,
+            "R calcaneal tuberosity": 7
+            },
+        "RH-04": {
+            "L first toe": 4,
+            "L second toe": 3,
+            "L first metatarsal head": 5,
+            "L third metatarsal head": 2,
+            "L fifth metatarsal head": 1,
+            "L lateral calcaneal tuberosity": 0,
+            "L medial calcaneal tuberosity": 6,
+            "L calcaneal tuberosity": 7,
+            "R first toe": 4,
+            "R second toe": 3,
+            "R first metatarsal head": 5,
+            "R third metatarsal head": 2,
+            "R fifth metatarsal head": 1,
+            "R lateral calcaneal tuberosity": 0,
+            "R medial calcaneal tuberosity": 6,
+            "R calcaneal tuberosity": 7
+            },
+        "RH-05": {
+            "L first toe": 4,
+            "L second toe": 2,
+            "L first metatarsal head": 5,
+            "L third metatarsal head": 3,
+            "L fifth metatarsal head": 1,
+            "L lateral calcaneal tuberosity": 0,
+            "L medial calcaneal tuberosity": 6,
+            "L calcaneal tuberosity": 7,
+            "R first toe": 4,
+            "R second toe": 2,
+            "R first metatarsal head": 5,
+            "R third metatarsal head": 3,
+            "R fifth metatarsal head": 1,
+            "R lateral calcaneal tuberosity": 6,
+            "R medial calcaneal tuberosity": 0,
+            "R calcaneal tuberosity": 7
+            },
+        "RH-06": {
+            "L first toe": 4,
+            "L second toe": 2,
+            "L first metatarsal head": 5,
+            "L third metatarsal head": 3,
+            "L fifth metatarsal head": 1,
+            "L lateral calcaneal tuberosity": 0,
+            "L medial calcaneal tuberosity": 6,
+            "L calcaneal tuberosity": 7,
+            "R first toe": 4,
+            "R second toe": 2,
+            "R first metatarsal head": 5,
+            "R third metatarsal head": 3,
+            "R fifth metatarsal head": 1,
+            "R lateral calcaneal tuberosity": 0,
+            "R medial calcaneal tuberosity": 6,
+            "R calcaneal tuberosity": 7
+            },
+        "RH-07": {
+            "L first toe": 7,
+            "L second toe": 0,
+            "L first metatarsal head": 6,
+            "L third metatarsal head": 1,
+            "L fifth metatarsal head": 2,
+            "L lateral calcaneal tuberosity": 3,
+            "L medial calcaneal tuberosity": 5,
+            "L calcaneal tuberosity": 4,
+            "R first toe": 7,
+            "R second toe": 0,
+            "R first metatarsal head": 6,
+            "R third metatarsal head": 1,
+            "R fifth metatarsal head": 2,
+            "R lateral calcaneal tuberosity": 3,
+            "R medial calcaneal tuberosity": 5,
+            "R calcaneal tuberosity": 4
+            },
+        "RH-08": {
+            "L first toe": 7,
+            "L second toe": 1,
+            "L first metatarsal head": 6,
+            "L third metatarsal head": 0,
+            "L fifth metatarsal head": 2,
+            "L lateral calcaneal tuberosity": 3,
+            "L medial calcaneal tuberosity": 5,
+            "L calcaneal tuberosity": 4,
+            "R first toe": 7,
+            "R second toe": 1,
+            "R first metatarsal head": 6,
+            "R third metatarsal head": 0,
+            "R fifth metatarsal head": 2,
+            "R lateral calcaneal tuberosity": 3,
+            "R medial calcaneal tuberosity": 5,
+            "R calcaneal tuberosity": 4
+            },
+        "RH-09": {
+            "L first toe": 7,
+            "L second toe": 0,
+            "L first metatarsal head": 6,
+            "L third metatarsal head": 1,
+            "L fifth metatarsal head": 2,
+            "L lateral calcaneal tuberosity": 3,
+            "L medial calcaneal tuberosity": 5,
+            "L calcaneal tuberosity": 4,
+            "R first toe": 7,
+            "R second toe": 1,
+            "R first metatarsal head": 6,
+            "R third metatarsal head": 0,
+            "R fifth metatarsal head": 2,
+            "R lateral calcaneal tuberosity": 3,
+            "R medial calcaneal tuberosity": 5,
+            "R calcaneal tuberosity": 4
+            },
+        "RH-10": {
+            "L first toe": 7,
+            "L second toe": 0,
+            "L first metatarsal head": 6,
+            "L third metatarsal head": 1,
+            "L fifth metatarsal head": 2,
+            "L lateral calcaneal tuberosity": 3,
+            "L medial calcaneal tuberosity": 5,
+            "L calcaneal tuberosity": 4,
+            "R first toe": 7,
+            "R second toe": 1,
+            "R first metatarsal head": 6,
+            "R third metatarsal head": 0,
+            "R fifth metatarsal head": 2,
+            "R lateral calcaneal tuberosity": 3,
+            "R medial calcaneal tuberosity": 5,
+            "R calcaneal tuberosity": 4
+            }
+        }
+
+    with open(file_path, "w", encoding='utf-8') as file:
+        json.dump(sole_header, file)
+
+    return 0
 
 
 def folder_path_name(path, start_or_end=None, char=None, T_F=None):
@@ -106,13 +354,13 @@ def load_SENSOR_vol(path, RH_num):
     data.columns = range(data.columns.size)
 
     if str(RH_num) == "00":
-        data.columns = ['time', 'v0', 'v1', 'v2', 'v3',
-                        'v4', 'v5', 'v6', 'v7']
+        data.columns = ['time', '0', '1', '2', '3',
+                        '4', '5', '6', '7']
         data.reset_index(drop=True, inplace=True)
 
     else:
-        data.columns = ['sync', 'time', 'v0', 'v1', 'v2',
-                        'v3', 'v4', 'v5', 'v6', 'v7']
+        data.columns = ['sync', 'time', '0', '1', '2',
+                        '3', '4', '5', '6', '7']
         data.reset_index(drop=True, inplace=True)
 
     return data
