@@ -415,7 +415,10 @@ def convert_sole_header(sole_header_path, save_flag=False):
     return sole_header
 
 
-def load_SENSOR_vol(path, force_sync_path, sensor_sync_path, RH_num, walk_num, sole_header, GRF_end_time):
+def load_SENSOR_vol(
+        path, force_sync_path, sensor_sync_path,
+        RH_num, walk_num, sole_header, GRF_end_time
+        ):
     # load sync time
     (force_start_time,
      L_sensor_start_time, R_sensor_start_time) = \
