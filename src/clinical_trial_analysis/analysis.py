@@ -2,14 +2,27 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from include.load_imu_data import load_xls, load_imu
-from include.sole_sensor_preprocessing import folder_path_name
-from include.sole_sensor_preprocessing import force_sensor_sync
-from include.sole_sensor_preprocessing import load_GRF, load_SENSOR_vol
-from include.sole_sensor_preprocessing import N_data_preprocessing
-from include.sole_sensor_preprocessing import GPR_df_save
-from include.sole_sensor_preprocessing import load_GPR
-from include.config import PlotFlag
+# D:.OneDrive - SNU.AFO_analysis.afo_clinical_trial.src.clinical_trial_analysis.
+
+configfile1 = 'D:/OneDrive - SNU/AFO_analysis/afo_clinical_trial/src/clinical_trial_analysis/include/load_imu_data.py'
+configfile2 = 'D:/OneDrive - SNU/AFO_analysis/afo_clinical_trial/src/clinical_trial_analysis/include/sole_sensor_preprocessing.py'
+configfile3 = 'D:/OneDrive - SNU/AFO_analysis/afo_clinical_trial/src/clinical_trial_analysis/include/config.py'
+
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.expanduser(configfile1)))
+sys.path.append(os.path.dirname(os.path.expanduser(configfile2)))
+sys.path.append(os.path.dirname(os.path.expanduser(configfile3)))
+
+from load_imu_data import load_xls, load_imu
+from sole_sensor_preprocessing import folder_path_name
+from sole_sensor_preprocessing import force_sensor_sync
+from sole_sensor_preprocessing import load_GRF, load_SENSOR_vol
+from sole_sensor_preprocessing import N_data_preprocessing
+from sole_sensor_preprocessing import GPR_df_save
+from sole_sensor_preprocessing import load_GPR
+from config import PlotFlag
 
 
 MAX_TRIAL = 100
@@ -85,18 +98,18 @@ def get_dataframe_sole_sensor(trial_num, walk_num):
     # ##########################################################
     GPR_save_path = '../../data/analyzed/sole/RH-%s/converted_data' % (
         trial_num)
-    if trial_num == "09":
+    # if trial_num == "09":
 
-        # Model loading and GPR force df save (ONLY USE FOR SAVING !!!!!)
-        # GPR_df_save(trial_num, df_vol_L, df_vol_R, volt_header, GPR_save_path)
-        # Load GPR force df
-        (df_force_L, df_force_R) = load_GPR(GPR_save_path)
+    # Model loading and GPR force df save (ONLY USE FOR SAVING !!!!!)
+    GPR_df_save(trial_num, df_vol_L, df_vol_R, volt_header, GPR_save_path)
+    # Load GPR force df
+    (df_force_L, df_force_R) = load_GPR(GPR_save_path)
 
-        return df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R
+    return df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R
 
-    else:
+    # else:
 
-        return df_didim_GRF, df_vol_L, df_vol_R
+    #     return df_didim_GRF, df_vol_L, df_vol_R
 
 
 def get_dataframe_imu(trial_num, walk_num):
@@ -113,6 +126,20 @@ def get_dataframe_imu(trial_num, walk_num):
 
     return df_didim_kinematics, df_imu
 
+def GPR_save():
+
+    walk_num = {"02": 9, "03": 10, "04": 12, "05": 14, "06": 16, "07": 16,
+                "08": 10, "09": 10, "10": 12}
+    walk_end = {"02": 15, "03": 18, "04": 18, "05": 19, "06": 20, "07": 24,
+                "08": 16, "09": 20, "10": 21}
+    
+    for trial_num in range(2,11,1):
+        for walk_num in range(walk_num[str(trial_num).zfill(2)],
+                              walk_end[str(trial_num).zfill(2)], 1):
+            df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R = \
+                get_dataframe_sole_sensor(trial_num, walk_num)
+
+    return 0
 
 def main():
     trial_num, walk_num = 7, 20
@@ -169,4 +196,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    GPR_save()
