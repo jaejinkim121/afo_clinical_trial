@@ -1,8 +1,8 @@
-
-
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
+import numpy as np
 from include.load_imu_data import load_xls, load_imu
 from include.sole_sensor_preprocessing import folder_path_name
 from include.sole_sensor_preprocessing import force_sensor_sync
@@ -13,7 +13,11 @@ from include.sole_sensor_preprocessing import load_GPR
 from include.config import PlotFlag
 
 
-MAX_TRIAL = 100
+class DataSet:
+    def __init__(self, time, data, title):
+        self.time = time
+        self.data = data
+        self.title = title
 
 
 def get_full_file_path(prefix, suffix, index):
@@ -85,18 +89,18 @@ def get_dataframe_sole_sensor(trial_num, walk_num):
     # ##########################################################
     GPR_save_path = '../../data/analyzed/sole/RH-%s/converted_data' % (
         trial_num)
-    if trial_num == "09":
+    if trial_num == "19":
 
         # Model loading and GPR force df save (ONLY USE FOR SAVING !!!!!)
         # GPR_df_save(trial_num, df_vol_L, df_vol_R, volt_header, GPR_save_path)
         # Load GPR force df
         (df_force_L, df_force_R) = load_GPR(GPR_save_path)
 
-        return df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R
+        return df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R, GRF_end_time
 
     else:
 
-        return df_didim_GRF, df_vol_L, df_vol_R
+        return df_didim_GRF, df_vol_L, df_vol_R, GRF_end_time
 
 
 def get_dataframe_imu(trial_num, walk_num):
@@ -109,68 +113,128 @@ def get_dataframe_imu(trial_num, walk_num):
         path_trial + "TRIMMED_WALK{}.xls".format(str(walk_num).zfill(2))
     )
 
-    df_imu = load_imu(path_trimmed_imu + "trimmed_walk{}_with_imu.xlsx".format(str(walk_num).zfill(2)))
-
+    df_imu = load_imu(path_trimmed_imu + "v2_trimmed_walk{}_with_imu.xlsx".format(str(walk_num)))
+    print(df_imu)
     return df_didim_kinematics, df_imu
 
 
-def main():
-    trial_num, walk_num = 7, 20
-
+def plot_walk(trial_num, walk_num):
+    output_name = '/tn{}_wn{}.png'.format(trial_num, walk_num)
+    output_prefix = '../../image/plot/'
     # ----------------- DATA LOADING ------------------- #
 
     df_didim_kinematics, df_imu = \
         get_dataframe_imu(trial_num, walk_num)
-    df_didim_GRF, df_vol_L, df_vol_R = \
+    df_didim_GRF, df_vol_L, df_vol_R, end_time = \
         get_dataframe_sole_sensor(trial_num, walk_num)
-
-
-    (df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R) = get_dataframe_sole_sensor(9, 15)
-
-    # -------------------  PLOT  ----------------------- #
-
 
     # ------------------ FLAG HANDLING ----------------- #
     data = []
     if PlotFlag.USE_DIDIM_GRF:
-        data.append([
-            df_didim_GRF['time'], df_didim_GRF['L_GRF_VRT'],
-            'GRF_normalized', 'Left foot normalized GRF'])
+        output_prefix += '_GRF'
+        grf_data = list()
+        grf_data.append(DataSet(
+            df_didim_GRF['time'],
+            df_didim_GRF['L_GRF_VRT'],
+            'Left foot GRF'))
+        grf_data.append(DataSet(
+            df_didim_GRF['time'],
+            df_didim_GRF['R_GRF_VRT'],
+            'Right foot GRF'
+        ))
+        data.append(grf_data)
 
-    if PlotFlag.USE_DIDIM_FLEXION:
+    if PlotFlag.USE_VOLT:
+        output_prefix += '_VOLT'
+        if PlotFlag.VOLT_SEP:
+            if PlotFlag.USE_VOLT_LorR:
+                for key in df_vol_L:
+                    if key == 'time':
+                        continue
+                    data.append([DataSet(
+                        df_vol_L['time'], df_vol_L[key], key
+                    )])
+            else:
+                for key in df_vol_R:
+                    if key == 'time':
+                        continue
+                    data.append([DataSet(
+                        df_vol_R['time'], df_vol_R[key], key
+                    )]  )
+        else:
+            # Left
+            sole_data_left = list()
+            for key in df_vol_L:
+                if key == 'time':
+                    continue
+                sole_data_left.append(DataSet(
+                    df_vol_L['time'], df_vol_L[key], key
+                ))
+            # Right
+            sole_data_right = list()
+            for key in df_vol_R:
+                if key == 'time':
+                    continue
+                sole_data_right.append(DataSet(
+                    df_vol_R['time'], df_vol_R[key], key
+                ))
+            data.append(sole_data_left)
+            data.append(sole_data_right)
+
+    if PlotFlag.USE_DIDIM_KINEMATICS:
+        if PlotFlag.USE_DIDIM_KINEMATICS_ALL:
+            output_prefix += '_KIN'
+        else:
+            output_prefix += '_FLEX'
+        joint_data_left = list()
+        joint_data_right = list()
         for key in df_didim_kinematics:
-            print(key)
             if key == 'time':
                 continue
-            data.append([
-                df_didim_kinematics['time'], df_didim_kinematics[key], key, key
-            ])
+            elif not PlotFlag.USE_DIDIM_KINEMATICS_ALL:
+                if ('Abd' in key) or ('Rot' in key):
+                    continue
+            if key[0] == 'L':
+                joint_data_left.append(DataSet(
+                    df_didim_kinematics['time'], df_didim_kinematics[key], key
+                ))
+            elif key[0] == 'R':
+                joint_data_right.append(DataSet(
+                    df_didim_kinematics['time'], df_didim_kinematics[key], key
+                ))
+        data.append(joint_data_left)
+        data.append(joint_data_right)
 
-    # if PlotFlag.USE_VOLT:
-    #     list_current_flag = list()
-    #     for
-    #     list_current_flag.append([
-    #         df_vol_L['time'], df_vol_L['v0'],
-    #         'GRF_normalized', 'Left foot normalized GRF'])
-    #     data.append(list_current_flag)
-
-    data_type_length = len(data)    # TEMP
+    data_length = len(data)    # TEMP
 
     # -------------------  PLOT  ----------------------- #
-    matplotlib.rcParams['figure.figsize'] = 20, 50
+    matplotlib.rcParams['figure.figsize'] = 20, 3 * data_length
     fig = plt.figure()
-    ax = [fig.add_subplot(data_type_length, 1, i) for i in range(1, data_type_length + 1)]
-    for i in range(data_type_length):
+    ax = [fig.add_subplot(data_length, 1, i) for i in range(1, data_length + 1)]
+
+    for i in range(data_length):
         current_ax = ax[i]
-        current_ax.plot(data[i][0], data[i][1])
-        current_ax.set_ylabel(data[i][2])
-        current_ax.set_title(data[i][3])
+        for dataset in data[i]:
+            current_ax.plot(dataset.time, dataset.data, label=dataset.title)
+
+        current_ax.set_xticks(np.arange(0, end_time, 0.25))
+        current_ax.set_xlim([0, end_time+0.7])
+        current_ax.legend(loc='right')
         current_ax.grid(axis='x',
                         linestyle='--')
-    plt.tight_layout()
-    plt.savefig('test.png')
+
+    # plt.tight_layout()
+    # os.makedirs(output_prefix, exist_ok=True)
+    # plt.savefig(output_prefix + output_name)
     return 0
 
+
+def main():
+    wn_list = {2:[9, 15], 3:[10, 18], 4:[12, 18], 5:[14, 19], 6:[16, 20],
+               7:[16, 24], 8:[10, 16], 9:[10, 20], 10:[12, 21]}
+    for tn in range(2, 11):
+        for wn in range(wn_list[tn][0], wn_list[tn][1]+1):
+            plot_walk(tn, wn)
 
 if __name__ == "__main__":
     main()
