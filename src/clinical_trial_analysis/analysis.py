@@ -75,7 +75,7 @@ def get_dataframe_sole_sensor(
             df_vol_L, df_vol_R,
             sole_header_dict,
             GPR_save_path)
-    (df_force_L, df_force_R) = load_GPR(GPR_save_path)
+    (df_force_L, df_force_R) = load_GPR(GPR_save_path, str(trial_num).zfill(2))
 
     return df_didim_GRF, df_vol_L, df_vol_R,\
         df_force_L, df_force_R, GRF_end_time
