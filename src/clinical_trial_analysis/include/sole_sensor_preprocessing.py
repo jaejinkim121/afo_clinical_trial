@@ -5,12 +5,298 @@ Created on Fri Jul 15 16:14:22 2022
 @author: mleem
 """
 
+import json
 import numpy as np
 import pandas as pd
 import glob
 import os
 import joblib
 import time
+
+
+def basic_info_save_json():
+    file_path = 'C:/Users/minhee/OneDrive - SNU/AFO_analysis/' +\
+        'afo_clinical_trial/data/basic_info.json'
+    basic_info = {
+        "RH-02": {
+            "size": 260,
+            "affected side": "left",
+            "stage": "chronic",
+            "left cane": False,
+            "right cane": False
+            },
+        "RH-03": {
+            "size": 270,
+            "affected side": "right",
+            "stage": "chronic",
+            "left cane": False,
+            "right cane": False
+            },
+        "RH-04": {
+            "size": 270,
+            "affected side": "left",
+            "stage": "chronic",
+            "left cane": False,
+            "right cane": False
+            },
+        "RH-05": {
+            "size": 260,
+            "affected side": "right",
+            "stage": "acute",
+            "left cane": False,
+            "right cane": False
+            },
+        "RH-06": {
+            "size": 250,
+            "affected side": "right",
+            "stage": "chronic",
+            "left cane": False,
+            "right cane": True
+            },
+        "RH-07": {
+            "size": 270,
+            "affected side": "right",
+            "stage": "chronic",
+            "left cane": False,
+            "right cane": False
+            },
+        "RH-08": {
+            "size": 260,
+            "affected side": "right",
+            "stage": "chronic",
+            "left cane": True,
+            "right cane": False
+            },
+        "RH-09": {
+            "size": 290,
+            "affected side": "left",
+            "stage": "chronic",
+            "left cane": False,
+            "right cane": False
+            },
+        "RH-10": {
+            "size": 280,
+            "affected side": "right",
+            "stage": "chronic",
+            "left cane": False,
+            "right cane": False
+            }
+        }
+
+    with open(file_path, "w", encoding='utf-8') as file:
+        json.dump(basic_info, file)
+
+    return 0
+
+
+def sole_header_info_save_json():
+    file_path = 'C:/Users/minhee/OneDrive - SNU/AFO_analysis/' +\
+        'afo_clinical_trial/data/sole_header_info.json'
+    sole_header = {
+        "RH-02": {
+            "left": [
+                "L lateral calcaneal tuberosity",
+                "L fifth metatarsal head",
+                "L second toe",
+                "L third metatarsal head",
+                "L first toe",
+                "L first metatarsal head",
+                "L medial calcaneal tuberosity",
+                "L calcaneal tuberosity"
+                ],
+            "right": [
+                "R medial calcaneal tuberosity",
+                "R fifth metatarsal head",
+                "R second toe",
+                "R third metatarsal head",
+                "R first toe",
+                "R first metatarsal head",
+                "R lateral calcaneal tuberosity",
+                "R calcaneal tuberosity"
+                ]
+            },
+        "RH-03": {
+            "left": [
+                "L lateral calcaneal tuberosity",
+                "L fifth metatarsal head",
+                "L third metatarsal head",
+                "L second toe",
+                "L first toe",
+                "L first metatarsal head",
+                "L medial calcaneal tuberosity",
+                "L calcaneal tuberosity"
+                ],
+            "right": [
+                "R lateral calcaneal tuberosity",
+                "R fifth metatarsal head",
+                "R third metatarsal head",
+                "R second toe",
+                "R first toe",
+                "R first metatarsal head",
+                "R medial calcaneal tuberosity",
+                "R calcaneal tuberosity"
+                ]
+            },
+        "RH-04": {
+            "left": [
+                "L lateral calcaneal tuberosity",
+                "L fifth metatarsal head",
+                "L third metatarsal head",
+                "L second toe",
+                "L first toe",
+                "L first metatarsal head",
+                "L medial calcaneal tuberosity",
+                "L calcaneal tuberosity"
+                ],
+            "right": [
+                "R lateral calcaneal tuberosity",
+                "R fifth metatarsal head",
+                "R third metatarsal head",
+                "R second toe",
+                "R first toe",
+                "R first metatarsal head",
+                "R medial calcaneal tuberosity",
+                "R calcaneal tuberosity"
+                ]
+            },
+        "RH-05": {
+            "left": [
+                "L lateral calcaneal tuberosity",
+                "L fifth metatarsal head",
+                "L second toe",
+                "L third metatarsal head",
+                "L first toe",
+                "L first metatarsal head",
+                "L medial calcaneal tuberosity",
+                "L calcaneal tuberosity"
+                ],
+            "right": [
+                "R medial calcaneal tuberosity",
+                "R fifth metatarsal head",
+                "R second toe",
+                "R third metatarsal head",
+                "R first toe",
+                "R first metatarsal head",
+                "R lateral calcaneal tuberosity",
+                "R calcaneal tuberosity"
+                ]
+            },
+        "RH-06": {
+            "left": [
+                "L lateral calcaneal tuberosity",
+                "L fifth metatarsal head",
+                "L second toe",
+                "L third metatarsal head",
+                "L first toe",
+                "L first metatarsal head",
+                "L medial calcaneal tuberosity",
+                "L calcaneal tuberosity"
+                ],
+            "right": [
+                "R lateral calcaneal tuberosity",
+                "R fifth metatarsal head",
+                "R second toe",
+                "R third metatarsal head",
+                "R first toe",
+                "R first metatarsal head",
+                "R medial calcaneal tuberosity",
+                "R calcaneal tuberosity"
+                ]
+            },
+        "RH-07": {
+            "left": [
+                "L second toe",
+                "L third metatarsal head",
+                "L fifth metatarsal head",
+                "L lateral calcaneal tuberosity",
+                "L calcaneal tuberosity",
+                "L medial calcaneal tuberosity",
+                "L first metatarsal head",
+                "L first toe"
+                ],
+            "right": [
+                "R second toe",
+                "R third metatarsal head",
+                "R fifth metatarsal head",
+                "R lateral calcaneal tuberosity",
+                "R calcaneal tuberosity",
+                "R medial calcaneal tuberosity",
+                "R first metatarsal head",
+                "R first toe"
+                ]
+            },
+        "RH-08": {
+            "left": [
+                "L third metatarsal head",
+                "L second toe",
+                "L fifth metatarsal head",
+                "L lateral calcaneal tuberosity",
+                "L calcaneal tuberosity",
+                "L medial calcaneal tuberosity",
+                "L first metatarsal head",
+                "L first toe"
+                ],
+            "right": [
+                "R third metatarsal head",
+                "R second toe",
+                "R fifth metatarsal head",
+                "R lateral calcaneal tuberosity",
+                "R calcaneal tuberosity",
+                "R medial calcaneal tuberosity",
+                "R first metatarsal head",
+                "R first toe"
+                ]
+            },
+        "RH-09": {
+            "left": [
+                "L second toe",
+                "L third metatarsal head",
+                "L fifth metatarsal head",
+                "L lateral calcaneal tuberosity",
+                "L calcaneal tuberosity",
+                "L medial calcaneal tuberosity",
+                "L first metatarsal head",
+                "L first toe"
+                ],
+            "right": [
+                "R third metatarsal head",
+                "R second toe",
+                "R fifth metatarsal head",
+                "R lateral calcaneal tuberosity",
+                "R calcaneal tuberosity",
+                "R medial calcaneal tuberosity",
+                "R first metatarsal head",
+                "R first toe"
+                ]
+            },
+        "RH-10": {
+            "left": [
+                "L second toe",
+                "L third metatarsal head",
+                "L fifth metatarsal head",
+                "L lateral calcaneal tuberosity",
+                "L calcaneal tuberosity",
+                "L medial calcaneal tuberosity",
+                "L first metatarsal head",
+                "L first toe"
+                ],
+            "right": [
+                "R third metatarsal head",
+                "R second toe",
+                "R fifth metatarsal head",
+                "R lateral calcaneal tuberosity",
+                "R calcaneal tuberosity",
+                "R medial calcaneal tuberosity",
+                "R first metatarsal head",
+                "R first toe"
+                ]
+            }
+        }
+
+    with open(file_path, "w", encoding='utf-8') as file:
+        json.dump(sole_header, file)
+
+    return 0
 
 
 def folder_path_name(path, start_or_end=None, char=None, T_F=None):
@@ -73,26 +359,29 @@ def force_sensor_sync(force_sync_path, sensor_sync_path, RH_num, walk_num):
     return force_start_time, L_sensor_start_time, R_sensor_start_time
 
 
-def load_GRF(GRF_path):
-
-    GRF_data = pd.read_csv(GRF_path, delimiter="\t", header=23)
+def load_GRF(path, walk_num):
+    # Find GRF path of given walk_num
+    (GRF_path, _) = folder_path_name(
+        path, "end", "WALK%s.XLS" % str(walk_num).zfill(2), T_F=1
+        )
+    # GRF data reading
+    GRF_data = pd.read_csv(GRF_path[0], delimiter="\t", header=23)
     GRF_data = GRF_data.astype(float)
-
+    # GRF column labelling: FWD, LAT, VRT
     index_data = list(GRF_data.index)
     df_index = pd.DataFrame(index_data, columns=["time"])
     df_index = (df_index * 5) / 600
     end_time = df_index.iloc[-1, 0]
-    R_GRF_data = GRF_data[["R_GRF_VRT"]]
-    L_GRF_data = GRF_data[["L_GRF_VRT"]]
-
+    R_GRF_data = GRF_data[["R_GRF_FWD", "R_GRF_LAT", "R_GRF_VRT"]]
+    L_GRF_data = GRF_data[["L_GRF_FWD", "L_GRF_LAT", "L_GRF_VRT"]]
+    # Total GRF dataframe
     walk_GRF = pd.concat([df_index, L_GRF_data], axis=1)
     walk_GRF = pd.concat([walk_GRF, R_GRF_data], axis=1)
 
     return walk_GRF, end_time
 
 
-def load_SENSOR_vol(path, RH_num):
-
+def read_SENSOR_vol(path, RH_num):
     # data reading ##################################################
     data = pd.read_csv(path, sep=" |,", header=None)
 
@@ -106,16 +395,80 @@ def load_SENSOR_vol(path, RH_num):
     data.columns = range(data.columns.size)
 
     if str(RH_num) == "00":
-        data.columns = ['time', 'v0', 'v1', 'v2', 'v3',
-                        'v4', 'v5', 'v6', 'v7']
+        data.columns = ['time', 0, 1, 2, 3, 4, 5, 6, 7]
         data.reset_index(drop=True, inplace=True)
 
     else:
-        data.columns = ['sync', 'time', 'v0', 'v1', 'v2',
-                        'v3', 'v4', 'v5', 'v6', 'v7']
+        data.columns = ['sync', 'time', 0, 1, 2, 3, 4, 5, 6, 7]
         data.reset_index(drop=True, inplace=True)
 
     return data
+
+
+def convert_sole_header(sole_header_path, save_flag=False):
+    # save json (basic info, sole_header)
+    if save_flag:
+        basic_info_save_json()
+        sole_header_info_save_json()
+    # sole header json reading
+    with open(sole_header_path, 'r') as file:
+        sole_header = json.load(file)
+
+    return sole_header
+
+
+def load_SENSOR_vol(
+        path, force_sync_path, sensor_sync_path,
+        RH_num, walk_num, sole_header, GRF_end_time
+        ):
+    # load sync time
+    (force_start_time,
+     L_sensor_start_time, R_sensor_start_time) = \
+        force_sensor_sync(force_sync_path, sensor_sync_path, RH_num, walk_num)
+    # sensor end time
+    L_sensor_end_time = L_sensor_start_time + GRF_end_time
+    R_sensor_end_time = R_sensor_start_time + GRF_end_time
+
+    # sensor L, R path
+    (L_data_path, _) = \
+        folder_path_name(path + "RasPi/sole/", "start", "L", 1)
+    (R_data_path, _) = \
+        folder_path_name(path + "RasPi/sole/", "start", "R", 1)
+
+    # data reading ##################################################
+    volt_header = ['time', 0, 1, 2, 3, 4, 5, 6, 7]
+
+    #################################################################
+    # L dataframe
+    df_vol_L = read_SENSOR_vol(L_data_path[0], RH_num)
+    df_vol_L = df_vol_L.loc[
+        (df_vol_L['time'] >= L_sensor_start_time) &
+        (df_vol_L['time'] <= L_sensor_end_time)
+        ][volt_header]
+    # initialize L time
+    df_vol_L["time"] = df_vol_L["time"] - L_sensor_start_time
+    # sole header matching for each trial
+    L_sole_header = ['time']
+    for n in range(0, 8):
+        L_sole_header.append(sole_header["RH-" + RH_num]["left"][int(n)])
+    df_vol_L.columns = L_sole_header
+
+    #################################################################
+    # R dataframe
+    df_vol_R = read_SENSOR_vol(R_data_path[0], RH_num)
+    df_vol_R = df_vol_R.loc[
+        (df_vol_R['time'] >= R_sensor_start_time) &
+        (df_vol_R['time'] <= R_sensor_end_time)
+        ][volt_header]
+    # initialize R time
+    df_vol_R["time"] = df_vol_R["time"] - R_sensor_start_time
+    # sole header matching for each trial
+    R_sole_header = ['time']
+    for n in range(0, 8):
+        R_sole_header.append(sole_header["RH-" + RH_num]["right"][int(n)])
+    df_vol_R.columns = R_sole_header
+
+    return df_vol_L, df_vol_R
 
 
 def N_data_preprocessing(data, NUM_PRE=30, WINDOWS=30, tol=0.01):
@@ -210,7 +563,7 @@ def GPR_prediction(df, model_path, sensor_dir, sensor_num):
     return mean_pred
 
 
-def GPR_df_save(RH_num, df_vol_L, df_vol_R, volt_header, save_path):
+def GPR_df_save(RH_num, walk_num, df_vol_L, df_vol_R, sole_header, save_path):
 
     # create csv path
     try:
@@ -219,51 +572,60 @@ def GPR_df_save(RH_num, df_vol_L, df_vol_R, volt_header, save_path):
     except OSError:
         pass
 
+    # model path
     model_path = '../../data/analyzed/sole/RH-%s/model/' % RH_num
-    force_header = ['time', 'f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7']
-    df_force_L = pd.DataFrame(columns=force_header)
+
+    # Define L, R force df
+    ###############################################################
+    # Left df
+    df_force_L = pd.DataFrame(columns=df_vol_L.columns)
     df_force_L["time"] = df_vol_L["time"]
-
-    df_force_R = pd.DataFrame(columns=force_header)
-    df_force_R["time"] = df_vol_R["time"]
-
-    for sensor in volt_header[1:]:
-
-        sensor_num = str(sensor[1:])
-        # Left sensor
+    # GPR prediction for each model
+    for sensor in list(df_vol_L.columns):
+        if sensor == "time":
+            continue
+        sensor_num = sole_header["RH-%s" % RH_num]["left"].index(sensor)
+        # individual sensor vout for GPR prediction
         df_left_sensor = pd.DataFrame(df_vol_L[["time", sensor]])
         df_left_sensor.columns = ["time", "vout"]
         # N data preprocessing
         # df_left_sensor = N_data_preprocessing(df_left_sensor)
         # GPR prediction
-        df_force_L['f%d' % int(sensor_num)] = \
-            GPR_prediction(
-                df_left_sensor,
-                model_path, "Left", sensor_num)
-        # save GPR df
-        df_force_L.to_csv(str(save_path) + "/df_force_L.csv",
-                          header=True, index=False, sep=',')
+        df_force_L[sensor] = GPR_prediction(
+            df_left_sensor, model_path, "Left", sensor_num)
+    # save GPR df
+    df_force_L.to_csv(str(save_path) + "/Trimmed_walk%s_df_force_L.csv"
+                      % walk_num, header=True, index=False, sep=',')
 
-        # Right sensor
+    ###############################################################
+    # Right df
+    df_force_R = pd.DataFrame(columns=df_vol_R.columns)
+    df_force_R["time"] = df_vol_R["time"]
+    # GPR prediction for each model
+    for sensor in list(df_vol_R.columns):
+        if sensor == "time":
+            continue
+        sensor_num = sole_header["RH-%s" % RH_num]["right"].index(sensor)
+        # individual sensor vout for GPR prediction
         df_right_sensor = pd.DataFrame(df_vol_R[["time", sensor]])
         df_right_sensor.columns = ["time", "vout"]
         # N data preprocessing
         # df_right_sensor = N_data_preprocessing(df_right_sensor)
         # GPR prediction
-        df_force_R['f%d' % int(sensor_num)] = \
-            GPR_prediction(
-                df_right_sensor,
-                model_path, "Right", sensor_num)
-        # save GPR df
-        df_force_R.to_csv(str(save_path) + "/df_force_R.csv",
-                          header=True, index=False, sep=',')
+        df_force_R[sensor] = GPR_prediction(
+            df_right_sensor, model_path, "Right", sensor_num)
+    # save GPR df
+    df_force_R.to_csv(str(save_path) + "/Trimmed_walk%s_df_force_R.csv"
+                      % walk_num, header=True, index=False, sep=',')
 
     return 0
 
 
-def load_GPR(path):
+def load_GPR(path, walk_num):
 
-    df_force_L = pd.read_csv(path + "/df_force_L.csv", sep=",", header=0)
-    df_force_R = pd.read_csv(path + "/df_force_R.csv", sep=",", header=0)
+    df_force_L = pd.read_csv(path + "/Trimmed_walk%s_df_force_L.csv"
+                             % walk_num, sep=",", header=0)
+    df_force_R = pd.read_csv(path + "/Trimmed_walk%s_df_force_R.csv"
+                             % walk_num, sep=",", header=0)
 
     return df_force_L, df_force_R
