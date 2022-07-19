@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
-path_configfile1 = 'C:/Users/minhee/OneDrive - SNU/AFO_analysis/' +\
+path_configfile1 = 'D:/OneDrive - SNU/AFO_analysis/' +\
     'afo_clinical_trial/src/clinical_trial_analysis/include'
 sys.path.append(os.path.dirname(os.path.expanduser(path_configfile1)))
 
