@@ -563,7 +563,7 @@ def GPR_prediction(df, model_path, sensor_dir, sensor_num):
     return mean_pred
 
 
-def GPR_df_save(RH_num, df_vol_L, df_vol_R, sole_header, save_path):
+def GPR_df_save(RH_num, walk_num, df_vol_L, df_vol_R, sole_header, save_path):
 
     # create csv path
     try:
@@ -594,8 +594,8 @@ def GPR_df_save(RH_num, df_vol_L, df_vol_R, sole_header, save_path):
         df_force_L[sensor] = GPR_prediction(
             df_left_sensor, model_path, "Left", sensor_num)
     # save GPR df
-    df_force_L.to_csv(str(save_path) + "/df_force_L.csv",
-                      header=True, index=False, sep=',')
+    df_force_L.to_csv(str(save_path) + "/Trimmed_walk%s_df_force_L.csv"
+                      % walk_num, header=True, index=False, sep=',')
 
     ###############################################################
     # Right df
@@ -615,15 +615,17 @@ def GPR_df_save(RH_num, df_vol_L, df_vol_R, sole_header, save_path):
         df_force_R[sensor] = GPR_prediction(
             df_right_sensor, model_path, "Right", sensor_num)
     # save GPR df
-    df_force_R.to_csv(str(save_path) + "/df_force_R.csv",
-                      header=True, index=False, sep=',')
+    df_force_R.to_csv(str(save_path) + "/Trimmed_walk%s_df_force_R.csv"
+                      % walk_num, header=True, index=False, sep=',')
 
     return 0
 
 
-def load_GPR(path):
+def load_GPR(path, walk_num):
 
-    df_force_L = pd.read_csv(path + "/df_force_L.csv", sep=",", header=0)
-    df_force_R = pd.read_csv(path + "/df_force_R.csv", sep=",", header=0)
+    df_force_L = pd.read_csv(path + "/Trimmed_walk%s_df_force_L.csv"
+                             % walk_num, sep=",", header=0)
+    df_force_R = pd.read_csv(path + "/Trimmed_walk%s_df_force_R.csv"
+                             % walk_num, sep=",", header=0)
 
     return df_force_L, df_force_R
