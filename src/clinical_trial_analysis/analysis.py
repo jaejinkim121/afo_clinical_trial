@@ -71,7 +71,7 @@ def get_dataframe_sole_sensor(
     # save GPR prediction
     if save_GPR_prediction:
         GPR_df_save(
-            str(trial_num).zfill(2),
+            str(trial_num).zfill(2), str(trial_num).zfill(2),
             df_vol_L, df_vol_R,
             sole_header_dict,
             GPR_save_path)
