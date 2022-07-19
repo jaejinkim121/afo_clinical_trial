@@ -15,3 +15,5 @@ class PlotFlag(enum.Flag):
     USE_DIDIM_KINEMATICS = True
     USE_DIDIM_KINEMATICS_ALL = False
 
+    USE_IMU_ACCEL = True
+    USE_IMU_GYRO = True

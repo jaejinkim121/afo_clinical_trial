@@ -121,7 +121,7 @@ def plot_walk(trial_num, walk_num):
     df_didim_kinematics, df_imu = \
         get_dataframe_imu(trial_num, walk_num)
     df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R, end_time = \
-        get_dataframe_sole_sensor(trial_num, walk_num, force_df=True)
+        get_dataframe_sole_sensor(trial_num, walk_num, force_df=False)
 
     # ------------------ FLAG HANDLING ----------------- #
     data = []
@@ -155,7 +155,7 @@ def plot_walk(trial_num, walk_num):
                         continue
                     data.append([DataSet(
                         df_vol_R['time'], df_vol_R[key], key
-                    )]  )
+                    )])
         else:
             # Left
             sole_data_left = list()
@@ -199,6 +199,26 @@ def plot_walk(trial_num, walk_num):
                 ))
         data.append(joint_data_left)
         data.append(joint_data_right)
+
+    if PlotFlag.USE_IMU_ACCEL:
+        output_prefix += '_ACC'
+        data_acc = list()
+        for imu in df_imu:
+            key = imu.keys()[-2]
+            data_acc.append(DataSet(
+                imu['time'], imu[key], key
+            ))
+        data.append(data_acc)
+
+    if PlotFlag.USE_IMU_GYRO:
+        output_prefix += '_GYRO'
+        data_gyro = list()
+        for imu in df_imu:
+            key = imu.keys()[-1]
+            data_gyro.append(DataSet(
+                imu['time'], imu[key], key
+            ))
+        data.append(data_gyro)
 
     data_length = len(data)    # TEMP
 
