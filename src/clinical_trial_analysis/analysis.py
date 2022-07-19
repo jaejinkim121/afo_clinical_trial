@@ -69,7 +69,8 @@ def get_dataframe_sole_sensor(
         return df_didim_GRF, df_vol_L, df_vol_R,\
             df_force_L, df_force_R, GRF_end_time
     else:
-        return df_didim_GRF, df_vol_L, df_vol_R, GRF_end_time
+        return df_didim_GRF, df_vol_L, df_vol_R, \
+               None, None, GRF_end_time
 
 
 def get_dataframe_imu(trial_num, walk_num):
