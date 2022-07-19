@@ -5,9 +5,8 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
-
-path_configfile1 = 'D:/OneDrive - SNU/AFO_analysis/afo_clinical_trial/' +\
-    'src/clinical_trial_analysis/include'
+path_configfile1 = 'C:/Users/minhee/OneDrive - SNU/AFO_analysis/' +\
+    'afo_clinical_trial/src/clinical_trial_analysis/include'
 sys.path.append(os.path.dirname(os.path.expanduser(path_configfile1)))
 
 
@@ -42,7 +41,8 @@ def get_full_file_path(prefix, suffix, index):
 def get_dataframe_sole_sensor(
         trial_num, walk_num,
         save_sole_header=False,
-        save_GPR_prediction=False
+        save_GPR_prediction=False,
+        force_df=False
         ):
 
     path = '../../data/RH-%s/' % (str(trial_num).zfill(2))
@@ -69,16 +69,21 @@ def get_dataframe_sole_sensor(
                         GRF_end_time)
 
     # save GPR prediction
-    if save_GPR_prediction:
-        GPR_df_save(
-            str(trial_num).zfill(2), str(trial_num).zfill(2),
-            df_vol_L, df_vol_R,
-            sole_header_dict,
-            GPR_save_path)
-    (df_force_L, df_force_R) = load_GPR(GPR_save_path, str(trial_num).zfill(2))
+    if force_df:
+        if save_GPR_prediction:
+            GPR_df_save(
+                str(trial_num).zfill(2), str(walk_num).zfill(2),
+                df_vol_L, df_vol_R,
+                sole_header_dict,
+                GPR_save_path)
+        # force df
+        (df_force_L, df_force_R) = load_GPR(GPR_save_path,
+                                            str(walk_num).zfill(2))
 
-    return df_didim_GRF, df_vol_L, df_vol_R,\
-        df_force_L, df_force_R, GRF_end_time
+        return df_didim_GRF, df_vol_L, df_vol_R,\
+            df_force_L, df_force_R, GRF_end_time
+    else:
+        return df_didim_GRF, df_vol_L, df_vol_R, GRF_end_time
 
 
 def get_dataframe_imu(trial_num, walk_num):
@@ -110,12 +115,14 @@ def save_GPR_predicted_data():
                 df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R, _ = \
                     get_dataframe_sole_sensor(tn, wn,
                                               save_sole_header=False,
-                                              save_GPR_prediction=True)
+                                              save_GPR_prediction=True,
+                                              force_df=True)
             else:
                 df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R, _ = \
                     get_dataframe_sole_sensor(tn, wn,
                                               save_sole_header=True,
-                                              save_GPR_prediction=True)
+                                              save_GPR_prediction=True,
+                                              force_df=True)
             flag += 1
 
     return 0
