@@ -256,6 +256,118 @@ def plot_walk(trial_num, walk_num):
             data.append(sole_data_left)
             data.append(sole_data_right)
 
+    if PlotFlag.USE_FORCE:
+        output_prefix += '_FORCE'
+        if PlotFlag.VOLT_SEP:
+            if PlotFlag.USE_VOLT_LorR:
+                for key in df_vol_L:
+                    if key == 'time':
+                        continue
+                    if key.split()[-1] == 'head':
+                        line_color = 'r'
+                        if key.split()[1] == 'first':
+                            line_type = 'solid'
+                        elif key.split()[1] == 'third':
+                            line_type = 'dash'
+                        else:
+                            line_type = 'dot'
+                    elif key.split()[-1] == 'toe':
+                        line_color = 'b'
+                        if key.split()[1] == 'first':
+                            line_type = 'solid'
+                        else:
+                            line_type = 'dot'
+                    elif key.split()[-1] == 'tuberosity':
+                        line_color = 'g'
+                        if key.split()[1] == 'medial':
+                            line_type = 'solid'
+                        elif key.split()[1] == 'lateral':
+                            line_type = 'dash'
+                        else:
+                            line_type = 'dot'
+                    data.append([DataSet(
+                        df_force_L['time'], df_force_L[key], key,
+                        line_type=line_type, line_color=line_color
+                    )])
+            else:
+                for key in df_vol_R:
+                    if key == 'time':
+                        continue
+                    if key.split()[-1] == 'head':
+                        plot_option = 'dot'
+                    elif key.split()[-1] == 'toe':
+                        plot_option = 'solid'
+                    elif key.split()[-1] == 'tuberosity':
+                        plot_option = 'dash'
+                    data.append([DataSet(
+                        df_force_R['time'], df_force_R[key], key
+                    )])
+        else:
+            # Left
+            sole_data_left = list()
+            for key in df_vol_L:
+                if key == 'time':
+                    continue
+                if key.split()[-1] == 'head':
+                    line_color = 'r'
+                    if key.split()[1] == 'first':
+                        line_type = 'solid'
+                    elif key.split()[1] == 'third':
+                        line_type = 'dash'
+                    else:
+                        line_type = 'dot'
+                elif key.split()[-1] == 'toe':
+                    line_color = 'b'
+                    if key.split()[1] == 'first':
+                        line_type = 'solid'
+                    else:
+                        line_type = 'dot'
+                elif key.split()[-1] == 'tuberosity':
+                    line_color = 'g'
+                    if key.split()[1] == 'medial':
+                        line_type = 'solid'
+                    elif key.split()[1] == 'lateral':
+                        line_type = 'dash'
+                    else:
+                        line_type = 'dot'
+                sole_data_left.append(DataSet(
+                    df_force_L['time'], df_force_L[key], key,
+                    line_type=line_type, line_color=line_color
+                ))
+            # Right
+            sole_data_right = list()
+            for key in df_vol_R:
+                if key == 'time':
+                    continue
+                if key.split()[-1] == 'head':
+                    line_color = 'r'
+                    if key.split()[1] == 'first':
+                        line_type = 'solid'
+                    elif key.split()[1] == 'third':
+                        line_type = 'dash'
+                    else:
+                        line_type = 'dot'
+                elif key.split()[-1] == 'toe':
+                    line_color = 'b'
+                    if key.split()[1] == 'first':
+                        line_type = 'solid'
+                    else:
+                        line_type = 'dash'
+                elif key.split()[-1] == 'tuberosity':
+                    line_color = 'g'
+                    if key.split()[1] == 'medial':
+                        line_type = 'solid'
+                    elif key.split()[1] == 'lateral':
+                        line_type = 'dash'
+                    else:
+                        line_type = 'dot'
+                sole_data_right.append(DataSet(
+                    df_force_R['time'], df_force_R[key], key,
+                    line_type=line_type, line_color=line_color
+                ))
+            data.append(sole_data_left)
+            data.append(sole_data_right)
+
     if PlotFlag.USE_DIDIM_KINEMATICS:
         if PlotFlag.USE_DIDIM_KINEMATICS_ALL:
             output_prefix += '_KIN'
