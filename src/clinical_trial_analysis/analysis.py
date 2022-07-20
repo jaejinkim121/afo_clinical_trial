@@ -397,8 +397,22 @@ def plot_walk(trial_num, walk_num):
         data_acc = list()
         for imu in df_imu:
             key = imu.keys()[-2]
+            if key.split()[0] == 'Left':
+                line_color = 'r'
+            elif key.split()[0] == 'Right':
+                line_color = 'b'
+            else:
+                line_color = 'g'
+            if key.split()[-1].split('_')[0] == 'Thigh':
+                line_type = 'dash'
+            elif key.split()[-1].split('_')[0] == 'Shank':
+                line_type = 'dot'
+            else:
+                line_type = 'solid'
+
             data_acc.append(DataSet(
-                imu['time'], imu[key], key
+                imu['time'], imu[key], key,
+                line_type=line_type, line_color=line_color
             ))
         data.append(data_acc)
 
@@ -407,8 +421,21 @@ def plot_walk(trial_num, walk_num):
         data_gyro = list()
         for imu in df_imu:
             key = imu.keys()[-1]
+            if key.split()[0] == 'Left':
+                line_color = 'r'
+            elif key.split()[0] == 'Right':
+                line_color = 'b'
+            else:
+                line_color = 'g'
+            if key.split()[-1].split('_')[0] == 'Thigh':
+                line_type = 'dash'
+            elif key.split()[-1].split('_')[0] == 'Shank':
+                line_type = 'dot'
+            else:
+                line_type = 'solid'
             data_gyro.append(DataSet(
-                imu['time'], imu[key], key
+                imu['time'], imu[key], key,
+                line_type=line_type, line_color=line_color
             ))
         data.append(data_gyro)
 
@@ -452,7 +479,7 @@ def main():
     wn_list = {2: [9, 15], 3: [10, 18], 4: [12, 18], 5: [14, 19],
                6: [16, 20], 7: [16, 24], 8: [10, 16], 9: [10, 20],
                10: [12, 21]}
-    for tn in range(2, 11):
+    for tn in range(2, 6):
         for wn in range(wn_list[tn][0], wn_list[tn][1]+1):
             plot_walk(tn, wn)
 
