@@ -3,11 +3,11 @@ import enum
 
 class PlotFlag(enum.Flag):
     # For LorR Flag -> True when Left-only, False when Right-only
-    USE_VOLT = True
+    USE_VOLT = False
     VOLT_SEP = False
     USE_VOLT_LorR = True
 
-    USE_FORCE = False
+    USE_FORCE = True
     FORCE_SEP = False
     USE_FORCE_LorR = True
 

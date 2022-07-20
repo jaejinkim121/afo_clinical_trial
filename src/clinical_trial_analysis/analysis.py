@@ -18,16 +18,20 @@ from include.config import PlotFlag
 
 
 class DataSet:
-    def __init__(self, time, data, title):
+    def __init__(self, time, data, title,
+                 line_type=None,
+                 line_color=''):
         self.time = time
         self.data = data
         self.title = title
+        self.line_type = line_type
+        self.line_color = line_color
 
 
 def get_dataframe_sole_sensor(
         trial_num, walk_num,
         save_sole_header=False,
-        save_GPR_prediction=False,
+        save_GPR_priction=False,
         force_df=False
         ):
 
@@ -54,9 +58,9 @@ def get_dataframe_sole_sensor(
                         sole_header_dict,
                         GRF_end_time)
 
-    # save GPR prediction
+    # save GPR priction
     if force_df:
-        if save_GPR_prediction:
+        if save_GPR_priction:
             GPR_df_save(
                 str(trial_num).zfill(2), str(walk_num).zfill(2),
                 df_vol_L, df_vol_R,
@@ -88,7 +92,7 @@ def get_dataframe_imu(trial_num, walk_num):
     return df_didim_kinematics, df_imu
 
 
-def save_GPR_predicted_data():
+def save_GPR_pricted_data():
     wn_list = {2: [9, 15], 3: [10, 18], 4: [12, 18], 5: [14, 19],
                6: [16, 20], 7: [16, 24], 8: [10, 16], 9: [10, 20],
                10: [12, 21]}
@@ -102,13 +106,13 @@ def save_GPR_predicted_data():
                 df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R, _ = \
                     get_dataframe_sole_sensor(tn, wn,
                                               save_sole_header=False,
-                                              save_GPR_prediction=True,
+                                              save_GPR_priction=True,
                                               force_df=True)
             else:
                 df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R, _ = \
                     get_dataframe_sole_sensor(tn, wn,
                                               save_sole_header=True,
-                                              save_GPR_prediction=True,
+                                              save_GPR_priction=True,
                                               force_df=True)
             flag += 1
 
@@ -147,13 +151,42 @@ def plot_walk(trial_num, walk_num):
                 for key in df_vol_L:
                     if key == 'time':
                         continue
+                    if key.split()[-1] == 'head':
+                        line_color = 'r'
+                        if key.split()[1] == 'first':
+                            line_type = 'solid'
+                        elif key.split()[1] == 'third':
+                            line_type = 'dash'
+                        else:
+                            line_type = 'dot'
+                    elif key.split()[-1] == 'toe':
+                        line_color = 'b'
+                        if key.split()[1] == 'first':
+                            line_type = 'solid'
+                        else:
+                            line_type = 'dot'
+                    elif key.split()[-1] == 'tuberosity':
+                        line_color = 'g'
+                        if key.split()[1] == 'medial':
+                            line_type = 'solid'
+                        elif key.split()[1] == 'lateral':
+                            line_type = 'dash'
+                        else:
+                            line_type = 'dot'
                     data.append([DataSet(
-                        df_vol_L['time'], df_vol_L[key], key
+                        df_vol_L['time'], df_vol_L[key], key,
+                        line_type=line_type, line_color=line_color
                     )])
             else:
                 for key in df_vol_R:
                     if key == 'time':
                         continue
+                    if key.split()[-1] == 'head':
+                        plot_option = 'dot'
+                    elif key.split()[-1] == 'toe':
+                        plot_option = 'solid'
+                    elif key.split()[-1] == 'tuberosity':
+                        plot_option = 'dash'
                     data.append([DataSet(
                         df_vol_R['time'], df_vol_R[key], key
                     )])
@@ -163,16 +196,62 @@ def plot_walk(trial_num, walk_num):
             for key in df_vol_L:
                 if key == 'time':
                     continue
+                if key.split()[-1] == 'head':
+                    line_color = 'r'
+                    if key.split()[1] == 'first':
+                        line_type = 'solid'
+                    elif key.split()[1] == 'third':
+                        line_type = 'dash'
+                    else:
+                        line_type = 'dot'
+                elif key.split()[-1] == 'toe':
+                    line_color = 'b'
+                    if key.split()[1] == 'first':
+                        line_type = 'solid'
+                    else:
+                        line_type = 'dot'
+                elif key.split()[-1] == 'tuberosity':
+                    line_color = 'g'
+                    if key.split()[1] == 'medial':
+                        line_type = 'solid'
+                    elif key.split()[1] == 'lateral':
+                        line_type = 'dash'
+                    else:
+                        line_type = 'dot'
                 sole_data_left.append(DataSet(
-                    df_vol_L['time'], df_vol_L[key], key
+                    df_vol_L['time'], df_vol_L[key], key,
+                    line_type=line_type, line_color=line_color
                 ))
             # Right
             sole_data_right = list()
             for key in df_vol_R:
                 if key == 'time':
                     continue
+                if key.split()[-1] == 'head':
+                    line_color = 'r'
+                    if key.split()[1] == 'first':
+                        line_type = 'solid'
+                    elif key.split()[1] == 'third':
+                        line_type = 'dash'
+                    else:
+                        line_type = 'dot'
+                elif key.split()[-1] == 'toe':
+                    line_color = 'b'
+                    if key.split()[1] == 'first':
+                        line_type = 'solid'
+                    else:
+                        line_type = 'dash'
+                elif key.split()[-1] == 'tuberosity':
+                    line_color = 'g'
+                    if key.split()[1] == 'medial':
+                        line_type = 'solid'
+                    elif key.split()[1] == 'lateral':
+                        line_type = 'dash'
+                    else:
+                        line_type = 'dot'
                 sole_data_right.append(DataSet(
-                    df_vol_R['time'], df_vol_R[key], key
+                    df_vol_R['time'], df_vol_R[key], key,
+                    line_type=line_type, line_color=line_color
                 ))
             data.append(sole_data_left)
             data.append(sole_data_right)
@@ -225,20 +304,32 @@ def plot_walk(trial_num, walk_num):
 
     # -------------------  PLOT  ----------------------- #
     matplotlib.rcParams['figure.figsize'] = 20, 3 * data_length
+    line_type = {
+        None: '-',
+        'solid': '-',
+        'dash': '--',
+        'dash_dot': '-.',
+        'dot': ':'
+    }
     fig = plt.figure()
     ax = [fig.add_subplot(data_length, 1, i) for i in range(1, data_length + 1)]
 
     for i in range(data_length):
         current_ax = ax[i]
         for dataset in data[i]:
-            current_ax.plot(dataset.time, dataset.data, label=dataset.title)
+            current_ax.plot(dataset.time,
+                            dataset.data,
+                            dataset.line_color + line_type[dataset.line_type],
+                            label=dataset.title,
+                            )
 
         current_ax.set_xticks(np.arange(0, end_time, 0.25))
-        current_ax.set_xlim([0, end_time+0.7])
+        current_ax.set_xlim([0, end_time+1])
         current_ax.legend(loc='right')
         current_ax.grid(axis='x',
                         linestyle='--')
-
+        current_ax.hlines(0, xmin=0, xmax=end_time, colors='k', linestyles='--')
+    plt.jet()
     plt.tight_layout()
     os.makedirs(output_prefix, exist_ok=True)
     plt.savefig(output_prefix + output_name)
