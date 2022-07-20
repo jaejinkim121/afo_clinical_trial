@@ -15,7 +15,7 @@ import time
 
 
 def basic_info_save_json():
-    file_path = 'C:/Users/minhee/OneDrive - SNU/AFO_analysis/' +\
+    file_path = 'D:/OneDrive - SNU/AFO_analysis/' +\
         'afo_clinical_trial/data/basic_info.json'
     basic_info = {
         "RH-02": {
@@ -90,7 +90,7 @@ def basic_info_save_json():
 
 
 def sole_header_info_save_json():
-    file_path = 'C:/Users/minhee/OneDrive - SNU/AFO_analysis/' +\
+    file_path = 'D:/OneDrive - SNU/AFO_analysis/' +\
         'afo_clinical_trial/data/sole_header_info.json'
     sole_header = {
         "RH-02": {

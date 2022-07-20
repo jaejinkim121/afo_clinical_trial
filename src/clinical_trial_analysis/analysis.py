@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
-path_configfile1 = 'C:/Users/minhee/OneDrive - SNU/AFO_analysis/' +\
+path_configfile1 = 'D:/OneDrive - SNU/AFO_analysis/' +\
     'afo_clinical_trial/src/clinical_trial_analysis/include'
 sys.path.append(os.path.dirname(os.path.expanduser(path_configfile1)))
 
@@ -28,6 +28,7 @@ class DataSet:
         self.line_color = line_color
 
 
+# input argument: trial_num, walk_num, force_df=True only for RH-02 ~ RH-06
 def get_dataframe_sole_sensor(
         trial_num, walk_num,
         save_sole_header=False,
@@ -97,7 +98,7 @@ def save_GPR_pricted_data():
                6: [16, 20], 7: [16, 24], 8: [10, 16], 9: [10, 20],
                10: [12, 21]}
     flag = 0
-    for tn in range(2, 11):
+    for tn in range(7, 11):
         for wn in range(wn_list[tn][0], wn_list[tn][1]+1):
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             print("RH: %s" % str(tn).zfill(2))
