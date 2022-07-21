@@ -127,7 +127,8 @@ def plot_walk(trial_num, walk_num):
     df_didim_kinematics, df_imu = \
         get_dataframe_imu(trial_num, walk_num)
     df_didim_GRF, df_vol_L, df_vol_R, df_force_L, df_force_R, end_time = \
-        get_dataframe_sole_sensor(trial_num, walk_num, force_df=False)
+        get_dataframe_sole_sensor(
+            trial_num, walk_num, force_df=PlotFlag.USE_FORCE)
 
     # ------------------ FLAG HANDLING ----------------- #
     data = []
@@ -137,11 +138,39 @@ def plot_walk(trial_num, walk_num):
         grf_data.append(DataSet(
             df_didim_GRF['time'],
             df_didim_GRF['L_GRF_VRT'],
-            'Left foot GRF'))
+            'Left GRF VRT'))
         grf_data.append(DataSet(
             df_didim_GRF['time'],
             df_didim_GRF['R_GRF_VRT'],
-            'Right foot GRF'
+            'Right GRF VRT'
+        ))
+        data.append(grf_data)
+
+    if PlotFlag.USE_DIDIM_GRF_LAT:
+        output_prefix += '_LAT'
+        grf_data = list()
+        grf_data.append(DataSet(
+            df_didim_GRF['time'],
+            df_didim_GRF['L_GRF_LAT'],
+            'Left GRF LAT'))
+        grf_data.append(DataSet(
+            df_didim_GRF['time'],
+            df_didim_GRF['R_GRF_LAT'],
+            'Right GRF LAT'
+        ))
+        data.append(grf_data)
+
+    if PlotFlag.USE_DIDIM_GRF_FWD:
+        output_prefix += '_FWD'
+        grf_data = list()
+        grf_data.append(DataSet(
+            df_didim_GRF['time'],
+            df_didim_GRF['L_GRF_FWD'],
+            'Left GRF FWD'))
+        grf_data.append(DataSet(
+            df_didim_GRF['time'],
+            df_didim_GRF['R_GRF_FWD'],
+            'Right GRF FWD'
         ))
         data.append(grf_data)
 
@@ -480,10 +509,14 @@ def main():
     wn_list = {2: [9, 15], 3: [10, 18], 4: [12, 18], 5: [14, 19],
                6: [16, 20], 7: [16, 24], 8: [10, 16], 9: [10, 20],
                10: [12, 21]}
-    for tn in range(2, 6):
+    for tn in range(2, 11):
         for wn in range(wn_list[tn][0], wn_list[tn][1]+1):
+            print("Current Trial: {}, Current Walk: {}".format(tn, wn))
             plot_walk(tn, wn)
+
+
 
 
 if __name__ == "__main__":
     main()
+

@@ -7,13 +7,16 @@ class PlotFlag(enum.Flag):
     VOLT_SEP = False
     USE_VOLT_LorR = True
 
-    USE_FORCE = True
+    USE_FORCE = False
     FORCE_SEP = False
     USE_FORCE_LorR = True
 
     USE_DIDIM_GRF = True
-    USE_DIDIM_KINEMATICS = True
+    USE_DIDIM_GRF_LAT = True
+    USE_DIDIM_GRF_FWD = True
+
+    USE_DIDIM_KINEMATICS = False
     USE_DIDIM_KINEMATICS_ALL = False
 
-    USE_IMU_ACCEL = True
-    USE_IMU_GYRO = True
+    USE_IMU_ACCEL = False
+    USE_IMU_GYRO = False
