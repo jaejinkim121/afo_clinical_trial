@@ -20,3 +20,14 @@ class PlotFlag(enum.Flag):
 
     USE_IMU_ACCEL = False
     USE_IMU_GYRO = False
+
+
+class DataSet:
+    def __init__(self, time, data, title,
+                 line_type=None,
+                 line_color=''):
+        self.time = time
+        self.data = data
+        self.title = title
+        self.line_type = line_type
+        self.line_color = line_color

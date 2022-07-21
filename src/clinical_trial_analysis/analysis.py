@@ -15,17 +15,7 @@ from include.sole_sensor_preprocessing import load_GRF, load_SENSOR_vol
 from include.sole_sensor_preprocessing import convert_sole_header
 from include.sole_sensor_preprocessing import GPR_df_save, load_GPR
 from include.config import PlotFlag
-
-
-class DataSet:
-    def __init__(self, time, data, title,
-                 line_type=None,
-                 line_color=''):
-        self.time = time
-        self.data = data
-        self.title = title
-        self.line_type = line_type
-        self.line_color = line_color
+from plot_by_type import *
 
 
 # input argument: trial_num, walk_num, force_df=True only for RH-02 ~ RH-06
@@ -134,342 +124,32 @@ def plot_walk(trial_num, walk_num):
     data = []
     if PlotFlag.USE_DIDIM_GRF:
         output_prefix += '_GRF'
-        grf_data = list()
-        grf_data.append(DataSet(
-            df_didim_GRF['time'],
-            df_didim_GRF['L_GRF_VRT'],
-            'Left GRF VRT'))
-        grf_data.append(DataSet(
-            df_didim_GRF['time'],
-            df_didim_GRF['R_GRF_VRT'],
-            'Right GRF VRT'
-        ))
-        data.append(grf_data)
-
-    if PlotFlag.USE_DIDIM_GRF_LAT:
-        output_prefix += '_LAT'
-        grf_data = list()
-        grf_data.append(DataSet(
-            df_didim_GRF['time'],
-            df_didim_GRF['L_GRF_LAT'],
-            'Left GRF LAT'))
-        grf_data.append(DataSet(
-            df_didim_GRF['time'],
-            df_didim_GRF['R_GRF_LAT'],
-            'Right GRF LAT'
-        ))
-        data.append(grf_data)
-
-    if PlotFlag.USE_DIDIM_GRF_FWD:
-        output_prefix += '_FWD'
-        grf_data = list()
-        grf_data.append(DataSet(
-            df_didim_GRF['time'],
-            df_didim_GRF['L_GRF_FWD'],
-            'Left GRF FWD'))
-        grf_data.append(DataSet(
-            df_didim_GRF['time'],
-            df_didim_GRF['R_GRF_FWD'],
-            'Right GRF FWD'
-        ))
-        data.append(grf_data)
+        add_data_GRF(data, df_didim_GRF)
 
     if PlotFlag.USE_VOLT:
         output_prefix += '_VOLT'
-        if PlotFlag.VOLT_SEP:
-            if PlotFlag.USE_VOLT_LorR:
-                for key in df_vol_L:
-                    if key == 'time':
-                        continue
-                    if key.split()[-1] == 'head':
-                        line_color = 'r'
-                        if key.split()[1] == 'first':
-                            line_type = 'solid'
-                        elif key.split()[1] == 'third':
-                            line_type = 'dash'
-                        else:
-                            line_type = 'dot'
-                    elif key.split()[-1] == 'toe':
-                        line_color = 'b'
-                        if key.split()[1] == 'first':
-                            line_type = 'solid'
-                        else:
-                            line_type = 'dot'
-                    elif key.split()[-1] == 'tuberosity':
-                        line_color = 'g'
-                        if key.split()[1] == 'medial':
-                            line_type = 'solid'
-                        elif key.split()[1] == 'lateral':
-                            line_type = 'dash'
-                        else:
-                            line_type = 'dot'
-                    data.append([DataSet(
-                        df_vol_L['time'], df_vol_L[key], key,
-                        line_type=line_type, line_color=line_color
-                    )])
-            else:
-                for key in df_vol_R:
-                    if key == 'time':
-                        continue
-                    if key.split()[-1] == 'head':
-                        plot_option = 'dot'
-                    elif key.split()[-1] == 'toe':
-                        plot_option = 'solid'
-                    elif key.split()[-1] == 'tuberosity':
-                        plot_option = 'dash'
-                    data.append([DataSet(
-                        df_vol_R['time'], df_vol_R[key], key
-                    )])
-        else:
-            # Left
-            sole_data_left = list()
-            for key in df_vol_L:
-                if key == 'time':
-                    continue
-                if key.split()[-1] == 'head':
-                    line_color = 'r'
-                    if key.split()[1] == 'first':
-                        line_type = 'solid'
-                    elif key.split()[1] == 'third':
-                        line_type = 'dash'
-                    else:
-                        line_type = 'dot'
-                elif key.split()[-1] == 'toe':
-                    line_color = 'b'
-                    if key.split()[1] == 'first':
-                        line_type = 'solid'
-                    else:
-                        line_type = 'dot'
-                elif key.split()[-1] == 'tuberosity':
-                    line_color = 'g'
-                    if key.split()[1] == 'medial':
-                        line_type = 'solid'
-                    elif key.split()[1] == 'lateral':
-                        line_type = 'dash'
-                    else:
-                        line_type = 'dot'
-                sole_data_left.append(DataSet(
-                    df_vol_L['time'], df_vol_L[key], key,
-                    line_type=line_type, line_color=line_color
-                ))
-            # Right
-            sole_data_right = list()
-            for key in df_vol_R:
-                if key == 'time':
-                    continue
-                if key.split()[-1] == 'head':
-                    line_color = 'r'
-                    if key.split()[1] == 'first':
-                        line_type = 'solid'
-                    elif key.split()[1] == 'third':
-                        line_type = 'dash'
-                    else:
-                        line_type = 'dot'
-                elif key.split()[-1] == 'toe':
-                    line_color = 'b'
-                    if key.split()[1] == 'first':
-                        line_type = 'solid'
-                    else:
-                        line_type = 'dash'
-                elif key.split()[-1] == 'tuberosity':
-                    line_color = 'g'
-                    if key.split()[1] == 'medial':
-                        line_type = 'solid'
-                    elif key.split()[1] == 'lateral':
-                        line_type = 'dash'
-                    else:
-                        line_type = 'dot'
-                sole_data_right.append(DataSet(
-                    df_vol_R['time'], df_vol_R[key], key,
-                    line_type=line_type, line_color=line_color
-                ))
-            data.append(sole_data_left)
-            data.append(sole_data_right)
+        add_data_sole(data, df_vol_L, df_vol_R)
 
     if PlotFlag.USE_FORCE:
         output_prefix += '_FORCE'
-        if PlotFlag.VOLT_SEP:
-            if PlotFlag.USE_VOLT_LorR:
-                for key in df_vol_L:
-                    if key == 'time':
-                        continue
-                    if key.split()[-1] == 'head':
-                        line_color = 'r'
-                        if key.split()[1] == 'first':
-                            line_type = 'solid'
-                        elif key.split()[1] == 'third':
-                            line_type = 'dash'
-                        else:
-                            line_type = 'dot'
-                    elif key.split()[-1] == 'toe':
-                        line_color = 'b'
-                        if key.split()[1] == 'first':
-                            line_type = 'solid'
-                        else:
-                            line_type = 'dot'
-                    elif key.split()[-1] == 'tuberosity':
-                        line_color = 'g'
-                        if key.split()[1] == 'medial':
-                            line_type = 'solid'
-                        elif key.split()[1] == 'lateral':
-                            line_type = 'dash'
-                        else:
-                            line_type = 'dot'
-                    data.append([DataSet(
-                        df_force_L['time'], df_force_L[key], key,
-                        line_type=line_type, line_color=line_color
-                    )])
-            else:
-                for key in df_vol_R:
-                    if key == 'time':
-                        continue
-                    if key.split()[-1] == 'head':
-                        plot_option = 'dot'
-                    elif key.split()[-1] == 'toe':
-                        plot_option = 'solid'
-                    elif key.split()[-1] == 'tuberosity':
-                        plot_option = 'dash'
-                    data.append([DataSet(
-                        df_force_R['time'], df_force_R[key], key
-                    )])
-        else:
-            # Left
-            sole_data_left = list()
-            for key in df_vol_L:
-                if key == 'time':
-                    continue
-                if key.split()[-1] == 'head':
-                    line_color = 'r'
-                    if key.split()[1] == 'first':
-                        line_type = 'solid'
-                    elif key.split()[1] == 'third':
-                        line_type = 'dash'
-                    else:
-                        line_type = 'dot'
-                elif key.split()[-1] == 'toe':
-                    line_color = 'b'
-                    if key.split()[1] == 'first':
-                        line_type = 'solid'
-                    else:
-                        line_type = 'dot'
-                elif key.split()[-1] == 'tuberosity':
-                    line_color = 'g'
-                    if key.split()[1] == 'medial':
-                        line_type = 'solid'
-                    elif key.split()[1] == 'lateral':
-                        line_type = 'dash'
-                    else:
-                        line_type = 'dot'
-                sole_data_left.append(DataSet(
-                    df_force_L['time'], df_force_L[key], key,
-                    line_type=line_type, line_color=line_color
-                ))
-            # Right
-            sole_data_right = list()
-            for key in df_vol_R:
-                if key == 'time':
-                    continue
-                if key.split()[-1] == 'head':
-                    line_color = 'r'
-                    if key.split()[1] == 'first':
-                        line_type = 'solid'
-                    elif key.split()[1] == 'third':
-                        line_type = 'dash'
-                    else:
-                        line_type = 'dot'
-                elif key.split()[-1] == 'toe':
-                    line_color = 'b'
-                    if key.split()[1] == 'first':
-                        line_type = 'solid'
-                    else:
-                        line_type = 'dash'
-                elif key.split()[-1] == 'tuberosity':
-                    line_color = 'g'
-                    if key.split()[1] == 'medial':
-                        line_type = 'solid'
-                    elif key.split()[1] == 'lateral':
-                        line_type = 'dash'
-                    else:
-                        line_type = 'dot'
-                sole_data_right.append(DataSet(
-                    df_force_R['time'], df_force_R[key], key,
-                    line_type=line_type, line_color=line_color
-                ))
-            data.append(sole_data_left)
-            data.append(sole_data_right)
+        add_data_sole(data, df_force_L, df_force_R)
 
     if PlotFlag.USE_DIDIM_KINEMATICS:
         if PlotFlag.USE_DIDIM_KINEMATICS_ALL:
             output_prefix += '_KIN'
         else:
             output_prefix += '_FLEX'
-        joint_data_left = list()
-        joint_data_right = list()
-        for key in df_didim_kinematics:
-            if key == 'time':
-                continue
-            elif not PlotFlag.USE_DIDIM_KINEMATICS_ALL:
-                if ('Abd' in key) or ('Rot' in key):
-                    continue
-            if key[0] == 'L':
-                joint_data_left.append(DataSet(
-                    df_didim_kinematics['time'], df_didim_kinematics[key], key
-                ))
-            elif key[0] == 'R':
-                joint_data_right.append(DataSet(
-                    df_didim_kinematics['time'], df_didim_kinematics[key], key
-                ))
-        data.append(joint_data_left)
-        data.append(joint_data_right)
+        add_data_kinematics(data, df_didim_kinematics)
 
     if PlotFlag.USE_IMU_ACCEL:
         output_prefix += '_ACC'
-        data_acc = list()
-        for imu in df_imu:
-            key = imu.keys()[-2]
-            if key.split()[0] == 'Left':
-                line_color = 'r'
-            elif key.split()[0] == 'Right':
-                line_color = 'b'
-            else:
-                line_color = 'g'
-            if key.split()[-1].split('_')[0] == 'Thigh':
-                line_type = 'dash'
-            elif key.split()[-1].split('_')[0] == 'Shank':
-                line_type = 'dot'
-            else:
-                line_type = 'solid'
-
-            data_acc.append(DataSet(
-                imu['time'], imu[key], key,
-                line_type=line_type, line_color=line_color
-            ))
-        data.append(data_acc)
+        add_data_accel(data, df_imu)
 
     if PlotFlag.USE_IMU_GYRO:
         output_prefix += '_GYRO'
-        data_gyro = list()
-        for imu in df_imu:
-            key = imu.keys()[-1]
-            if key.split()[0] == 'Left':
-                line_color = 'r'
-            elif key.split()[0] == 'Right':
-                line_color = 'b'
-            else:
-                line_color = 'g'
-            if key.split()[-1].split('_')[0] == 'Thigh':
-                line_type = 'dash'
-            elif key.split()[-1].split('_')[0] == 'Shank':
-                line_type = 'dot'
-            else:
-                line_type = 'solid'
-            data_gyro.append(DataSet(
-                imu['time'], imu[key], key,
-                line_type=line_type, line_color=line_color
-            ))
-        data.append(data_gyro)
+        add_data_gyro(data, df_imu)
 
-    data_length = len(data)    # TEMP
+    data_length = len(data)
 
     # -------------------  PLOT  ----------------------- #
     matplotlib.rcParams['figure.figsize'] = 20, 3 * data_length
