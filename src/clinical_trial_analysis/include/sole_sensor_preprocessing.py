@@ -346,7 +346,7 @@ def sole_header_change(path, RH_num):
             "R medial calcaneal tuberosity": "R medial heel",
             "R lateral calcaneal tuberosity": "R lateral heel"
             }, inplace=True)
-        data.to_csv(L_path, header=True, index=False, sep=',')
+        data.to_csv(R_path, header=True, index=False, sep=',')
 
     return 0
 
