@@ -199,8 +199,6 @@ def main():
             plot_walk(tn, wn)
 
 
-
-
 if __name__ == "__main__":
     main()
 
