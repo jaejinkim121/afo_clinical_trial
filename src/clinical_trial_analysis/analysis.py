@@ -12,6 +12,8 @@ sys.path.append(os.path.dirname(os.path.expanduser(path_configfile1)))
 from include.load_imu_data import load_xls, load_imu
 from include.sole_sensor_preprocessing import load_GRF, load_SENSOR_vol
 from include.sole_sensor_preprocessing import convert_sole_header
+from include.sole_sensor_preprocessing import sole_header_change
+from include.sole_sensor_preprocessing import sole_header_info_save_json
 from include.sole_sensor_preprocessing import GPR_df_save, load_GPR
 from include.config import PlotFlag
 from plot_by_type import *
@@ -87,9 +89,8 @@ def save_GPR_pricted_data():
                6: [16, 20], 7: [16, 24], 8: [10, 16], 9: [10, 20],
                10: [12, 21]}
     flag = 0
-    for tn in range(7, 11):
+    for tn in range(2, 11):
         for wn in range(wn_list[tn][0], wn_list[tn][1]+1):
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             print("RH: %s" % str(tn).zfill(2))
             print("walk: %s" % str(wn).zfill(2))
             if flag > 0:
@@ -105,6 +106,14 @@ def save_GPR_pricted_data():
                                               save_GPR_priction=True,
                                               force_df=True)
             flag += 1
+
+    return 0
+
+
+def change_sole_header(trial_num):
+    GPR_save_path = '../../data/analyzed/sole/RH-%s/converted_data'\
+        % str(trial_num).zfill(2)
+    sole_header_change(GPR_save_path, str(trial_num).zfill(2))
 
     return 0
 
@@ -199,8 +208,5 @@ def main():
             plot_walk(tn, wn)
 
 
-
-
 if __name__ == "__main__":
     main()
-
