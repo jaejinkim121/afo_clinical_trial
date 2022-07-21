@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 import pandas as pd
 import numpy as np
 import matplotlib
@@ -116,6 +117,19 @@ def change_sole_header(trial_num):
     sole_header_change(GPR_save_path, str(trial_num).zfill(2))
 
     return 0
+
+
+# (RETURN type) affected_side: "left" or "right", L_cane, R_cane: True or False
+def get_exp_info(trial_num):
+    exp_info_path = '../../data/basic_info.json'
+    with open(exp_info_path, 'r') as file:
+        exp_info = json.load(file)
+
+    affected_side = exp_info["RH-" + str(trial_num).zfill(2)]["affected side"]
+    L_cane = exp_info["RH-" + str(trial_num).zfill(2)]["left cane"]
+    R_cane = exp_info["RH-" + str(trial_num).zfill(2)]["right cane"]
+
+    return affected_side, L_cane, R_cane
 
 
 def plot_walk(trial_num, walk_num):
