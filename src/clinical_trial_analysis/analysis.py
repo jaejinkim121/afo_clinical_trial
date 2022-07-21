@@ -9,7 +9,6 @@ path_configfile1 = 'D:/OneDrive - SNU/AFO_analysis/' +\
     'afo_clinical_trial/src/clinical_trial_analysis/include'
 sys.path.append(os.path.dirname(os.path.expanduser(path_configfile1)))
 
-
 from include.load_imu_data import load_xls, load_imu
 from include.sole_sensor_preprocessing import load_GRF, load_SENSOR_vol
 from include.sole_sensor_preprocessing import convert_sole_header
@@ -109,9 +108,11 @@ def save_GPR_pricted_data():
 
     return 0
 
+
 def plot_walk(trial_num, walk_num):
-    output_name = '/tn{}_wn{}.png'.format(trial_num, walk_num)
+    output_name = '/RH{}_wn{}.png'.format(trial_num, walk_num)
     output_prefix = '../../image/plot/'
+
     # ----------------- DATA LOADING ------------------- #
 
     df_didim_kinematics, df_imu = \
@@ -152,6 +153,7 @@ def plot_walk(trial_num, walk_num):
     data_length = len(data)
 
     # -------------------  PLOT  ----------------------- #
+
     matplotlib.rcParams['figure.figsize'] = 20, 3 * data_length
     line_type = {
         None: '-',
@@ -177,11 +179,13 @@ def plot_walk(trial_num, walk_num):
         current_ax.legend(loc='right')
         current_ax.grid(axis='x',
                         linestyle='--')
-        current_ax.hlines(0, xmin=0, xmax=end_time, colors='k', linestyles='--')
-    plt.jet()
+        if i == 3 or i == 4:
+            current_ax.hlines(0, xmin=0, xmax=end_time, colors='k', linestyles='--')
+
     plt.tight_layout()
     os.makedirs(output_prefix, exist_ok=True)
     plt.savefig(output_prefix + output_name)
+
     return 0
 
 
