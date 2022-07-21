@@ -299,6 +299,58 @@ def sole_header_info_save_json():
     return 0
 
 
+def sole_header_change(path, RH_num):
+    # Left
+    (df_force_L_path, _) = folder_path_name(path + "/", "end", "L.csv", T_F=1)
+    for L_path in df_force_L_path:
+        data = pd.read_csv(L_path, delimiter=",", header=0)
+        # revise force mapping only for RH-07
+        if RH_num == "07":
+            data.rename(columns={
+                "L second toe": "L lateral calcaneal tuberosity",
+                "L third metatarsal head": "L fifth metatarsal head",
+                "L fifth metatarsal head": "L third metatarsal head",
+                "L lateral calcaneal tuberosity": "L second toe",
+                "L calcaneal tuberosity": "L first toe",
+                "L medial calcaneal tuberosity": "L first metatarsal head",
+                "L first metatarsal head": "L medial calcaneal tuberosity",
+                "L first toe": "L calcaneal tuberosity"
+            }, inplace=True)
+        # change sole header for hindfoot
+        data.rename(columns={
+            "L calcaneal tuberosity": "L heel",
+            "L medial calcaneal tuberosity": "L medial heel",
+            "L lateral calcaneal tuberosity": "L lateral heel"
+            }, inplace=True)
+        data.to_csv(L_path, header=True, index=False, sep=',')
+
+    # Right
+    (df_force_R_path, _) = folder_path_name(path + "/", "end", "R.csv", T_F=1)
+    for R_path in df_force_R_path:
+        data = pd.read_csv(R_path, delimiter=",", header=0)
+        # revise force mapping only for RH-07
+        if RH_num == "07":
+            data.rename(columns={
+                "R second toe": "R lateral calcaneal tuberosity",
+                "R third metatarsal head": "R fifth metatarsal head",
+                "R fifth metatarsal head": "R third metatarsal head",
+                "R lateral calcaneal tuberosity": "R second toe",
+                "R calcaneal tuberosity": "R first toe",
+                "R medial calcaneal tuberosity": "R first metatarsal head",
+                "R first metatarsal head": "R medial calcaneal tuberosity",
+                "R first toe": "R calcaneal tuberosity"
+            }, inplace=True)
+        # change sole header for hindfoot
+        data.rename(columns={
+            "R calcaneal tuberosity": "R heel",
+            "R medial calcaneal tuberosity": "R medial heel",
+            "R lateral calcaneal tuberosity": "R lateral heel"
+            }, inplace=True)
+        data.to_csv(L_path, header=True, index=False, sep=',')
+
+    return 0
+
+
 def folder_path_name(path, start_or_end=None, char=None, T_F=None):
 
     folder_name_path = str(path)
