@@ -95,134 +95,134 @@ def sole_header_info_save_json():
     sole_header = {
         "RH-02": {
             "left": [
-                "L lateral calcaneal tuberosity",
+                "L lateral heel",
                 "L fifth metatarsal head",
                 "L second toe",
                 "L third metatarsal head",
                 "L first toe",
                 "L first metatarsal head",
-                "L medial calcaneal tuberosity",
-                "L calcaneal tuberosity"
+                "L medial heel",
+                "L heel"
                 ],
             "right": [
-                "R medial calcaneal tuberosity",
+                "R medial heel",
                 "R fifth metatarsal head",
                 "R second toe",
                 "R third metatarsal head",
                 "R first toe",
                 "R first metatarsal head",
-                "R lateral calcaneal tuberosity",
-                "R calcaneal tuberosity"
+                "R lateral heel",
+                "R heel"
                 ]
             },
         "RH-03": {
             "left": [
-                "L lateral calcaneal tuberosity",
+                "L lateral heel",
                 "L fifth metatarsal head",
                 "L third metatarsal head",
                 "L second toe",
                 "L first toe",
                 "L first metatarsal head",
-                "L medial calcaneal tuberosity",
-                "L calcaneal tuberosity"
+                "L medial heel",
+                "L heel"
                 ],
             "right": [
-                "R lateral calcaneal tuberosity",
+                "R lateral heel",
                 "R fifth metatarsal head",
                 "R third metatarsal head",
                 "R second toe",
                 "R first toe",
                 "R first metatarsal head",
-                "R medial calcaneal tuberosity",
-                "R calcaneal tuberosity"
+                "R medial heel",
+                "R heel"
                 ]
             },
         "RH-04": {
             "left": [
-                "L lateral calcaneal tuberosity",
+                "L lateral heel",
                 "L fifth metatarsal head",
                 "L third metatarsal head",
                 "L second toe",
                 "L first toe",
                 "L first metatarsal head",
-                "L medial calcaneal tuberosity",
-                "L calcaneal tuberosity"
+                "L medial heel",
+                "L heel"
                 ],
             "right": [
-                "R lateral calcaneal tuberosity",
+                "R lateral heel",
                 "R fifth metatarsal head",
                 "R third metatarsal head",
                 "R second toe",
                 "R first toe",
                 "R first metatarsal head",
-                "R medial calcaneal tuberosity",
-                "R calcaneal tuberosity"
+                "R medial heel",
+                "R heel"
                 ]
             },
         "RH-05": {
             "left": [
-                "L lateral calcaneal tuberosity",
+                "L lateral heel",
                 "L fifth metatarsal head",
                 "L second toe",
                 "L third metatarsal head",
                 "L first toe",
                 "L first metatarsal head",
-                "L medial calcaneal tuberosity",
-                "L calcaneal tuberosity"
+                "L medial heel",
+                "L heel"
                 ],
             "right": [
-                "R medial calcaneal tuberosity",
+                "R medial heel",
                 "R fifth metatarsal head",
                 "R second toe",
                 "R third metatarsal head",
                 "R first toe",
                 "R first metatarsal head",
-                "R lateral calcaneal tuberosity",
-                "R calcaneal tuberosity"
+                "R lateral heel",
+                "R heel"
                 ]
             },
         "RH-06": {
             "left": [
-                "L lateral calcaneal tuberosity",
+                "L lateral heel",
                 "L fifth metatarsal head",
                 "L second toe",
                 "L third metatarsal head",
                 "L first toe",
                 "L first metatarsal head",
-                "L medial calcaneal tuberosity",
-                "L calcaneal tuberosity"
+                "L medial heel",
+                "L heel"
                 ],
             "right": [
-                "R lateral calcaneal tuberosity",
+                "R lateral heel",
                 "R fifth metatarsal head",
                 "R second toe",
                 "R third metatarsal head",
                 "R first toe",
                 "R first metatarsal head",
-                "R medial calcaneal tuberosity",
-                "R calcaneal tuberosity"
+                "R medial heel",
+                "R heel"
                 ]
             },
         "RH-07": {
             "left": [
-                "L second toe",
-                "L third metatarsal head",
+                "L lateral heel",
                 "L fifth metatarsal head",
-                "L lateral calcaneal tuberosity",
-                "L calcaneal tuberosity",
-                "L medial calcaneal tuberosity",
+                "L third metatarsal head",
+                "L second toe",
+                "L first toe",
                 "L first metatarsal head",
-                "L first toe"
+                "L medial heel",
+                "L heel"
                 ],
             "right": [
-                "R second toe",
-                "R third metatarsal head",
+                "R lateral heel",
                 "R fifth metatarsal head",
-                "R lateral calcaneal tuberosity",
-                "R calcaneal tuberosity",
-                "R medial calcaneal tuberosity",
+                "R third metatarsal head",
+                "R second toe",
+                "R first toe",
                 "R first metatarsal head",
-                "R first toe"
+                "R medial heel",
+                "R heel"
                 ]
             },
         "RH-08": {
@@ -230,9 +230,9 @@ def sole_header_info_save_json():
                 "L third metatarsal head",
                 "L second toe",
                 "L fifth metatarsal head",
-                "L lateral calcaneal tuberosity",
-                "L calcaneal tuberosity",
-                "L medial calcaneal tuberosity",
+                "L lateral heel",
+                "L heel",
+                "L medial heel",
                 "L first metatarsal head",
                 "L first toe"
                 ],
@@ -240,9 +240,9 @@ def sole_header_info_save_json():
                 "R third metatarsal head",
                 "R second toe",
                 "R fifth metatarsal head",
-                "R lateral calcaneal tuberosity",
-                "R calcaneal tuberosity",
-                "R medial calcaneal tuberosity",
+                "R lateral heel",
+                "R heel",
+                "R medial heel",
                 "R first metatarsal head",
                 "R first toe"
                 ]
@@ -252,9 +252,9 @@ def sole_header_info_save_json():
                 "L second toe",
                 "L third metatarsal head",
                 "L fifth metatarsal head",
-                "L lateral calcaneal tuberosity",
-                "L calcaneal tuberosity",
-                "L medial calcaneal tuberosity",
+                "L lateral heel",
+                "L heel",
+                "L medial heel",
                 "L first metatarsal head",
                 "L first toe"
                 ],
@@ -262,9 +262,9 @@ def sole_header_info_save_json():
                 "R third metatarsal head",
                 "R second toe",
                 "R fifth metatarsal head",
-                "R lateral calcaneal tuberosity",
-                "R calcaneal tuberosity",
-                "R medial calcaneal tuberosity",
+                "R lateral heel",
+                "R heel",
+                "R medial heel",
                 "R first metatarsal head",
                 "R first toe"
                 ]
@@ -274,9 +274,9 @@ def sole_header_info_save_json():
                 "L second toe",
                 "L third metatarsal head",
                 "L fifth metatarsal head",
-                "L lateral calcaneal tuberosity",
-                "L calcaneal tuberosity",
-                "L medial calcaneal tuberosity",
+                "L lateral heel",
+                "L heel",
+                "L medial heel",
                 "L first metatarsal head",
                 "L first toe"
                 ],
@@ -284,9 +284,9 @@ def sole_header_info_save_json():
                 "R third metatarsal head",
                 "R second toe",
                 "R fifth metatarsal head",
-                "R lateral calcaneal tuberosity",
-                "R calcaneal tuberosity",
-                "R medial calcaneal tuberosity",
+                "R lateral heel",
+                "R heel",
+                "R medial heel",
                 "R first metatarsal head",
                 "R first toe"
                 ]
@@ -295,6 +295,58 @@ def sole_header_info_save_json():
 
     with open(file_path, "w", encoding='utf-8') as file:
         json.dump(sole_header, file)
+
+    return 0
+
+
+def sole_header_change(path, RH_num):
+    # Left
+    (df_force_L_path, _) = folder_path_name(path + "/", "end", "L.csv", T_F=1)
+    for L_path in df_force_L_path:
+        data = pd.read_csv(L_path, delimiter=",", header=0)
+        # revise force mapping only for RH-07
+        if RH_num == "07":
+            data.rename(columns={
+                "L second toe": "L lateral calcaneal tuberosity",
+                "L third metatarsal head": "L fifth metatarsal head",
+                "L fifth metatarsal head": "L third metatarsal head",
+                "L lateral calcaneal tuberosity": "L second toe",
+                "L calcaneal tuberosity": "L first toe",
+                "L medial calcaneal tuberosity": "L first metatarsal head",
+                "L first metatarsal head": "L medial calcaneal tuberosity",
+                "L first toe": "L calcaneal tuberosity"
+            }, inplace=True)
+        # change sole header for hindfoot
+        data.rename(columns={
+            "L calcaneal tuberosity": "L heel",
+            "L medial calcaneal tuberosity": "L medial heel",
+            "L lateral calcaneal tuberosity": "L lateral heel"
+            }, inplace=True)
+        data.to_csv(L_path, header=True, index=False, sep=',')
+
+    # Right
+    (df_force_R_path, _) = folder_path_name(path + "/", "end", "R.csv", T_F=1)
+    for R_path in df_force_R_path:
+        data = pd.read_csv(R_path, delimiter=",", header=0)
+        # revise force mapping only for RH-07
+        if RH_num == "07":
+            data.rename(columns={
+                "R second toe": "R lateral calcaneal tuberosity",
+                "R third metatarsal head": "R fifth metatarsal head",
+                "R fifth metatarsal head": "R third metatarsal head",
+                "R lateral calcaneal tuberosity": "R second toe",
+                "R calcaneal tuberosity": "R first toe",
+                "R medial calcaneal tuberosity": "R first metatarsal head",
+                "R first metatarsal head": "R medial calcaneal tuberosity",
+                "R first toe": "R calcaneal tuberosity"
+            }, inplace=True)
+        # change sole header for hindfoot
+        data.rename(columns={
+            "R calcaneal tuberosity": "R heel",
+            "R medial calcaneal tuberosity": "R medial heel",
+            "R lateral calcaneal tuberosity": "R lateral heel"
+            }, inplace=True)
+        data.to_csv(R_path, header=True, index=False, sep=',')
 
     return 0
 

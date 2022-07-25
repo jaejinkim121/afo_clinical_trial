@@ -61,7 +61,7 @@ def add_data_sole(data, df_L, df_R):
                 line_type = 'solid'
             else:
                 line_type = 'dot'
-        elif key.split()[-1] == 'tuberosity':
+        elif key.split()[-1] == 'heel':
             line_color = 'g'
             if key.split()[1] == 'medial':
                 line_type = 'solid'
@@ -91,7 +91,7 @@ def add_data_sole(data, df_L, df_R):
                 line_type = 'solid'
             else:
                 line_type = 'dot'
-        elif key.split()[-1] == 'tuberosity':
+        elif key.split()[-1] == 'heel':
             line_color = 'g'
             if key.split()[1] == 'medial':
                 line_type = 'solid'
