@@ -202,8 +202,10 @@ def plot_walk(trial_num, walk_num):
         current_ax.legend(loc='right')
         current_ax.grid(axis='x',
                         linestyle='--')
+        # I'm lazy... Too bad hard-coding
         if i == 3 or i == 4:
-            current_ax.hlines(0, xmin=0, xmax=end_time, colors='k', linestyles='--')
+            current_ax.hlines(
+                0, xmin=0, xmax=end_time, colors='k', linestyles='--')
 
     plt.tight_layout()
     os.makedirs(output_prefix, exist_ok=True)
