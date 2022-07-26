@@ -536,8 +536,8 @@ def load_SENSOR_NORMAL_vol(path, sole_header):
 
     #################################################################
     # L dataframe
-    df_vol_L = read_SENSOR_vol(L_data_path[0], 'NORMAL')
-    df_vol_L = df_vol_L[volt_header]
+    df_vol_L = pd.read_csv(L_data_path[0], sep=",", header=0)
+    df_vol_L.columns = volt_header
     # initialize L time
     df_vol_L["time"] = df_vol_L["time"] - df_vol_L.loc[0, "time"]
     # sole header matching for each trial
@@ -548,8 +548,8 @@ def load_SENSOR_NORMAL_vol(path, sole_header):
 
     #################################################################
     # R dataframe
-    df_vol_R = read_SENSOR_vol(R_data_path[0], 'NORMAL')
-    df_vol_R = df_vol_R[volt_header]
+    df_vol_R = pd.read_csv(R_data_path[0], sep=",", header=0)
+    df_vol_R.columns = volt_header
     # initialize R time
     df_vol_R["time"] = df_vol_R["time"] - df_vol_R.loc[0, "time"]
     # sole header matching for each trial
