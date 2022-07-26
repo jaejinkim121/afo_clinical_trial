@@ -523,6 +523,44 @@ def load_SENSOR_vol(
     return df_vol_L, df_vol_R
 
 
+def load_SENSOR_NORMAL_vol(path, sole_header):
+
+    # sensor L, R path
+    (L_data_path, _) = \
+        folder_path_name(path + "RasPi/sole/", "end", "left.csv", 1)
+    (R_data_path, _) = \
+        folder_path_name(path + "RasPi/sole/", "end", "right.csv", 1)
+
+    # data reading ##################################################
+    volt_header = ['time', 0, 1, 2, 3, 4, 5, 6, 7]
+
+    #################################################################
+    # L dataframe
+    df_vol_L = pd.read_csv(L_data_path[0], sep=",", header=0)
+    df_vol_L.columns = volt_header
+    # initialize L time
+    df_vol_L["time"] = df_vol_L["time"] - df_vol_L.loc[0, "time"]
+    # sole header matching for each trial
+    L_sole_header = ['time']
+    for n in range(0, 8):
+        L_sole_header.append(sole_header["RH-10"]["left"][int(n)])
+    df_vol_L.columns = L_sole_header
+
+    #################################################################
+    # R dataframe
+    df_vol_R = pd.read_csv(R_data_path[0], sep=",", header=0)
+    df_vol_R.columns = volt_header
+    # initialize R time
+    df_vol_R["time"] = df_vol_R["time"] - df_vol_R.loc[0, "time"]
+    # sole header matching for each trial
+    R_sole_header = ['time']
+    for n in range(0, 8):
+        R_sole_header.append(sole_header["RH-10"]["right"][int(n)])
+    df_vol_R.columns = R_sole_header
+
+    return df_vol_L, df_vol_R
+
+
 def N_data_preprocessing(data, NUM_PRE=30, WINDOWS=30, tol=0.01):
 
     data.sort_values(by=['time'], axis=0, ascending=True, inplace=True)
@@ -669,6 +707,68 @@ def GPR_df_save(RH_num, walk_num, df_vol_L, df_vol_R, sole_header, save_path):
     # save GPR df
     df_force_R.to_csv(str(save_path) + "/Trimmed_walk%s_df_force_R.csv"
                       % walk_num, header=True, index=False, sep=',')
+
+    return 0
+
+
+def GPR_df_NORMAL_save(
+        df_vol_L, df_vol_R, sole_header, save_path
+        ):
+
+    # create csv path
+    try:
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+    except OSError:
+        pass
+
+    # model path
+    model_path = '../../data/analyzed/sole/RH-10/model/'
+
+    # Define L, R force df
+    ###############################################################
+    # Left df
+    df_force_L = pd.DataFrame(columns=df_vol_L.columns)
+    df_force_L["time"] = df_vol_L["time"]
+    # GPR prediction for each model
+    for sensor in list(df_vol_L.columns):
+        if sensor == "time":
+            continue
+        print("left sensor model number %s" % sensor)
+        sensor_num = sole_header["RH-10"]["left"].index(sensor)
+        # individual sensor vout for GPR prediction
+        df_left_sensor = pd.DataFrame(df_vol_L[["time", sensor]])
+        df_left_sensor.columns = ["time", "vout"]
+        # N data preprocessing
+        # df_left_sensor = N_data_preprocessing(df_left_sensor)
+        # GPR prediction
+        df_force_L[sensor] = GPR_prediction(
+            df_left_sensor, model_path, "Left", sensor_num)
+    # save GPR df
+    df_force_L.to_csv(str(save_path) + "/df_force_L.csv",
+                      header=True, index=False, sep=',')
+
+    ###############################################################
+    # Right df
+    df_force_R = pd.DataFrame(columns=df_vol_R.columns)
+    df_force_R["time"] = df_vol_R["time"]
+    # GPR prediction for each model
+    for sensor in list(df_vol_R.columns):
+        if sensor == "time":
+            continue
+        print("right sensor model number %s" % sensor)
+        sensor_num = sole_header["RH-10"]["right"].index(sensor)
+        # individual sensor vout for GPR prediction
+        df_right_sensor = pd.DataFrame(df_vol_R[["time", sensor]])
+        df_right_sensor.columns = ["time", "vout"]
+        # N data preprocessing
+        # df_right_sensor = N_data_preprocessing(df_right_sensor)
+        # GPR prediction
+        df_force_R[sensor] = GPR_prediction(
+            df_right_sensor, model_path, "Right", sensor_num)
+    # save GPR df
+    df_force_R.to_csv(str(save_path) + "/df_force_R.csv",
+                      header=True, index=False, sep=',')
 
     return 0
 

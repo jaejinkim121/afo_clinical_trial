@@ -11,13 +11,46 @@ path_configfile1 = 'D:/OneDrive - SNU/AFO_analysis/' +\
 sys.path.append(os.path.dirname(os.path.expanduser(path_configfile1)))
 
 from include.load_imu_data import load_xls, load_imu
-from include.sole_sensor_preprocessing import load_GRF, load_SENSOR_vol
-from include.sole_sensor_preprocessing import convert_sole_header
-from include.sole_sensor_preprocessing import sole_header_change
-from include.sole_sensor_preprocessing import sole_header_info_save_json
-from include.sole_sensor_preprocessing import GPR_df_save, load_GPR
+from include.sole_sensor_preprocessing import *
+# from include.sole_sensor_preprocessing import load_GRF, load_SENSOR_vol
+# from include.sole_sensor_preprocessing import convert_sole_header
+# from include.sole_sensor_preprocessing import sole_header_change
+# from include.sole_sensor_preprocessing import sole_header_info_save_json
+# from include.sole_sensor_preprocessing import GPR_df_save, load_GPR
 from include.config import PlotFlag
 from plot_by_type import *
+
+
+def get_NORMAL_dataframe_sole_sensor(
+        save_GPR_priction=False
+        ):
+
+    path = '../../data/HSJ/'
+    sole_header_path = '../../data/sole_header_info.json'
+    GPR_save_path = \
+        '../../data/analyzed/sole/HSJ/converted_data'
+
+    # Read sole_header dict
+    sole_header_dict = convert_sole_header(
+        sole_header_path, save_flag=False
+        )
+
+    # load L, R sensor df
+    (df_vol_L, df_vol_R) = load_SENSOR_NORMAL_vol(path, sole_header_dict)
+
+    # save GPR priction
+    if save_GPR_priction:
+        GPR_df_NORMAL_save(
+            df_vol_L, df_vol_R, sole_header_dict, GPR_save_path
+            )
+
+    # force df
+    df_force_L = pd.read_csv(GPR_save_path + "/df_force_L.csv",
+                             sep=",", header=0)
+    df_force_R = pd.read_csv(GPR_save_path + "/df_force_R.csv",
+                             sep=",", header=0)
+
+    return df_vol_L, df_vol_R, df_force_L, df_force_R
 
 
 # input argument: trial_num, walk_num, force_df=True only for RH-02 ~ RH-06
