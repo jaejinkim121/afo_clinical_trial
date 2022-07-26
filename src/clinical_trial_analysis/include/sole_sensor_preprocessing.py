@@ -734,6 +734,7 @@ def GPR_df_NORMAL_save(
     for sensor in list(df_vol_L.columns):
         if sensor == "time":
             continue
+        print("left sensor model number %s" % sensor)
         sensor_num = sole_header["RH-10"]["left"].index(sensor)
         # individual sensor vout for GPR prediction
         df_left_sensor = pd.DataFrame(df_vol_L[["time", sensor]])
@@ -755,6 +756,7 @@ def GPR_df_NORMAL_save(
     for sensor in list(df_vol_R.columns):
         if sensor == "time":
             continue
+        print("right sensor model number %s" % sensor)
         sensor_num = sole_header["RH-10"]["right"].index(sensor)
         # individual sensor vout for GPR prediction
         df_right_sensor = pd.DataFrame(df_vol_R[["time", sensor]])
