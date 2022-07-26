@@ -523,9 +523,7 @@ def load_SENSOR_vol(
     return df_vol_L, df_vol_R
 
 
-def load_SENSOR_NORMAL_vol(
-        path, RH_num, sole_header
-        ):
+def load_SENSOR_NORMAL_vol(path, sole_header):
 
     # sensor L, R path
     (L_data_path, _) = \
