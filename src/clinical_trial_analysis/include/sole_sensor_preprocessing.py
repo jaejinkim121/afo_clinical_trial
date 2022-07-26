@@ -711,6 +711,66 @@ def GPR_df_save(RH_num, walk_num, df_vol_L, df_vol_R, sole_header, save_path):
     return 0
 
 
+def GPR_df_NORMAL_save(
+        df_vol_L, df_vol_R, sole_header, save_path
+        ):
+
+    # create csv path
+    try:
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+    except OSError:
+        pass
+
+    # model path
+    model_path = '../../data/analyzed/sole/RH-10/model/'
+
+    # Define L, R force df
+    ###############################################################
+    # Left df
+    df_force_L = pd.DataFrame(columns=df_vol_L.columns)
+    df_force_L["time"] = df_vol_L["time"]
+    # GPR prediction for each model
+    for sensor in list(df_vol_L.columns):
+        if sensor == "time":
+            continue
+        sensor_num = sole_header["RH-10"]["left"].index(sensor)
+        # individual sensor vout for GPR prediction
+        df_left_sensor = pd.DataFrame(df_vol_L[["time", sensor]])
+        df_left_sensor.columns = ["time", "vout"]
+        # N data preprocessing
+        # df_left_sensor = N_data_preprocessing(df_left_sensor)
+        # GPR prediction
+        df_force_L[sensor] = GPR_prediction(
+            df_left_sensor, model_path, "Left", sensor_num)
+    # save GPR df
+    df_force_L.to_csv(str(save_path) + "/df_force_L.csv",
+                      header=True, index=False, sep=',')
+
+    ###############################################################
+    # Right df
+    df_force_R = pd.DataFrame(columns=df_vol_R.columns)
+    df_force_R["time"] = df_vol_R["time"]
+    # GPR prediction for each model
+    for sensor in list(df_vol_R.columns):
+        if sensor == "time":
+            continue
+        sensor_num = sole_header["RH-10"]["right"].index(sensor)
+        # individual sensor vout for GPR prediction
+        df_right_sensor = pd.DataFrame(df_vol_R[["time", sensor]])
+        df_right_sensor.columns = ["time", "vout"]
+        # N data preprocessing
+        # df_right_sensor = N_data_preprocessing(df_right_sensor)
+        # GPR prediction
+        df_force_R[sensor] = GPR_prediction(
+            df_right_sensor, model_path, "Right", sensor_num)
+    # save GPR df
+    df_force_R.to_csv(str(save_path) + "/df_force_R.csv",
+                      header=True, index=False, sep=',')
+
+    return 0
+
+
 def load_GPR(path, walk_num):
 
     df_force_L = pd.read_csv(path + "/Trimmed_walk%s_df_force_L.csv"
