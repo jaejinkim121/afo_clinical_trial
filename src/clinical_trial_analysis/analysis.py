@@ -166,6 +166,7 @@ def get_exp_info(trial_num):
 
 
 def plot_walk(trial_num, walk_num):
+    affected_side, is_left_cane, is_right_cane = get_exp_info(trial_num)
     output_name = '/RH{}_wn{}.png'.format(trial_num, walk_num)
     output_prefix = '../../image/plot/'
 
@@ -218,6 +219,9 @@ def plot_walk(trial_num, walk_num):
         'dash_dot': '-.',
         'dot': ':'
     }
+
+    affected_side_font = {'str': 'CANE USED', 'font_size': 50}
+
     fig = plt.figure()
     ax = [fig.add_subplot(data_length, 1, i) for i in range(1, data_length + 1)]
 
@@ -235,7 +239,39 @@ def plot_walk(trial_num, walk_num):
         current_ax.legend(loc='right')
         current_ax.grid(axis='x',
                         linestyle='--')
+        if i == 0:
+            current_ax.set_title('Trial: {}, Walk: {}  *LEFT-first'.format(trial_num, walk_num),
+                                 fontsize=20)
+
         # I'm lazy... Too bad hard-coding
+
+        if (i == 1) or (i == 3):
+            if is_left_cane:
+                xlim = current_ax.get_xlim()
+                ylim = current_ax.get_ylim()
+                current_ax.text(0.5 * (xlim[0] + xlim[1]),
+                                0.15 * ylim[0] + 0.85 * ylim[1],
+                                'Left Cane',
+                                fontsize=affected_side_font['font_size'],
+                                horizontalalignment='center',
+                                verticalalignment='center',
+                                alpha=0.08)
+            if affected_side == "left":
+                current_ax.set_facecolor('0.9')
+        if (i == 2) or (i == 4):
+            if is_right_cane:
+                xlim = current_ax.get_xlim()
+                ylim = current_ax.get_ylim()
+                current_ax.text(0.5 * (xlim[0] + xlim[1]),
+                                0.15 * ylim[0] + 0.85 * ylim[1],
+                                'Right Cane',
+                                fontsize=affected_side_font['font_size'],
+                                horizontalalignment='center',
+                                verticalalignment='center',
+                                alpha=0.08)
+            if affected_side == "right":
+                current_ax.set_facecolor('0.9')
+
         if i == 3 or i == 4:
             current_ax.hlines(
                 0, xmin=0, xmax=end_time, colors='k', linestyles='--')
