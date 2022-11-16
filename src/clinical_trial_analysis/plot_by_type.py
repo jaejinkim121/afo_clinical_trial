@@ -41,10 +41,15 @@ def add_data_GRF(data, df_didim_GRF):
         data.append(grf_data)
 
 
-def add_data_sole(data, df_L, df_R):
+def add_data_sole(data, df_L, df_R, selected_sensor=None):
     sole_data_left = list()
     sole_data_right = list()
     for key in df_L:
+        if selected_sensor is not None:
+            if key.split()[-1] != selected_sensor:
+                continue
+        if key == 'L lateral heel' or key == 'L medial heel':
+            continue
         if key == 'time':
             continue
         if key.split()[-1] == 'head':
@@ -75,6 +80,11 @@ def add_data_sole(data, df_L, df_R):
         ))
 
     for key in df_R:
+        if selected_sensor is not None:
+            if key.split()[-1] != selected_sensor:
+                continue
+        if key == 'R lateral heel' or key == 'R medial heel':
+            continue
         if key == 'time':
             continue
         if key.split()[-1] == 'head':

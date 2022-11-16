@@ -185,12 +185,24 @@ def plot_walk(trial_num, walk_num):
         add_data_GRF(data, df_didim_GRF)
 
     if PlotFlag.USE_VOLT:
-        output_prefix += '_VOLT'
-        add_data_sole(data, df_vol_L, df_vol_R)
+        if not PlotFlag.VOLT_SEP:
+            output_prefix += '_VOLT'
+            add_data_sole(data, df_vol_L, df_vol_R)
+        else:
+            output_prefix += '_VOLT_SEP'
+            add_data_sole(data, df_vol_L, df_vol_R, 'head')
+            add_data_sole(data, df_vol_L, df_vol_R, 'toe')
+            add_data_sole(data, df_vol_L, df_vol_R, 'heel')
 
     if PlotFlag.USE_FORCE:
-        output_prefix += '_FORCE'
-        add_data_sole(data, df_force_L, df_force_R)
+        if not PlotFlag.FORCE_SEP:
+            output_prefix += '_FORCE'
+            add_data_sole(data, df_force_L, df_force_R)
+        else:
+            output_prefix += '_FORCE_SEP'
+            add_data_sole(data, df_force_L, df_force_R, 'head')
+            add_data_sole(data, df_force_L, df_force_R, 'toe')
+            add_data_sole(data, df_force_L, df_force_R, 'heel')
 
     if PlotFlag.USE_DIDIM_KINEMATICS:
         if PlotFlag.USE_DIDIM_KINEMATICS_ALL:
@@ -245,7 +257,7 @@ def plot_walk(trial_num, walk_num):
 
         # I'm lazy... Too bad hard-coding
 
-        if (i == 1) or (i == 3):
+        if i % 2 == 0:
             if is_left_cane:
                 xlim = current_ax.get_xlim()
                 ylim = current_ax.get_ylim()
@@ -258,7 +270,7 @@ def plot_walk(trial_num, walk_num):
                                 alpha=0.08)
             if affected_side == "left":
                 current_ax.set_facecolor('0.9')
-        if (i == 2) or (i == 4):
+        if i % 2 == 1:
             if is_right_cane:
                 xlim = current_ax.get_xlim()
                 ylim = current_ax.get_ylim()
@@ -272,9 +284,9 @@ def plot_walk(trial_num, walk_num):
             if affected_side == "right":
                 current_ax.set_facecolor('0.9')
 
-        if i == 3 or i == 4:
-            current_ax.hlines(
-                0, xmin=0, xmax=end_time, colors='k', linestyles='--')
+        # if i == 3 or i == 4:
+        #     current_ax.hlines(
+        #         0, xmin=0, xmax=end_time, colors='k', linestyles='--')
 
     plt.tight_layout()
     os.makedirs(output_prefix, exist_ok=True)
