@@ -29,10 +29,10 @@ class ClinicalIndexJJ:
         non_paretic_stdev = np.std(np_nptc)
         symmetry = paretic_mean / (paretic_mean + non_paretic_mean)
 
-        return (paretic_mean, paretic_stdev,
+        return [paretic_mean, paretic_stdev,
                 non_paretic_mean, non_paretic_stdev,
                 symmetry
-                )
+                ]
 
     @staticmethod
     def get_clinical_index_gait_speed_imu(stride_path):

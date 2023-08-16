@@ -1,5 +1,8 @@
 from bagpy import bagreader
 import pandas as pd
+from jj import ClinicalIndexJJ
+import mh
+
 
 # return some clinical index -> side-dependent case
 # 1. Give each value of paretic and non-paretic side
@@ -40,7 +43,6 @@ def main():
     path = "../../bag/log_2023-08-04-16-26-19.bag"
     bag = bagreader(path)
     start_time = bag.start_time
-    print(start_time)
 
     # To filter specific topics with interests
     TOPIC_MH = (
@@ -50,24 +52,40 @@ def main():
         "/afo_detector/gait_nonparetic"
     )
 
-    TOPIC_JJ = ()
+    TOPIC_JJ = ("afo_gui/left_toe_clearance",
+                "afo_gui/right_toe_clearance",
+                "afo_gui/stride")
 
     # Definition of Clinical Indices
     # Sample
     cadence_trial_mean = 0.0
 
+    left_toe_path = ""
+    right_toe_path = ""
+    stride_path = ""
+
     # Read Topics and calculate clinical index
     for topic in bag.topics:
         msg_topic = bag.message_by_topic(topic)
-        print(msg_topic)
 
         # Use own module and methods
         if topic in TOPIC_MH:
-            msg_topic = bag.message_by_topic(topic)
-            print(msg_topic)
-
-        if topic in TOPIC_JJ:
             ...
+
+        if topic is TOPIC_JJ[0]:
+            left_toe_path = msg_topic
+        elif topic is TOPIC_JJ[1]:
+            right_toe_path = msg_topic
+        elif topic is TOPIC_JJ[2]:
+            stride_path = msg_topic
+
+    toe_clearance_data = \
+        ClinicalIndexJJ.get_clinical_index_max_toe_clearance(
+            left_toe_path, right_toe_path)
+
+    stride_data = ClinicalIndexJJ.get_clinical_index_gait_speed_imu(
+        stride_path)
+
 
     # Document Formatting
     ...
