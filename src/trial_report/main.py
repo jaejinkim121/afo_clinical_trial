@@ -1,7 +1,7 @@
 from bagpy import bagreader
 import pandas as pd
 from jj import ClinicalIndexJJ
-import mh
+from mh import ClinicalIndexMH
 
 
 # return some clinical index -> side-dependent case
@@ -52,9 +52,9 @@ def main():
         "/afo_detector/gait_nonparetic"
     )
 
-    TOPIC_JJ = ("afo_gui/left_toe_clearance",
-                "afo_gui/right_toe_clearance",
-                "afo_gui/stride")
+    TOPIC_JJ = ("/afo_gui/left_toe_clearance",
+                "/afo_gui/right_toe_clearance",
+                "/afo_gui/stride")
 
     # Definition of Clinical Indices
     # Sample
@@ -63,30 +63,97 @@ def main():
     left_toe_path = ""
     right_toe_path = ""
     stride_path = ""
+    
+    left_sole_path = ""
+    right_sole_path = ""
+    paretic_gait_path = ""
+    nonparetic_gait_path = ""
+    
+    calib_model_path = '../../model/CHAR_230815_280_LP/'
+    GRF_model_path = '../../model/GRF_230815/LSTM_GRF.pt'
+    
+    BW = float(100)
+    paretic_side = 'L'
+    size = '280'
 
     # Read Topics and calculate clinical index
     for topic in bag.topics:
         msg_topic = bag.message_by_topic(topic)
 
         # Use own module and methods
-        if topic in TOPIC_MH:
-            ...
+        if topic == TOPIC_MH[0]:
+            left_sole_path = msg_topic
+        elif topic == TOPIC_MH[1]:
+            right_sole_path = msg_topic
+        elif topic == TOPIC_MH[2]:
+            paretic_gait_path = msg_topic
+        elif topic == TOPIC_MH[3]:
+            nonparetic_gait_path = msg_topic
 
-        if topic is TOPIC_JJ[0]:
+        if topic == TOPIC_JJ[0]:
             left_toe_path = msg_topic
-        elif topic is TOPIC_JJ[1]:
+        elif topic == TOPIC_JJ[1]:
             right_toe_path = msg_topic
-        elif topic is TOPIC_JJ[2]:
+        elif topic == TOPIC_JJ[2]:
             stride_path = msg_topic
+        
+    report_df = pd.DataFrame(columns = ['mean_paretic', 'std_paretic',
+                                        'mean_nonparetic', 'std_nonparetic',
+                                        'symmetry'],
+                             index = ['toeClearance', 'stride', 'GRFmax'
+                                      'GRFimpulse', 'stanceTime'])
+    # toe_clearance_data = \
+    #     ClinicalIndexJJ.get_clinical_index_max_toe_clearance(
+    #         left_toe_path, right_toe_path)
 
-    toe_clearance_data = \
-        ClinicalIndexJJ.get_clinical_index_max_toe_clearance(
-            left_toe_path, right_toe_path)
+    # stride_data = ClinicalIndexJJ.get_clinical_index_gait_speed_imu(
+    #     stride_path)
+    
+    GRF_maximum_data = \
+        ClinicalIndexMH.get_symmetry_index_GRFmax(start_time = start_time,
+                                                  leftPath = left_sole_path,
+                                                  rightPath = right_sole_path,
+                                                  pareticPath = paretic_gait_path,
+                                                  nonpareticPath = nonparetic_gait_path,
+                                                  modelPathCalib = calib_model_path,
+                                                  modelPathGRF = GRF_model_path,
+                                                  size=size,
+                                                  paretic_side=paretic_side,
+                                                  BW=BW)
 
-    stride_data = ClinicalIndexJJ.get_clinical_index_gait_speed_imu(
-        stride_path)
+    GRF_impulse_data = \
+        ClinicalIndexMH.get_symmetry_index_GRFimpulse(start_time = start_time,
+                                                      leftPath = left_sole_path,
+                                                      rightPath = right_sole_path,
+                                                      pareticPath = paretic_gait_path,
+                                                      nonpareticPath = nonparetic_gait_path,
+                                                      modelPathCalib = calib_model_path,
+                                                      modelPathGRF = GRF_model_path,
+                                                      size=size,
+                                                      paretic_side=paretic_side,
+                                                      BW=BW)
 
+    stance_time_data = ClinicalIndexMH.get_symmetry_index_stanceTime(
+        start_time = start_time,
+        pareticPath = paretic_gait_path,
+        nonpareticPath = nonparetic_gait_path,
+        paretic_side='L')
+    
+    
+    # add report df
+    # report_df.loc['toeClearance', :] = toe_clearance_data
+    # report_df.loc['stride', :] = stride_data
+    report_df.loc['GRFmax', :] = GRF_maximum_data
+    report_df.loc['GRFimpulse', :] = GRF_impulse_data
+    report_df.loc['stanceTime', :] = stance_time_data
 
+    print(report_df)
+    report_df.to_csv('../../data/report/report_df_230816.csv', sep=',',
+                     columns = ['mean_paretic', 'std_paretic',
+                                'mean_nonparetic', 'std_nonparetic',
+                                'symmetry'],
+                     index = ['toeClearance', 'stride', 'GRFmax',
+                              'GRFimpulse', 'stanceTime'])
     # Document Formatting
     ...
 
