@@ -1,2 +1,4 @@
 임시로 CHAR_1121_260 model 이용
 모델이름만 280 -> 260으로 임의로 변경
+
+230816 오전에 230815 calibration version으로 update
