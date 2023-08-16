@@ -40,6 +40,7 @@ def main():
     path = "../../bag/log_2023-08-04-16-26-19.bag"
     bag = bagreader(path)
     start_time = bag.start_time
+    print(start_time)
 
     # To filter specific topics with interests
     TOPIC_MH = (
@@ -58,10 +59,12 @@ def main():
     # Read Topics and calculate clinical index
     for topic in bag.topics:
         msg_topic = bag.message_by_topic(topic)
+        print(msg_topic)
 
         # Use own module and methods
         if topic in TOPIC_MH:
-            ...
+            msg_topic = bag.message_by_topic(topic)
+            print(msg_topic)
 
         if topic in TOPIC_JJ:
             ...
