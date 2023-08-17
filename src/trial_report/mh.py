@@ -627,8 +627,8 @@ class ClinicalIndexMH:
         # mean based calculation
         symmetry = mean_paretic / (mean_paretic + mean_non_paretic) * 100
 
-        return mean_paretic, std_paretic,\
-            mean_non_paretic, std_non_paretic, symmetry
+        return [mean_paretic, std_paretic,\
+            mean_non_paretic, std_non_paretic, symmetry]
 
     @staticmethod
     def get_symmetry_index_GRFmax(start_time, leftPath, rightPath,
@@ -663,8 +663,8 @@ class ClinicalIndexMH:
         # mean based calculation
         symmetry = mean_paretic / (mean_paretic + mean_non_paretic) * 100
 
-        return mean_paretic, std_paretic,\
-            mean_non_paretic, std_non_paretic, symmetry
+        return [mean_paretic, std_paretic,\
+            mean_non_paretic, std_non_paretic, symmetry]
 
     @staticmethod
     def get_symmetry_index_GRFimpulse(start_time, leftPath, rightPath,
@@ -699,8 +699,8 @@ class ClinicalIndexMH:
         # mean based calculation
         symmetry = mean_paretic / (mean_paretic + mean_non_paretic) * 100
 
-        return mean_paretic, std_paretic,\
-            mean_non_paretic, std_non_paretic, symmetry
+        return [mean_paretic, std_paretic,\
+            mean_non_paretic, std_non_paretic, symmetry]
 
 
 def basic_test():
