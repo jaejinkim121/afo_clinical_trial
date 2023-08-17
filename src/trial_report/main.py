@@ -41,6 +41,7 @@ def get_cycle_mean_data_sth(filepath):
 def main():
     # Read bag file
     path = "../../bag/log_2023-08-04-16-26-19.bag"
+    save_path = '../../data/report/report_df_230816_.csv'
     bag = bagreader(path)
     start_time = bag.start_time
 
@@ -72,7 +73,7 @@ def main():
     calib_model_path = '../../model/CHAR_230815_280_LP/'
     GRF_model_path = '../../model/GRF_230815/LSTM_GRF.pt'
     
-    BW = float(100)
+    BW = float(85.1) # 장비무게포함
     paretic_side = 'L'
     size = '280'
 
@@ -148,7 +149,7 @@ def main():
     report_df.loc['stanceTime', :] = stance_time_data
 
     print(report_df)
-    report_df.to_csv('../../data/report/report_df_230816.csv', sep=',',
+    report_df.to_csv(save_path, sep=',',
                      columns = ['mean_paretic', 'std_paretic',
                                 'mean_nonparetic', 'std_nonparetic',
                                 'symmetry'],
