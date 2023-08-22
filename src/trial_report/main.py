@@ -2,7 +2,14 @@ from bagpy import bagreader
 import pandas as pd
 from jj import ClinicalIndexJJ
 from mh import ClinicalIndexMH
-
+import numpy as np
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import *
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import *
+from reportlab.lib.styles import *
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import inch
 
 # return some clinical index -> side-dependent case
 # 1. Give each value of paretic and non-paretic side
@@ -42,6 +49,7 @@ def main():
     # Read bag file
     path = "../../bag/log_2023-08-04-16-26-19.bag"
     save_path = '../../data/report/report_df_230816_.csv'
+    path = "bag/log_2023-08-04-16-26-19.bag"
     bag = bagreader(path)
     start_time = bag.start_time
 
@@ -60,6 +68,7 @@ def main():
     # Definition of Clinical Indices
     # Sample
     cadence_trial_mean = 0.0
+    variables = [("vGRF", 1.0, "[N]"), ("Gait Speed", 21.0, "[m/s]")]
 
     left_toe_path = ""
     right_toe_path = ""
@@ -149,13 +158,45 @@ def main():
     report_df.loc['stanceTime', :] = stance_time_data
 
     print(report_df)
-    report_df.to_csv(save_path, sep=',',
-                     columns = ['mean_paretic', 'std_paretic',
-                                'mean_nonparetic', 'std_nonparetic',
-                                'symmetry'],
-                     index = ['toeClearance', 'stride', 'GRFmax',
-                              'GRFimpulse', 'stanceTime'])
+    report_df.to_csv(
+        save_path,
+        sep=',',
+        columns=['mean_paretic', 'std_paretic',
+                'mean_nonparetic', 'std_nonparetic',
+                'symmetry'],
+        index=['toeClearance', 'stride', 'GRFmax',
+                              'GRFimpulse', 'stanceTime']
+    )
+
     # Document Formatting
+    story = []
+
+    doc = SimpleDocTemplate(
+        "test.pdf",
+        pagesize=A4,
+        rightMargin=72,
+        leftMargin=72,
+        topMargin=72,
+        bottomMargin=18)
+    styles = getSampleStyleSheet()
+
+    story.append(
+        Paragraph(
+            "Ankle Foot Orthosis - Clinical Trial Report", styles['Title']))
+    data = []
+    for i in range(10):
+        data.append([])
+    data[0].append("Subject Name: ")
+    data[0].append("KJJ")
+    data[1].append("Subject ID: ")
+    data[1].append("RH-23-01")
+    data[2].append()
+
+    story.append(
+
+        Table(data)
+    )
+    doc.build(story)
     ...
 
 
