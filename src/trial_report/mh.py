@@ -656,6 +656,16 @@ class ClinicalIndexMH:
             nonpareticMaximum = grf_max.leftGRFtrimmed
             pareticMaximum = grf_max.rightGRFtrimmed
         # Calculation
+        print("Paretic")
+        print(pareticMaximum.maximum)
+        print("Nonparetic")
+        print(nonpareticMaximum.maximum)
+        
+        pareticMaximum.to_csv('../../data/report/log_2023-08-16-16-23-57_paretic_GRFmax_bare_2MWT_example.csv',
+                              sep=',')
+        nonpareticMaximum.to_csv('../../data/report/log_2023-08-16-16-23-57_nonparetic_GRFmax_bare_2MWT_example.csv',
+                              sep=',')
+
         mean_paretic = np.mean(pareticMaximum.maximum)
         std_paretic = np.std(pareticMaximum.maximum)
         mean_non_paretic = np.mean(nonpareticMaximum.maximum)

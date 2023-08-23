@@ -47,9 +47,9 @@ def get_cycle_mean_data_sth(filepath):
 
 def main():
     # Read bag file
-    path = "../../bag/log_2023-08-04-16-26-19.bag"
-    save_path = '../../data/report/report_df_230816_.csv'
-    path = "bag/log_2023-08-04-16-26-19.bag"
+    path = '../../bag/log_2023-08-16-16-23-57.bag'
+    save_path = '../../data/report/report_df_230816_10MWT_BARE_CueOFF_2.csv'
+
     bag = bagreader(path)
     start_time = bag.start_time
 
@@ -110,7 +110,7 @@ def main():
     report_df = pd.DataFrame(columns = ['mean_paretic', 'std_paretic',
                                         'mean_nonparetic', 'std_nonparetic',
                                         'symmetry'],
-                             index = ['toeClearance', 'stride', 'GRFmax'
+                             index = ['toeClearance', 'stride', 'GRFmax',
                                       'GRFimpulse', 'stanceTime'])
     # toe_clearance_data = \
     #     ClinicalIndexJJ.get_clinical_index_max_toe_clearance(
@@ -157,17 +157,14 @@ def main():
     report_df.loc['GRFimpulse', :] = GRF_impulse_data
     report_df.loc['stanceTime', :] = stance_time_data
 
+    print("Report")
     print(report_df)
-    report_df.to_csv(
-        save_path,
-        sep=',',
-        columns=['mean_paretic', 'std_paretic',
-                'mean_nonparetic', 'std_nonparetic',
-                'symmetry'],
-        index=['toeClearance', 'stride', 'GRFmax',
-                              'GRFimpulse', 'stanceTime']
-    )
-
+    # report_df.to_csv(save_path, sep=',',
+    #                  columns = ['mean_paretic', 'std_paretic',
+    #                             'mean_nonparetic', 'std_nonparetic',
+    #                             'symmetry'],
+    #                  index = ['toeClearance', 'stride', 'GRFmax',
+    #                           'GRFimpulse', 'stanceTime'])
     # Document Formatting
     story = []
 
