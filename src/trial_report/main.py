@@ -37,7 +37,8 @@ def get_cycle_mean_data_sth(filepath):
 
 def main():
     # Read bag file
-    path = "../../bag/log_2023-08-04-16-26-19.bag"
+    path = '../../bag/log_2023-08-16-16-23-57.bag'
+    save_path = '../../data/report/report_df_230816_10MWT_BARE_CueOFF_2.csv'
     bag = bagreader(path)
     start_time = bag.start_time
     print(start_time)
@@ -62,13 +63,80 @@ def main():
         print(msg_topic)
 
         # Use own module and methods
-        if topic in TOPIC_MH:
-            msg_topic = bag.message_by_topic(topic)
-            print(msg_topic)
+        if topic == TOPIC_MH[0]:
+            left_sole_path = msg_topic
+        elif topic == TOPIC_MH[1]:
+            right_sole_path = msg_topic
+        elif topic == TOPIC_MH[2]:
+            paretic_gait_path = msg_topic
+        elif topic == TOPIC_MH[3]:
+            nonparetic_gait_path = msg_topic
 
-        if topic in TOPIC_JJ:
-            ...
+        if topic == TOPIC_JJ[0]:
+            left_toe_path = msg_topic
+        elif topic == TOPIC_JJ[1]:
+            right_toe_path = msg_topic
+        elif topic == TOPIC_JJ[2]:
+            stride_path = msg_topic
+        
+    report_df = pd.DataFrame(columns = ['mean_paretic', 'std_paretic',
+                                        'mean_nonparetic', 'std_nonparetic',
+                                        'symmetry'],
+                             index = ['toeClearance', 'stride', 'GRFmax',
+                                      'GRFimpulse', 'stanceTime'])
+    # toe_clearance_data = \
+    #     ClinicalIndexJJ.get_clinical_index_max_toe_clearance(
+    #         left_toe_path, right_toe_path)
 
+    # stride_data = ClinicalIndexJJ.get_clinical_index_gait_speed_imu(
+    #     stride_path)
+    
+    GRF_maximum_data = \
+        ClinicalIndexMH.get_symmetry_index_GRFmax(start_time = start_time,
+                                                  leftPath = left_sole_path,
+                                                  rightPath = right_sole_path,
+                                                  pareticPath = paretic_gait_path,
+                                                  nonpareticPath = nonparetic_gait_path,
+                                                  modelPathCalib = calib_model_path,
+                                                  modelPathGRF = GRF_model_path,
+                                                  size=size,
+                                                  paretic_side=paretic_side,
+                                                  BW=BW)
+
+    GRF_impulse_data = \
+        ClinicalIndexMH.get_symmetry_index_GRFimpulse(start_time = start_time,
+                                                      leftPath = left_sole_path,
+                                                      rightPath = right_sole_path,
+                                                      pareticPath = paretic_gait_path,
+                                                      nonpareticPath = nonparetic_gait_path,
+                                                      modelPathCalib = calib_model_path,
+                                                      modelPathGRF = GRF_model_path,
+                                                      size=size,
+                                                      paretic_side=paretic_side,
+                                                      BW=BW)
+
+    stance_time_data = ClinicalIndexMH.get_symmetry_index_stanceTime(
+        start_time = start_time,
+        pareticPath = paretic_gait_path,
+        nonpareticPath = nonparetic_gait_path,
+        paretic_side='L')
+    
+    
+    # add report df
+    # report_df.loc['toeClearance', :] = toe_clearance_data
+    # report_df.loc['stride', :] = stride_data
+    report_df.loc['GRFmax', :] = GRF_maximum_data
+    report_df.loc['GRFimpulse', :] = GRF_impulse_data
+    report_df.loc['stanceTime', :] = stance_time_data
+
+    print("Report")
+    print(report_df)
+    # report_df.to_csv(save_path, sep=',',
+    #                  columns = ['mean_paretic', 'std_paretic',
+    #                             'mean_nonparetic', 'std_nonparetic',
+    #                             'symmetry'],
+    #                  index = ['toeClearance', 'stride', 'GRFmax',
+    #                           'GRFimpulse', 'stanceTime'])
     # Document Formatting
     ...
 
