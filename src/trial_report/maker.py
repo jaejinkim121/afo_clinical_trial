@@ -10,6 +10,7 @@ from reportlab.lib.units import inch
 import os
 from bagpy import bagreader
 import pandas as pd
+import numpy as np
 
 from jj import ClinicalIndexJJ
 from mh import ClinicalIndexMH
