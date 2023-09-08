@@ -178,13 +178,14 @@ class GRF_predictor:
         self.GRF_preprocessing()
         
         left_stance_time = pd.DataFrame(
-            self.leftTime.isin(self.SyncedLeftTime) * 1,
-            columns=["stance time"]
+            self.leftTime.isin(self.SyncedLeftTime) * 1.0
             )
         right_stance_time = pd.DataFrame(
-            self.rightTime.isin(self.SyncedRightTime) * 1,
-            columns=["stance time"]
+            self.rightTime.isin(self.SyncedRightTime) * 1.0
             )
+
+        left_stance_time.columns = ["stance time"]
+        right_stance_time.columns = ["stance time"]
         
         left_voltage = pd.concat([self.leftData, left_stance_time], axis=1)
         right_voltage = pd.concat([self.rightData, right_stance_time], axis=1)
@@ -201,19 +202,22 @@ class GRF_predictor:
         self.GRF_preprocessing()
         
         left_stance_time = pd.DataFrame(
-            self.leftTime.isin(self.SyncedLeftTime) * 1,
-            columns=["stance time"]
+            self.leftTime.isin(self.SyncedLeftTime) * 1.0
             )
         right_stance_time = pd.DataFrame(
-            self.rightTime.isin(self.SyncedRightTime) * 1,
-            columns=["stance time"]
+            self.rightTime.isin(self.SyncedRightTime) * 1.0
             )
         
+        left_stance_time.columns = ["stance time"]
+        right_stance_time.columns = ["stance time"]
+
         left_force = pd.concat(
-            [self.leftTime, self.leftForce, left_stance_time], axis=1
+            [self.leftTime, pd.DataFrame(self.leftForce), left_stance_time],
+            axis=1
             )
         right_force = pd.concat(
-            [self.rightTime, self.rightForce, right_stance_time], axis=1
+            [self.rightTime, pd.DataFrame(self.rightForce), right_stance_time],
+            axis=1
             )
 
         return left_force, right_force
@@ -223,15 +227,19 @@ class GRF_predictor:
         self.GRF_initialization()
         
         left_GRF_stance = pd.concat(
-            [self.SyncedLeftTime, self.GRFleftData], axis=1
+            [self.SyncedLeftTime, pd.DataFrame(self.GRFleftData)], axis=1
             )
         right_GRF_stance = pd.concat(
-            [self.SyncedRightTime, self.GRFrightData], axis=1
+            [self.SyncedRightTime, pd.DataFrame(self.GRFrightData)], axis=1
             )
         
-        left_GRF = self.leftTime.merge(left_GRF_stance, how='left', on="time")
+        left_GRF = self.leftTime.to_frame().merge(
+            left_GRF_stance, how='left', on="time"
+            )
         left_GRF = left_GRF.fillna(0)
-        right_GRF = self.rightTime.merge(right_GRF_stance, how='left', on="time")
+        right_GRF = self.rightTime.to_frame().merge(
+            right_GRF_stance, how='left', on="time"
+            )
         right_GRF = right_GRF.fillna(0)
 
         return left_GRF, right_GRF
@@ -959,7 +967,8 @@ def Rawdata_saving(
             nonparetic_gait_path = msg_topic
     
     # Raw data saving
-    save_raw_data(
+    CI = ClinicalIndexMH()
+    CI.save_raw_data(
         start_time=start_time,
         left_path=left_sole_path,
         right_path=right_sole_path,
@@ -1019,21 +1028,48 @@ def Rawdata_saving(
 
 
 if __name__ == "__main__":
-
-    bag_name = "log_2023-08-16-15-40-08"
-    session_name = '10MWT_OFF_CueOFF'
-    calib_folder_name = 'CHAR_230815_280_LP'
-    GRF_model_name = 'GRF_230815/LSTM_GRF.pt'
-    body_weight = 85.1 # 장비 무게 포함
-    paretic_side = 'L'
-    shoe_size = '280'
     
-    Rawdata_saving(
-        bag_name=bag_name,
-        session_name=session_name,
-        calib_folder_name=calib_folder_name,
-        GRF_model_name=GRF_model_name,
-        shoe_size=shoe_size,
-        paretic_side=paretic_side,
-        body_weight=body_weight
-        )
+    bag_list = [
+        "log_2023-08-16-15-41-19",
+        "log_2023-08-16-15-43-10",
+        "log_2023-08-16-15-44-06",
+        "log_2023-08-16-15-46-14",
+        "log_2023-08-16-15-51-39",
+        "log_2023-08-16-15-56-59",
+        "log_2023-08-16-16-02-17",
+        "log_2023-08-16-16-23-57",
+        "log_2023-08-16-16-27-28",
+        "log_2023-08-16-16-29-04"
+        ]
+    session_list = [
+        "10MWT_ON_CueOFF",
+        "10MWT_ON_CueON_1",
+        "10MWT_ON_CueON_2",
+        "10MWT_ON_CueON_3",
+        "2MWT_OFF_CueOFF_89.4m",
+        "2MWT_ON_CueOFF_88.2m",
+        "2MWT_ON_CueON_64.2m",
+        "2MWT_BARE_CueOFF_90m",
+        "10MWT_BARE_CueOFF_1",
+        "10MWT_BARE_CueOFF_2"
+        ]
+
+    for bag_ind in np.arange(len(bag_list)):
+        
+        bag_name = bag_list[bag_ind]
+        session_name = session_list[bag_ind]
+        calib_folder_name = 'CHAR_230815_280_LP'
+        GRF_model_name = 'GRF_230815/LSTM_GRF.pt'
+        body_weight = 85.1 # 장비 무게 포함
+        paretic_side = 'L'
+        shoe_size = '280'
+        
+        Rawdata_saving(
+            bag_name=bag_name,
+            session_name=session_name,
+            calib_folder_name=calib_folder_name,
+            GRF_model_name=GRF_model_name,
+            shoe_size=shoe_size,
+            paretic_side=paretic_side,
+            body_weight=body_weight
+            )
