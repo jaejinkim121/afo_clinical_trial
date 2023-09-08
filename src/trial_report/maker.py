@@ -21,7 +21,9 @@ class ReportMaker:
         self._root = tk.Tk()
 
         self._font_title = font.Font(family="Calibri", size=30, weight="bold")
-        self._font_sub_title = font.Font(family="Calibri", size=15)
+        self._font_title_sub = font.Font(family="Calibri", size=15)
+        self._font_sub_title = font.Font(family="Calibri", size=15, weight="bold")
+        self._font_sub_sub = font.Font(family="Calibri", size=12)
 
         self._path_bag_file = "C:/"
         self._path_calibration_model_directory = "C:/"
@@ -30,6 +32,10 @@ class ReportMaker:
         self._shoe_size_list = [
             255, 260, 265, 270, 275, 280, 285
         ]
+        outline_label = "flat"
+        outline_button = "raised"
+        outline_entry = "sunken"
+        outline_option = "raised"
 
         self._label_title_main = tk.Label(
             self._root,
@@ -37,14 +43,16 @@ class ReportMaker:
             font=self._font_title,
             height=1,
             width=30,
+            relief=outline_label
         )
 
         self._label_title_sub = tk.Label(
             self._root,
             text="made by Jaejin Kim",
-            font=self._font_sub_title,
+            font=self._font_title_sub,
             height=2,
-            anchor='n'
+            anchor='n',
+            relief=outline_label
         )
 
         # Section 1 - select paretic side with radiobutton
@@ -52,25 +60,25 @@ class ReportMaker:
             self._root,
             text="1. Paretic side",
             font=self._font_sub_title,
-            padx='30',
+            relief=outline_label
         )
 
         self._var_paretic_side = tk.IntVar(value=1)
         self._radiobutton_sub1_left = tk.Radiobutton(
             self._root,
             text="Left",
-            font=self._font_sub_title,
+            font=self._font_title_sub,
             value=1,
             variable=self._var_paretic_side,
-            pady='10',
+            relief=outline_label
         )
         self._radiobutton_sub1_right = tk.Radiobutton(
             self._root,
             text="Right",
-            font=self._font_sub_title,
+            font=self._font_title_sub,
             value=2,
             variable=self._var_paretic_side,
-            pady='10'
+            relief=outline_label
         )
 
         # Section 2 - Select bag file and update file path
@@ -78,14 +86,15 @@ class ReportMaker:
             self._root,
             text="2. Bag file",
             font=self._font_sub_title,
-            padx='30',
+            relief=outline_label
         )
 
         self._button_sub2_search = tk.Button(
             self._root,
-            width=15,
+            width=10,
             text="Search",
-            command=self.search_bag_file_path
+            command=self.search_bag_file_path,
+            relief=outline_button,
         )
 
         self._string_var_sub2_search = tk.StringVar()
@@ -93,7 +102,8 @@ class ReportMaker:
 
         self._entry_sub2_search = tk.Entry(
             self._root, width=60, state='readonly',
-            textvariable=self._string_var_sub2_search
+            textvariable=self._string_var_sub2_search,
+            relief=outline_entry
         )
 
         # Section 3 - Patient info (Name, Body_weight, Shoe_size)
@@ -101,82 +111,88 @@ class ReportMaker:
             self._root,
             text="3. Patient Info",
             font=self._font_sub_title,
-            padx='30',
+            relief=outline_label
         )
 
         self._label_sub3_name = tk.Label(
             self._root,
             text="Name",
-            font=self._font_sub_title,
-            padx='30'
+            font=self._font_sub_sub,
+            relief=outline_label
         )
 
         self._label_sub3_body_weight = tk.Label(
             self._root,
             text="Body Weight [kg]",
-            font=self._font_sub_title,
-            padx='30'
+            font=self._font_sub_sub,
+            relief=outline_label
         )
 
         self._label_sub3_shoe_size = tk.Label(
             self._root,
             text="Shoe size",
-            font=self._font_sub_title,
-            padx='30'
+            font=self._font_sub_sub,
+            relief=outline_label
         )
 
         self._string_var_sub3_name = tk.StringVar()
         self._string_var_sub3_body_weight = tk.StringVar()
         self._entry_sub3_name = tk.Entry(
             self._root, width=20,
-            textvariable=self._string_var_sub3_name
+            textvariable=self._string_var_sub3_name,
+            relief=outline_entry
         )
         self._entry_sub3_body_weight = tk.Entry(
             self._root, width=20,
-            textvariable=self._string_var_sub3_body_weight
+            textvariable=self._string_var_sub3_body_weight,
+            relief=outline_entry
         )
         self._int_var_sub3_shoe_size = tk.IntVar()
         self._int_var_sub3_shoe_size.set(self._shoe_size_list[0])
         self._opt_sub3_shoe_size = tk.OptionMenu(
             self._root,
             self._int_var_sub3_shoe_size,
-            *self._shoe_size_list,
+            *self._shoe_size_list
         )
-        self._opt_sub3_shoe_size.config(width=15)
+        self._opt_sub3_shoe_size.config(width=15,
+            relief=outline_option)
 
         self._label_sub4 = tk.Label(
             self._root,
             text="4. Walking Distance",
             font=self._font_sub_title,
-            padx='30',
+            relief=outline_label
         )
         self._label_sub4_sub1 = tk.Label(
             self._root,
             text="unit: [m]",
-            font=self._font_sub_title,
-            padx='15',
+            font=self._font_sub_sub,
+            relief=outline_label
         )
         self._string_var_sub4_walking_distance = tk.StringVar()
         self._entry_sub4_walking_distance = tk.Entry(
-            self._root, width=20,
-            textvariable=self._string_var_sub4_walking_distance
+            self._root, width=25,
+            textvariable=self._string_var_sub4_walking_distance,
+            relief=outline_entry
         )
 
         self._label_sub5 = tk.Label(
             self._root,
             text="5. Model Path",
             font=self._font_sub_title,
-            padx='30',
+            relief=outline_label
         )
         self._label_sub5_calibration = tk.Label(
             self._root,
             text="Calibration Model Path",
-            font=self._font_sub_title,
+            font=self._font_sub_sub,
+            relief=outline_label
         )
         self._label_sub5_grf = tk.Label(
             self._root,
             text="GRF Model Path",
-            font=self._font_sub_title
+            font=self._font_sub_sub,
+            relief=outline_label
         )
 
         self._string_var_sub5_calibraion_model_path = tk.StringVar()
@@ -188,46 +204,52 @@ class ReportMaker:
             self._path_grf_model_directory
         )
         self._entry_sub5_calibration = tk.Entry(
-            self._root, width=35,
+            self._root, width=30,
             textvariable=self._string_var_sub5_calibraion_model_path,
-            state='readonly'
+            state='readonly',
+            relief=outline_entry
         )
         self._entry_sub5_grf = tk.Entry(
-            self._root, width=35,
+            self._root, width=30,
             textvariable=self._string_var_sub5_grf_model_path,
-            state='readonly'
+            state='readonly',
+            relief=outline_entry
         )
         self._button_sub5_calibration_search = tk.Button(
             self._root,
             width=10,
             text="Search",
-            command=self.search_calibration_model_path
+            command=self.search_calibration_model_path,
+            relief=outline_button
         )
         self._button_sub5_grf_search = tk.Button(
             self._root,
             width=10,
             text="Search",
-            command=self.search_grf_model_path
+            command=self.search_grf_model_path,
+            relief=outline_button
         )
 
         self._label_sub6 = tk.Label(
             self._root,
             text="6. Output Path",
             font=self._font_sub_title,
-            padx='30',
+            relief=outline_label
         )
         self._string_var_sub6_output_path = tk.StringVar()
         self._string_var_sub6_output_path.set(self._path_output_file)
         self._entry_sub6_output_path = tk.Entry(
             self._root, width=60,
             textvariable=self._string_var_sub6_output_path,
-            state='readonly'
+            state='readonly',
+            relief=outline_entry
         )
         self._button_sub6_output_path = tk.Button(
             self._root,
             width=10,
             text="Search",
-            command=self.search_output_path
+            command=self.search_output_path,
+            relief=outline_button
         )
 
         self._button_make_output = tk.Button(
@@ -236,7 +258,8 @@ class ReportMaker:
             height=3,
             text="Make Report",
             font=self._font_sub_title,
-            command=self.make_clinical_report
+            command=self.make_clinical_report,
+            relief=outline_button
         )
 
         self._button_exit = tk.Button(
@@ -245,9 +268,9 @@ class ReportMaker:
             height=3,
             text="Exit",
             font=self._font_sub_title,
-            command=self.exit_program
+            command=self.exit_program,
+            relief=outline_button
         )
-
 
     def run_gui(self):
         self._root.title("AFO Clinical Reporter")
@@ -257,46 +280,71 @@ class ReportMaker:
         self._label_title_main.grid(row=0, column=0, columnspan=6)
         self._label_title_sub.grid(row=1, column=0, columnspan=6)
 
-        self._label_sub1.grid(row=2, column=0, columnspan=6, sticky='w')
-        self._radiobutton_sub1_left.grid(row=3, column=0, columnspan=2)
-        self._radiobutton_sub1_right.grid(row=3, column=2, columnspan=2)
+        self._label_sub1.grid(row=2, column=0, columnspan=6,
+                              sticky='w', padx='30', pady='5')
+        self._radiobutton_sub1_left.grid(row=3, column=0, columnspan=2,
+                                         pady='5')
+        self._radiobutton_sub1_right.grid(row=3, column=2, columnspan=2,
+                                          pady='5')
 
-        self._label_sub2.grid(row=4, column=0, columnspan=6, sticky='w')
-        self._entry_sub2_search.grid(row=5, column=0, columnspan=4, padx='30')
-        self._button_sub2_search.grid(row=5, column=4, columnspan=2,
-                                      sticky='w', padx='7')
+        self._label_sub2.grid(row=4, column=0, columnspan=6,
+                              sticky='w', padx='30', pady='5')
+        self._entry_sub2_search.grid(row=5, column=0, columnspan=4,
+                                     sticky='e', padx='5', pady='5')
+        self._button_sub2_search.grid(row=5, column=4,
+                                      sticky='w', padx='5', pady='5')
 
-        self._label_sub3.grid(row=6, column=0, columnspan=6, sticky='w', pady='10')
-        self._label_sub3_name.grid(row=7, column=0, columnspan=2)
+        self._label_sub3.grid(row=6, column=0, columnspan=6,
+                              sticky='w', padx='30', pady='5')
+        self._label_sub3_name.grid(row=7, column=0, columnspan=2,
+                                   sticky='w', padx='44', pady='5')
         self._entry_sub3_name.grid(row=7, column=2, columnspan=4,
-                                   padx='15', pady='10', sticky='w')
-        self._label_sub3_body_weight.grid(row=8, column=0, columnspan=2)
+                                   sticky='w')
+        self._label_sub3_body_weight.grid(row=8, column=0, columnspan=2,
+                                          sticky='w', padx='44', pady='5')
         self._entry_sub3_body_weight.grid(row=8, column=2, columnspan=4,
-                                          padx='15', pady='10', sticky='w')
-        self._label_sub3_shoe_size.grid(row=9, column=0, columnspan=2)
+                                          sticky='w')
+        self._label_sub3_shoe_size.grid(row=9, column=0, columnspan=2,
+                                        sticky='w', padx='44', pady='5')
         self._opt_sub3_shoe_size.grid(row=9, column=2, columnspan=4,
-                                      padx='15', pady='10', sticky='w')
+                                      sticky='w')
 
-        self._label_sub4.grid(row=10, column=0, columnspan=6, sticky='w')
-        self._entry_sub4_walking_distance.grid(row=11, column=0, columnspan=2)
-        self._label_sub4_sub1.grid(row=11, column=2, columnspan=2, sticky='w')
+        self._label_sub4.grid(row=10, column=0, columnspan=6,
+                              sticky='w', padx='30', pady='5')
+        self._entry_sub4_walking_distance.grid(
+            row=11, column=0, columnspan=2,
+            sticky='w', padx='44', pady='5'
+        )
+        self._label_sub4_sub1.grid(row=11, column=2, columnspan=2,
+                                   sticky='w', padx='5', pady='5')
 
-        self._label_sub5.grid(row=12, column=0, columnspan=6, sticky='w')
-        self._label_sub5_calibration.grid(row=13, column=0, columnspan=2)
+        self._label_sub5.grid(row=12, column=0, columnspan=6,
+                              sticky='w', padx='30', pady='5')
+        self._label_sub5_calibration.grid(row=13, column=0, columnspan=2,
+                                          sticky='w', padx='44', pady='5')
         self._entry_sub5_calibration.grid(
-            row=13, column=2, columnspan=2, sticky='w')
-        self._button_sub5_calibration_search.grid(row=13, column=4)
-        self._label_sub5_grf.grid(row=14, column=0, columnspan=2)
-        self._entry_sub5_grf.grid(row=14, column=2, columnspan=2, sticky='w')
-        self._button_sub5_grf_search.grid(row=14, column=4)
+            row=13, column=2, columnspan=2, sticky='w', padx='5')
+        self._button_sub5_calibration_search.grid(
+            row=13, column=4, sticky='w', padx='5', pady='5'
+        )
+        self._label_sub5_grf.grid(row=14, column=0, columnspan=2,
+                                  sticky='w', padx='44', pady='5')
+        self._entry_sub5_grf.grid(row=14, column=2, columnspan=2,
+                                  sticky='w', padx='5')
+        self._button_sub5_grf_search.grid(row=14, column=4,
+                                          sticky='w', padx='5', pady='5')
 
-        self._label_sub6.grid(row=15, column=0, columnspan=6, sticky='w')
+        self._label_sub6.grid(row=15, column=0, columnspan=6,
+                              sticky='w', padx='30', pady='5')
         self._entry_sub6_output_path.grid(
-            row=16, column=0, columnspan=4, sticky='w', padx='30')
+            row=16, column=0, columnspan=4,
+            sticky='e', padx='5', pady='5')
         self._button_sub6_output_path.grid(
-            row=16, column=4, columnspan=2, sticky='w')
-        self._button_make_output.grid(row=17, column=0, columnspan=2, pady='30')
-        self._button_exit.grid(row=17, column=3, columnspan=2)
+            row=16, column=4, columnspan=2,
+            sticky='w', padx='5', pady='5')
+        self._button_make_output.grid(row=17, column=0, columnspan=3,
+                                      pady='15')
+        self._button_exit.grid(row=17, column=2, columnspan=3, pady='15')
         #    label_sub3.grid(row=6, column=0, columnspan=6, sticky='w')
         # label_sub4.grid(row=6, column=0)
         # label_sub5.grid(row=7, column=0)
