@@ -7,6 +7,15 @@ import torch
 import torch.nn as nn
 
 
+# Create Directory
+def create_folder(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print ('Error: Creating directory. ' +  directory)
+
+
 # Function for folder path reading
 def folder_path_name(path, option=None, char=None, T_F=None):
 
@@ -158,6 +167,74 @@ class GRF_predictor:
         self.GRF_input_length = int(25)
         # Read gait detection data
         self.Gait_detection_data_read()
+
+    def get_voltage_raw_data(self):
+        # Read vout data
+        self.vout_data_read()
+        # Calib model loading
+        self.force_model_load()
+        # Calibration model inference
+        self.Calib_total_prediction()
+        self.GRF_preprocessing()
+        
+        left_stance_time = pd.DataFrame(
+            self.leftTime.isin(self.SyncedLeftTime) * 1,
+            columns=["stance time"]
+            )
+        right_stance_time = pd.DataFrame(
+            self.rightTime.isin(self.SyncedRightTime) * 1,
+            columns=["stance time"]
+            )
+        
+        left_voltage = pd.concat([self.leftData, left_stance_time], axis=1)
+        right_voltage = pd.concat([self.rightData, right_stance_time], axis=1)
+        
+        return left_voltage, right_voltage
+
+    def get_force_raw_data(self):
+        # Read vout data
+        self.vout_data_read()
+        # Calib model loading
+        self.force_model_load()
+        # Calibration model inference
+        self.Calib_total_prediction()
+        self.GRF_preprocessing()
+        
+        left_stance_time = pd.DataFrame(
+            self.leftTime.isin(self.SyncedLeftTime) * 1,
+            columns=["stance time"]
+            )
+        right_stance_time = pd.DataFrame(
+            self.rightTime.isin(self.SyncedRightTime) * 1,
+            columns=["stance time"]
+            )
+        
+        left_force = pd.concat(
+            [self.leftTime, self.leftForce, left_stance_time], axis=1
+            )
+        right_force = pd.concat(
+            [self.rightTime, self.rightForce, right_stance_time], axis=1
+            )
+
+        return left_force, right_force
+
+    # Set GRF values of swing phase as zero
+    def get_GRF_raw_data(self):
+        self.GRF_initialization()
+        
+        left_GRF_stance = pd.concat(
+            [self.SyncedLeftTime, self.GRFleftData], axis=1
+            )
+        right_GRF_stance = pd.concat(
+            [self.SyncedRightTime, self.GRFrightData], axis=1
+            )
+        
+        left_GRF = self.leftTime.merge(left_GRF_stance, how='left', on="time")
+        left_GRF = left_GRF.fillna(0)
+        right_GRF = self.rightTime.merge(right_GRF_stance, how='left', on="time")
+        right_GRF = right_GRF.fillna(0)
+
+        return left_GRF, right_GRF
 
     def GRF_initialization(self):
         # Read vout data
@@ -711,6 +788,61 @@ class ClinicalIndexMH:
 
         return [mean_paretic, std_paretic,\
             mean_non_paretic, std_non_paretic, symmetry]
+    
+    @staticmethod
+    def save_raw_data(
+            start_time:float, left_path:str, right_path:str,
+            paretic_path:str, nonparetic_path:str,
+            model_path_calib:str, model_path_GRF:str,
+            shoe_size:str, paretic_side:str, body_weight:float,
+            save_folder:str, session_name:str
+            ):
+
+        grf_class = GRF_predictor(
+            start_time = start_time,
+            leftPath = left_path,
+            rightPath = right_path,
+            pareticPath = paretic_path,
+            nonpareticPath = nonparetic_path,
+            modelPathCalib = model_path_calib,
+            modelPathGRF = model_path_GRF,
+            size = shoe_size,
+            paretic_side = paretic_side,
+            BW = body_weight)
+
+        # raw data - voltage, force, GRF
+        raw_voltage_left, raw_voltage_right =\
+            grf_class.get_voltage_raw_data()
+        raw_force_left, raw_force_right =\
+            grf_class.get_force_raw_data()
+        raw_GRF_left, raw_GRF_right =\
+            grf_class.get_GRF_raw_data()
+
+        # raw data saving
+        raw_voltage_left.to_csv(
+            save_folder + 'RAW_VOLTAGE_LEFT_' + session_name + '.csv',
+            sep=",", header=True, index=False
+            )
+        raw_voltage_right.to_csv(
+            save_folder + 'RAW_VOLTAGE_RIGHT_' + session_name + '.csv',
+            sep=",", header=True, index=False
+            )
+        raw_force_left.to_csv(
+            save_folder + 'RAW_FORCE_LEFT_' + session_name + '.csv',
+            sep=",", header=True, index=False
+            )
+        raw_force_right.to_csv(
+            save_folder + 'RAW_FORCE_RIGHT_' + session_name + '.csv',
+            sep=",", header=True, index=False
+            )
+        raw_GRF_left.to_csv(
+            save_folder + 'RAW_GRF_LEFT_' + session_name + '.csv',
+            sep=",", header=True, index=False
+            )
+        raw_GRF_right.to_csv(
+            save_folder + 'RAW_GRF_RIGHT_' + session_name + '.csv',
+            sep=",", header=True, index=False
+            )
 
 
 def basic_test():
@@ -771,3 +903,137 @@ def GRFmax_test():
     print(std_non_paretic)
     print(symmetry)
 
+
+def Rawdata_saving(
+        bag_name:str, session_name:str,
+        calib_folder_name:str, GRF_model_name:str, 
+        shoe_size:str, paretic_side:str, body_weight:float
+        ):
+    # Read bag file
+    # example_path = ../../bag/log_2023-08-16-15-40-08.bag
+    path = '../../bag/' + bag_name + '.bag'
+    # bag_name[4:-9] = 2023-08-16
+    save_folder = '../../data/report/' + bag_name[4:-9] + '/'
+    create_folder(save_folder)
+    # example_path = ../../data/report/2023-08-16/10MWT_OFF_CueOFF.csv
+    save_path = save_folder + session_name + '.csv'
+
+    bag = bagreader(path)
+    start_time = bag.start_time
+
+    # To filter specific topics with interests
+    TOPIC_MH = (
+        "/afo_sensor/soleSensor_left",
+        "/afo_sensor/soleSensor_right",
+        "/afo_detector/gait_paretic",
+        "/afo_detector/gait_nonparetic"
+    )
+
+    # Definition of Clinical Indices
+    left_sole_path = ""
+    right_sole_path = ""
+    paretic_gait_path = ""
+    nonparetic_gait_path = ""
+    
+    # calib_model_path example = ../../model/CHAR_230815_280_LP/
+    # GRF_model_path example = ../../model/GRF_230815/LSTM_GRF.pt
+    calib_model_path = '../../model/' + calib_folder_name + '/'
+    GRF_model_path = '../../model/' + GRF_model_name
+    
+    BW = body_weight # 85.1
+    paretic_side = paretic_side # 'L'
+    size = shoe_size # '280'
+
+    # Read Topics and calculate clinical index
+    for topic in bag.topics:
+        msg_topic = bag.message_by_topic(topic)
+
+        # Use own module and methods
+        if topic == TOPIC_MH[0]:
+            left_sole_path = msg_topic
+        elif topic == TOPIC_MH[1]:
+            right_sole_path = msg_topic
+        elif topic == TOPIC_MH[2]:
+            paretic_gait_path = msg_topic
+        elif topic == TOPIC_MH[3]:
+            nonparetic_gait_path = msg_topic
+    
+    # Raw data saving
+    save_raw_data(
+        start_time=start_time,
+        left_path=left_sole_path,
+        right_path=right_sole_path,
+        paretic_path=paretic_gait_path,
+        nonparetic_path=nonparetic_gait_path,
+        model_path_calib=calib_model_path,
+        model_path_GRF=GRF_model_path,
+        shoe_size=size,
+        paretic_side=paretic_side,
+        body_weight=BW,
+        save_folder=save_folder,
+        session_name=session_name
+        )
+
+    # report_df = pd.DataFrame(columns = ['mean_paretic', 'std_paretic',
+    #                                     'mean_nonparetic', 'std_nonparetic',
+    #                                     'symmetry'],
+    #                          index = ['toeClearance', 'stride', 'GRFmax',
+    #                                   'GRFimpulse', 'stanceTime'])
+
+    # GRF_maximum_data = \
+    #     ClinicalIndexMH.get_symmetry_index_GRFmax(start_time = start_time,
+    #                                               leftPath = left_sole_path,
+    #                                               rightPath = right_sole_path,
+    #                                               pareticPath = paretic_gait_path,
+    #                                               nonpareticPath = nonparetic_gait_path,
+    #                                               modelPathCalib = calib_model_path,
+    #                                               modelPathGRF = GRF_model_path,
+    #                                               size=size,
+    #                                               paretic_side=paretic_side,
+    #                                               BW=BW)
+
+    # GRF_impulse_data = \
+    #     ClinicalIndexMH.get_symmetry_index_GRFimpulse(start_time = start_time,
+    #                                                   leftPath = left_sole_path,
+    #                                                   rightPath = right_sole_path,
+    #                                                   pareticPath = paretic_gait_path,
+    #                                                   nonpareticPath = nonparetic_gait_path,
+    #                                                   modelPathCalib = calib_model_path,
+    #                                                   modelPathGRF = GRF_model_path,
+    #                                                   size=size,
+    #                                                   paretic_side=paretic_side,
+    #                                                   BW=BW)
+
+    # stance_time_data = ClinicalIndexMH.get_symmetry_index_stanceTime(
+    #     start_time = start_time,
+    #     pareticPath = paretic_gait_path,
+    #     nonpareticPath = nonparetic_gait_path,
+    #     paretic_side='L')
+    
+    
+    # # add report df
+
+    # report_df.loc['GRFmax', :] = GRF_maximum_data
+    # report_df.loc['GRFimpulse', :] = GRF_impulse_data
+    # report_df.loc['stanceTime', :] = stance_time_data
+
+
+if __name__ == "__main__":
+
+    bag_name = "log_2023-08-16-15-40-08"
+    session_name = '10MWT_OFF_CueOFF'
+    calib_folder_name = 'CHAR_230815_280_LP'
+    GRF_model_name = 'GRF_230815/LSTM_GRF.pt'
+    body_weight = 85.1 # 장비 무게 포함
+    paretic_side = 'L'
+    shoe_size = '280'
+    
+    Rawdata_saving(
+        bag_name=bag_name,
+        session_name=session_name,
+        calib_folder_name=calib_folder_name,
+        GRF_model_name=GRF_model_name,
+        shoe_size=shoe_size,
+        paretic_side=paretic_side,
+        body_weight=body_weight
+        )
