@@ -30,7 +30,7 @@ class DataProcess:
 
         for i in range(len(x_start)):
             target = x_start[i]
-            ind_start = DataProcess.search_index(x[ind_start:], target)
+            ind_start = DataProcess.search_index(x[ind_end:], target)
             target = x_end[i]
             ind_end = DataProcess.search_index(x[ind_start:], target)
 
