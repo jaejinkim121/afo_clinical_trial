@@ -5,6 +5,9 @@ import pandas as pd
 import numpy as np
 import torch
 import torch.nn as nn
+import matplotlib.pyplot as plt
+
+from utils import DataProcess
 
 
 # Create Directory
@@ -799,6 +802,32 @@ class ClinicalIndexMH:
                 mean_non_paretic, std_non_paretic, symmetry]
 
     @staticmethod
+    def get_data_stance_time(
+            start_time, leftPath, rightPath,
+            pareticPath, nonpareticPath,
+            modelPathCalib, modelPathGRF,
+            size='280', paretic_side='L', BW=float(100)):
+        ST = GRF_predictor(start_time=float(start_time),
+                           leftPath=leftPath,
+                           rightPath=rightPath,
+                           pareticPath=pareticPath,
+                           nonpareticPath=nonpareticPath,
+                           modelPathCalib=modelPathCalib,
+                           modelPathGRF=modelPathGRF,
+                           size=size,
+                           paretic_side=paretic_side,
+                           BW=BW)
+        if paretic_side == 'L':
+            pareticTiming = ST.leftTiming_df
+            nonpareticTiming = ST.rightTiming_df
+        else:
+            nonpareticTiming = ST.leftTiming_df
+            pareticTiming = ST.rightTiming_df
+
+        return np.array(pareticTiming.duration),\
+               np.array(nonpareticTiming.duration)
+
+    @staticmethod
     def get_symmetry_index_GRFmax(start_time, leftPath, rightPath,
                                   pareticPath, nonpareticPath,
                                   modelPathCalib, modelPathGRF,
@@ -835,6 +864,35 @@ class ClinicalIndexMH:
                 mean_non_paretic, std_non_paretic, symmetry]
 
     @staticmethod
+    def get_data_GRFmax(
+            start_time, leftPath, rightPath,
+            pareticPath, nonpareticPath,
+            modelPathCalib, modelPathGRF,
+            size='280', paretic_side='L', BW=float(100)):
+        grf_max = GRF_predictor(start_time=float(start_time),
+                                leftPath=leftPath,
+                                rightPath=rightPath,
+                                pareticPath=pareticPath,
+                                nonpareticPath=nonpareticPath,
+                                modelPathCalib=modelPathCalib,
+                                modelPathGRF=modelPathGRF,
+                                size=size,
+                                paretic_side=paretic_side,
+                                BW=BW)
+        grf_max.GRF_initialization()
+        grf_max.GRF_trimmed_by_gait()
+
+        if paretic_side == 'L':
+            pareticMaximum = grf_max.leftGRFtrimmed
+            nonpareticMaximum = grf_max.rightGRFtrimmed
+        else:
+            nonpareticMaximum = grf_max.leftGRFtrimmed
+            pareticMaximum = grf_max.rightGRFtrimmed
+
+        return np.array(pareticMaximum.maximum),\
+               np.array(nonpareticMaximum.maximum)
+
+    @staticmethod
     def get_symmetry_index_GRFimpulse(start_time, leftPath, rightPath,
                                       pareticPath, nonpareticPath,
                                       modelPathCalib, modelPathGRF,
@@ -869,6 +927,35 @@ class ClinicalIndexMH:
 
         return [mean_paretic, std_paretic,
                 mean_non_paretic, std_non_paretic, symmetry]
+
+    @staticmethod
+    def get_data_GRFimpulse(
+            start_time, leftPath, rightPath,
+            pareticPath, nonpareticPath,
+            modelPathCalib, modelPathGRF,
+            size='280', paretic_side='L', BW=float(100)):
+        grf_impulse = GRF_predictor(start_time=float(start_time),
+                                    leftPath=leftPath,
+                                    rightPath=rightPath,
+                                    pareticPath=pareticPath,
+                                    nonpareticPath=nonpareticPath,
+                                    modelPathCalib=modelPathCalib,
+                                    modelPathGRF=modelPathGRF,
+                                    size=size,
+                                    paretic_side=paretic_side,
+                                    BW=BW)
+        grf_impulse.GRF_initialization()
+        grf_impulse.GRF_trimmed_by_gait()
+
+        if paretic_side == 'L':
+            pareticImpulse = grf_impulse.leftGRFtrimmed
+            nonpareticImpulse = grf_impulse.rightGRFtrimmed
+        else:
+            nonpareticImpulse = grf_impulse.leftGRFtrimmed
+            pareticImpulse = grf_impulse.rightGRFtrimmed
+
+        return np.array(pareticImpulse.impulse),\
+               np.array(nonpareticImpulse.impulse)
 
     @staticmethod
     def save_raw_data(
@@ -925,7 +1012,316 @@ class ClinicalIndexMH:
             sep=",", header=True, index=False
             )
 
+    @staticmethod
+    def make_plot(
+            session_name: str, base_path: str,
+            cycle_data_path: str, raw_data_path: str,
+            paretic_side: str,
+            paretic_color='red',
+            nonparetic_color='blue',
+            std_alpha=0.35
+            ):
+        # GRF raw data plot
+        raw_report_path = base_path + raw_data_path + session_name + "/"
+        raw_left_path_list, raw_left_name_list =\
+            folder_path_name(
+                raw_report_path,
+                option='start',
+                char='RAW_GRF_LEFT',
+                T_F=1
+                )
+        raw_right_path_list, raw_right_name_list =\
+            folder_path_name(
+                raw_report_path,
+                option='start',
+                char='RAW_GRF_RIGHT',
+                T_F=1
+                )
 
+        if paretic_side == 'L':
+            raw_paretic_path = raw_left_path_list[0]
+            raw_nonparetic_path = raw_right_path_list[0]
+        elif paretic_side == 'R':
+            raw_paretic_path = raw_right_path_list[0]
+            raw_nonparetic_path = raw_left_path_list[0]
+
+        df_raw_paretic = pd.read_csv(
+            raw_paretic_path,
+            header=0,
+            delimiter=",")
+        df_raw_paretic.columns = ["time", "grf"]
+        df_raw_nonparetic = pd.read_csv(
+            raw_nonparetic_path,
+            header=0,
+            delimiter=",")
+        df_raw_nonparetic.columns = ["time", "grf"]
+
+        paretic_start_time = gait_start_time(
+            df_raw_paretic, "time", "grf"
+            )
+        paretic_end_time = gait_end_time(
+            df_raw_paretic, "time", "grf"
+            )
+        nonparetic_start_time = gait_start_time(
+            df_raw_nonparetic, "time", "grf"
+            )
+        nonparetic_end_time = gait_end_time(
+            df_raw_nonparetic, "time", "grf"
+            )
+
+        paretic_mean_time_series, paretic_std_time_series =\
+            DataProcess.average_time_series(
+                x=np.array(df_raw_paretic.time),
+                y=np.array(df_raw_paretic.grf),
+                x_start=paretic_start_time,
+                x_end=paretic_end_time)
+        nonparetic_mean_time_series, nonparetic_std_time_series =\
+            DataProcess.average_time_series(
+                x=np.array(df_raw_nonparetic.time),
+                y=np.array(df_raw_nonparetic.grf),
+                x_start=nonparetic_start_time,
+                x_end=nonparetic_end_time)
+
+        # Only paretic
+        fig1 = plt.figure(figsize=(18, 8))
+        ax = fig1.gca()
+        for axis in ['top', 'bottom', 'left', 'right']:
+            ax.spines[axis].set_linewidth(2)
+        plt.plot(
+            np.linspace(0, 100, 101),
+            paretic_mean_time_series,
+            color=paretic_color,
+            label='paretic side')
+        plt.fill_between(
+            np.linspace(0, 100, 101),
+            paretic_mean_time_series - paretic_std_time_series,
+            paretic_mean_time_series + paretic_std_time_series,
+            color=paretic_color,
+            alpha=std_alpha)
+        plt.xlabel("Gait Cycle [%]", fontsize=30)
+        plt.ylabel("Vertical Ground Reaction Force [N]", fontsize=30)
+        plt.xticks([0, 20, 40, 60, 80, 100], fontsize=25)
+        plt.yticks(
+            [-200, 0, 200, 400, 600, 800, 1000, 1200, 1400, 1600], fontsize=25)
+        plt.xlim([0, 100])
+        plt.ylim([-200, 1600])
+        plt.legend(loc='upper left', fontsize=25)
+        plt.show()
+        fig1.savefig(raw_report_path + 'paretic_side_vGRF.png')
+
+        # Only nonparetic
+        fig2 = plt.figure(figsize=(18, 8))
+        bx = fig2.gca()
+        for axis in ['top', 'bottom', 'left', 'right']:
+            bx.spines[axis].set_linewidth(2)
+        plt.plot(
+            np.linspace(0, 100, 101),
+            nonparetic_mean_time_series,
+            color=nonparetic_color,
+            label='non-paretic side')
+        plt.fill_between(
+            np.linspace(0, 100, 101),
+            nonparetic_mean_time_series - nonparetic_std_time_series,
+            nonparetic_mean_time_series + nonparetic_std_time_series,
+            color=nonparetic_color,
+            alpha=std_alpha)
+        plt.xlabel("Gait Cycle [%]", fontsize=30)
+        plt.ylabel("Vertical Ground Reaction Force [N]", fontsize=30)
+        plt.xticks([0, 20, 40, 60, 80, 100], fontsize=25)
+        plt.yticks(
+            [-200, 0, 200, 400, 600, 800, 1000, 1200, 1400, 1600], fontsize=25)
+        plt.xlim([0, 100])
+        plt.ylim([-200, 1600])
+        plt.legend(loc='upper left', fontsize=25)
+        plt.show()
+        fig2.savefig(raw_report_path + 'non-paretic_side_vGRF.png')
+
+        # Comparison
+        fig3 = plt.figure(figsize=(18, 8))
+        cx = fig3.gca()
+        for axis in ['top', 'bottom', 'left', 'right']:
+            cx.spines[axis].set_linewidth(2)
+        plt.plot(
+            np.linspace(0, 100, 101),
+            paretic_mean_time_series,
+            color=paretic_color,
+            label='paretic side')
+        plt.fill_between(
+            np.linspace(0, 100, 101),
+            paretic_mean_time_series - paretic_std_time_series,
+            paretic_mean_time_series + paretic_std_time_series,
+            color=paretic_color,
+            alpha=std_alpha)
+        plt.plot(
+            np.linspace(0, 100, 101),
+            nonparetic_mean_time_series,
+            color=nonparetic_color,
+            label='non-paretic side')
+        plt.fill_between(
+            np.linspace(0, 100, 101),
+            nonparetic_mean_time_series - nonparetic_std_time_series,
+            nonparetic_mean_time_series + nonparetic_std_time_series,
+            color=nonparetic_color,
+            alpha=std_alpha)
+        plt.xlabel("Gait Cycle [%]", fontsize=30)
+        plt.ylabel("Vertical Ground Reaction Force [N]", fontsize=30)
+        plt.xticks([0, 20, 40, 60, 80, 100], fontsize=25)
+        plt.yticks(
+            [-200, 0, 200, 400, 600, 800, 1000, 1200, 1400, 1600], fontsize=25)
+        plt.xlim([0, 100])
+        plt.ylim([-200, 1600])
+        plt.legend(loc='upper left', fontsize=25)
+        plt.show()
+        fig3.savefig(raw_report_path + 'comparison_vGRF.png')
+
+        ######################################################################
+        ######################################################################
+        # gait cycle plot
+        cycle_report_path = base_path + cycle_data_path + session_name + "/"
+        # stance time
+        df_cycle_paretic_stance_time = pd.read_csv(
+            cycle_report_path + 'paretic_stance_time.csv',
+            header=None,
+            delimiter=",")
+        df_cycle_nonparetic_stance_time = pd.read_csv(
+            cycle_report_path + 'non-paretic_stance_time.csv',
+            header=None,
+            delimiter=",")
+        # GRF maximum
+        df_cycle_paretic_GRF_maximum = pd.read_csv(
+            cycle_report_path + 'paretic_grf_max.csv',
+            header=None,
+            delimiter=",")
+        df_cycle_nonparetic_GRF_maximum = pd.read_csv(
+            cycle_report_path + 'non-paretic_grf_max.csv',
+            header=None,
+            delimiter=",")
+        # GRF impulse
+        df_cycle_paretic_GRF_impulse = pd.read_csv(
+            cycle_report_path + 'paretic_grf_impulse.csv',
+            header=None,
+            delimiter=",")
+        df_cycle_nonparetic_GRF_impulse = pd.read_csv(
+            cycle_report_path + 'non-paretic_grf_impulse.csv',
+            header=None,
+            delimiter=",")
+
+        # stance time plot
+        fig4 = plt.figure(figsize=(18, 8))
+        dx = fig4.gca()
+        for axis in ['top', 'bottom', 'left', 'right']:
+            dx.spines[axis].set_linewidth(2)
+        plt.plot(
+            df_cycle_paretic_stance_time.iloc[:, 0],
+            color=paretic_color,
+            label='paretic side')
+        plt.plot(
+            df_cycle_nonparetic_stance_time.iloc[:, 0],
+            color=nonparetic_color,
+            label='non-paretic side')
+        plt.xlabel("Gait Cycle Number", fontsize=30)
+        plt.ylabel("Stance time [sec]", fontsize=30)
+        plt.xticks(fontsize=25)
+        plt.yticks(fontsize=25)
+        plt.ylim([0, 2.5])
+        plt.legend(loc='upper left', fontsize=25)
+        plt.show()
+        fig4.savefig(cycle_report_path + 'stance_time.png')
+
+        # GRF maximum
+        fig5 = plt.figure(figsize=(18, 8))
+        ex = fig5.gca()
+        for axis in ['top', 'bottom', 'left', 'right']:
+            ex.spines[axis].set_linewidth(2)
+        plt.plot(
+            df_cycle_paretic_GRF_maximum.iloc[:, 0],
+            color=paretic_color,
+            label='paretic side')
+        plt.plot(
+            df_cycle_nonparetic_GRF_maximum.iloc[:, 0],
+            color=nonparetic_color,
+            label='non-paretic side')
+        plt.xlabel("Gait Cycle Number", fontsize=30)
+        plt.ylabel("vGRF Maximum [N]", fontsize=30)
+        plt.title("Vertical Ground Reaction Force", fontsize=45)
+        plt.xticks(fontsize=25)
+        plt.yticks(fontsize=25)
+        plt.ylim([0, 1500])
+        plt.legend(loc='upper left', fontsize=25)
+        plt.show()
+        fig5.savefig(cycle_report_path + 'GRF_maximum.png')
+
+        # GRF impulse
+        fig6 = plt.figure(figsize=(18, 8))
+        fx = fig6.gca()
+        for axis in ['top', 'bottom', 'left', 'right']:
+            fx.spines[axis].set_linewidth(2)
+        plt.plot(
+            df_cycle_paretic_GRF_impulse.iloc[:, 0],
+            color=paretic_color,
+            label='paretic side')
+        plt.plot(
+            df_cycle_nonparetic_GRF_impulse.iloc[:, 0],
+            color=nonparetic_color,
+            label='non-paretic side')
+        plt.xlabel("Gait Cycle Number", fontsize=30)
+        plt.ylabel("vGRF Impulse [N sec]", fontsize=30)
+        plt.title("Vertical Ground Reaction Force", fontsize=45)
+        plt.xticks(fontsize=25)
+        plt.yticks(fontsize=25)
+        plt.ylim([0, 2000])
+        plt.legend(loc='upper left', fontsize=25)
+        plt.show()
+        fig6.savefig(cycle_report_path + 'GRF_impulse.png')
+
+
+def gait_start_time(df, time_column_name: str, column_name: str):
+    start_time_array = np.array([])
+    # swing: 0, stance: 1
+    phase_flag = 0
+    for idx in np.arange(len(df)):
+        if (df.loc[idx, column_name] != 0) & (phase_flag == 0):
+            start_time = df.loc[idx, time_column_name]
+            start_time_array = np.append(start_time_array, start_time)
+            phase_flag = 1
+        elif (df.loc[idx, column_name] == 0) & (phase_flag == 1):
+            phase_flag = 0
+        else:
+            pass
+
+    return start_time_array
+
+
+def gait_end_time(df, time_column_name: str, column_name: str):
+    end_time_array = np.array([])
+    # swing: 0, stance: 1
+    phase_flag = 0
+    for idx in np.arange(len(df)):
+        if (df.loc[idx, column_name] != 0) & (phase_flag == 0):
+            if idx == 0:
+                continue
+            end_time = df.loc[idx - 1, time_column_name]
+            end_time_array = np.append(end_time_array, end_time)
+            phase_flag = 1
+        elif (df.loc[idx, column_name] == 0) & (phase_flag == 1):
+            phase_flag = 0
+        else:
+            pass
+
+    # Dismiss the first end time
+    end_time_array = end_time_array[1:]
+
+    # Add the last end time
+    end_time_array = np.append(
+        end_time_array,
+        df.loc[len(df) - 1, time_column_name])
+
+    return end_time_array
+
+
+##############################################################################
+# TEST CODE for MAIN
+##############################################################################
 def basic_test():
     grf = GRF_predictor()
     # Sensor data reading, model loading
@@ -1001,6 +1397,9 @@ def GRFmax_test():
     print(std_non_paretic)
     print(symmetry)
 
+###############################################################################
+###############################################################################
+
 
 def Rawdata_saving(
         bag_name: str, session_name: str,
@@ -1075,51 +1474,123 @@ def Rawdata_saving(
         session_name=session_name
         )
 
-    # report_df = pd.DataFrame(columns = ['mean_paretic', 'std_paretic',
-    #                                     'mean_nonparetic', 'std_nonparetic',
-    #                                     'symmetry'],
-    #                          index = ['toeClearance', 'stride', 'GRFmax',
-    #                                   'GRFimpulse', 'stanceTime'])
-    # GRF_maximum_data =\
-    #     ClinicalIndexMH.get_symmetry_index_GRFmax(
-    #         start_time=start_time,
-    #         leftPath=left_sole_path,
-    #         rightPath=right_sole_path,
-    #         pareticPath=paretic_gait_path,
-    #         nonpareticPath=nonparetic_gait_path,
-    #         modelPathCalib=calib_model_path,
-    #         modelPathGRF=GRF_model_path,
-    #         size=size,
-    #         paretic_side=paretic_side,
-    #         BW=BW
-    #         )
-    # GRF_impulse_data =\
-    #     ClinicalIndexMH.get_symmetry_index_GRFimpulse(
-    #         start_time=start_time,
-    #         leftPath=left_sole_path,
-    #         rightPath=right_sole_path,
-    #         pareticPath=paretic_gait_path,
-    #         nonpareticPath=nonparetic_gait_path,
-    #         modelPathCalib=calib_model_path,
-    #         modelPathGRF=GRF_model_path,
-    #         size=size,
-    #         paretic_side=paretic_side,
-    #         BW=BW
-    #         )
-    # stance_time_data = ClinicalIndexMH.get_symmetry_index_stanceTime(
-    #     start_time = start_time,
-    #     pareticPath = paretic_gait_path,
-    #     nonpareticPath = nonparetic_gait_path,
-    #     paretic_side='L')
-    #
-    # # add report df
-    # report_df.loc['GRFmax', :] = GRF_maximum_data
-    # report_df.loc['GRFimpulse', :] = GRF_impulse_data
-    # report_df.loc['stanceTime', :] = stance_time_data
+def Gaitcycledata_saving(
+        base_path: str, cycle_data_path: str,
+        bag_name: str, session_name: str,
+        calib_folder_name: str, GRF_model_name: str,
+        shoe_size: str, paretic_side: str, body_weight: float
+        ):
+    # Read bag file
+    path = base_path + 'bag/' + bag_name + '.bag'
+    # bag_name[4:-9] = 2023-08-16
+    save_folder = base_path + cycle_data_path + session_name + '/'
+    create_folder(save_folder)
+
+    bag = bagreader(path)
+    start_time = bag.start_time
+
+    # To filter specific topics with interests
+    TOPIC_MH = (
+        "/afo_sensor/soleSensor_left",
+        "/afo_sensor/soleSensor_right",
+        "/afo_detector/gait_paretic",
+        "/afo_detector/gait_nonparetic"
+    )
+
+    # Definition of Clinical Indices
+    left_sole_path = ""
+    right_sole_path = ""
+    paretic_gait_path = ""
+    nonparetic_gait_path = ""
+
+    # calib_model_path example = ../../model/CHAR_230815_280_LP/
+    # GRF_model_path example = ../../model/GRF_230815/LSTM_GRF.pt
+    calib_model_path = '../../model/' + calib_folder_name + '/'
+    GRF_model_path = '../../model/' + GRF_model_name
+    # 85.1
+    BW = body_weight
+    # 'L'
+    paretic_side = paretic_side
+    # '280'
+    size = shoe_size
+
+    # Read Topics and calculate clinical index
+    for topic in bag.topics:
+        msg_topic = bag.message_by_topic(topic)
+
+        # Use own module and methods
+        if topic == TOPIC_MH[0]:
+            left_sole_path = msg_topic
+        elif topic == TOPIC_MH[1]:
+            right_sole_path = msg_topic
+        elif topic == TOPIC_MH[2]:
+            paretic_gait_path = msg_topic
+        elif topic == TOPIC_MH[3]:
+            nonparetic_gait_path = msg_topic
+
+    # gait cycle data saving
+    stance_time_paretic_array, stance_time_nonparetic_array =\
+        ClinicalIndexMH.get_data_stance_time(
+            start_time=start_time,
+            leftPath=left_sole_path,
+            rightPath=right_sole_path,
+            pareticPath=paretic_gait_path,
+            nonpareticPath=nonparetic_gait_path,
+            modelPathCalib=calib_model_path,
+            modelPathGRF=GRF_model_path,
+            size=size,
+            paretic_side=paretic_side,
+            BW=BW)
+
+    pd.DataFrame(stance_time_paretic_array).to_csv(
+        save_folder + "paretic_stance_time.csv",
+        header=False, index=False)
+    pd.DataFrame(stance_time_nonparetic_array).to_csv(
+        save_folder + "non-paretic_stance_time.csv",
+        header=False, index=False)
+
+    grf_max_paretic_array, grf_max_nonparetic_array =\
+        ClinicalIndexMH.get_data_GRFmax(
+            start_time=start_time,
+            leftPath=left_sole_path,
+            rightPath=right_sole_path,
+            pareticPath=paretic_gait_path,
+            nonpareticPath=nonparetic_gait_path,
+            modelPathCalib=calib_model_path,
+            modelPathGRF=GRF_model_path,
+            size=size,
+            paretic_side=paretic_side,
+            BW=BW)
+
+    pd.DataFrame(grf_max_paretic_array).to_csv(
+        save_folder + "paretic_grf_max.csv",
+        header=False, index=False)
+    pd.DataFrame(grf_max_nonparetic_array).to_csv(
+        save_folder + "non-paretic_grf_max.csv",
+        header=False, index=False)
+
+    grf_impulse_paretic_array, grf_impulse_nonparetic_array =\
+        ClinicalIndexMH.get_data_GRFimpulse(
+            start_time=start_time,
+            leftPath=left_sole_path,
+            rightPath=right_sole_path,
+            pareticPath=paretic_gait_path,
+            nonpareticPath=nonparetic_gait_path,
+            modelPathCalib=calib_model_path,
+            modelPathGRF=GRF_model_path,
+            size=size,
+            paretic_side=paretic_side,
+            BW=BW)
+
+    pd.DataFrame(grf_impulse_paretic_array).to_csv(
+        save_folder + "paretic_grf_impulse.csv",
+        header=False, index=False)
+    pd.DataFrame(grf_impulse_nonparetic_array).to_csv(
+        save_folder + "non-paretic_grf_impulse.csv",
+        header=False, index=False)
 
 
-if __name__ == "__main__":
-
+def raw_data_save_test():
     bag_list = [
         "log_2023-08-16-15-40-08",
         "log_2023-08-16-15-41-19",
@@ -1167,3 +1638,74 @@ if __name__ == "__main__":
             paretic_side=paretic_side,
             body_weight=body_weight
             )
+
+
+def make_plot_test():
+    bag_list = [
+        "log_2023-08-16-15-40-08",
+        "log_2023-08-16-15-41-19",
+        "log_2023-08-16-15-43-10",
+        "log_2023-08-16-15-44-06",
+        "log_2023-08-16-15-46-14",
+        "log_2023-08-16-15-51-39",
+        "log_2023-08-16-15-56-59",
+        "log_2023-08-16-16-02-17",
+        "log_2023-08-16-16-23-57",
+        "log_2023-08-16-16-27-28",
+        "log_2023-08-16-16-29-04"
+        ]
+    session_list = [
+        "10MWT_OFF_CueOFF",
+        "10MWT_ON_CueOFF",
+        "10MWT_ON_CueON_1",
+        "10MWT_ON_CueON_2",
+        "10MWT_ON_CueON_3",
+        "2MWT_OFF_CueOFF_89.4m",
+        "2MWT_ON_CueOFF_88.2m",
+        "2MWT_ON_CueON_64.2m",
+        "2MWT_BARE_CueOFF_90m",
+        "10MWT_BARE_CueOFF_1",
+        "10MWT_BARE_CueOFF_2"
+        ]
+
+    base_path =\
+        'D:/OneDrive - SNU/범부처-DESKTOP-2JL44HH/C_임상_2023/2023-08-16/'
+    cycle_data_path = 'report_CYCLE/'
+    raw_data_path = 'report_RAW/'
+    calib_folder_name = 'CHAR_230815_280_LP'
+    GRF_model_name = 'GRF_230815/LSTM_GRF.pt'
+    # 장비 무게 포함
+    body_weight = 85.1
+    paretic_side = 'L'
+    shoe_size = '280'
+
+    for bag_ind in np.arange(len(bag_list)):
+
+        bag_name = bag_list[bag_ind]
+        session_name = session_list[bag_ind]
+        
+        # Gaitcycledata_saving(
+        #     base_path=base_path,
+        #     cycle_data_path=cycle_data_path,
+        #     bag_name=bag_name,
+        #     session_name=session_name,
+        #     calib_folder_name=calib_folder_name,
+        #     GRF_model_name=GRF_model_name,
+        #     shoe_size=shoe_size,
+        #     paretic_side=paretic_side,
+        #     body_weight=body_weight
+        #     )
+
+        ClinicalIndexMH.make_plot(
+            session_name=session_name,
+            base_path=base_path,
+            cycle_data_path=cycle_data_path,
+            raw_data_path=raw_data_path,
+            paretic_side='L',
+            paretic_color='red',
+            nonparetic_color='blue',
+            std_alpha=0.35
+            )
+
+if __name__ == "__main__":
+    make_plot_test()
