@@ -13,7 +13,7 @@ def create_folder(directory):
         if not os.path.exists(directory):
             os.makedirs(directory)
     except OSError:
-        print ('Error: Creating directory. ' +  directory)
+        print('Error: Creating directory. ' + directory)
 
 
 # Function for folder path reading
@@ -38,7 +38,7 @@ def folder_path_name(path, option=None, char=None, T_F=None):
         exp_name_list = [name for (file, name)
                          in zip(file_list, file_name_list)
                          if name.endswith(str(char)) == int(T_F)]
-        
+
     elif option == "include":
         exp_list = [file for (file, name) in zip(file_list, file_name_list)
                     if str(char) in name]
@@ -70,17 +70,18 @@ class LSTM_Calib(nn.Module):
         self.dropout = drop_p
 
         self.lstm = nn.LSTM(
-            input_size = input_size,
-            hidden_size = hidden_size_1,
-            batch_first = True,
-            num_layers =  num_layers,
-            dropout = drop_p
+            input_size=input_size,
+            hidden_size=hidden_size_1,
+            batch_first=True,
+            num_layers=num_layers,
+            dropout=drop_p
             )
         self.linear1 = nn.Linear(in_features=self.hidden_size_1,
                                  out_features=self.hidden_size_2)
         self.linear2 = nn.Linear(in_features=self.hidden_size_2,
                                  out_features=self.hidden_size_3)
-        self.linear3 = nn.Linear(in_features=self.hidden_size_3, out_features=1)
+        self.linear3 = nn.Linear(in_features=self.hidden_size_3,
+                                 out_features=1)
 
     def forward(self, x):
         batch_size = x.shape[0]
@@ -90,7 +91,7 @@ class LSTM_Calib(nn.Module):
                          self.hidden_size_1).requires_grad_()
 
         outn, (hn, cn) = self.lstm(x, (h0, c0))
-        out1 = self.linear1(outn[:,:,-1])
+        out1 = self.linear1(outn[:, :, -1])
         out2 = self.linear2(out1)
         out = self.linear3(out2)
 
@@ -111,17 +112,18 @@ class LSTM_GRF(nn.Module):
         self.dropout = drop_p
 
         self.lstm = nn.LSTM(
-            input_size = input_size,
-            hidden_size = hidden_size_1,
-            batch_first = True,
-            num_layers =  num_layers,
-            dropout = drop_p
+            input_size=input_size,
+            hidden_size=hidden_size_1,
+            batch_first=True,
+            num_layers=num_layers,
+            dropout=drop_p
             )
         self.linear1 = nn.Linear(in_features=self.hidden_size_1,
                                  out_features=self.hidden_size_2)
         self.linear2 = nn.Linear(in_features=self.hidden_size_2,
                                  out_features=self.hidden_size_3)
-        self.linear3 = nn.Linear(in_features=self.hidden_size_3, out_features=1)
+        self.linear3 = nn.Linear(in_features=self.hidden_size_3,
+                                 out_features=1)
 
     def forward(self, x):
         batch_size = x.shape[0]
@@ -131,7 +133,7 @@ class LSTM_GRF(nn.Module):
                          self.hidden_size_1, device=x.device).requires_grad_()
 
         outn, (hn, cn) = self.lstm(x, (h0, c0))
-        out1 = self.linear1(outn[:,:,-1])
+        out1 = self.linear1(outn[:, :, -1])
         out2 = self.linear2(out1)
         out = self.linear3(out2)
 
@@ -141,16 +143,50 @@ class LSTM_GRF(nn.Module):
 # 후에 force output에 filtering하고 GRF 추정하도록 수정하기
 # GRF output이 음수가 나오지 않도록 재확인해보자
 class GRF_predictor:
-    def __init__(self, start_time=float(1691133979.160155),
-                 leftPath='../../bag/log_2023-08-04-16-26-19/afo_sensor-soleSensor_left.csv',
-                 rightPath='../../bag/log_2023-08-04-16-26-19/afo_sensor-soleSensor_right.csv',
-                 pareticPath='../../bag/log_2023-08-04-16-26-19/afo_detector-gait_paretic.csv',
-                 nonpareticPath='../../bag/log_2023-08-04-16-26-19/afo_detector-gait_nonparetic.csv',
-                 modelPathCalib='../../model/CHAR_230815_280_LP/',
-                 modelPathGRF='../../model/GRF_230815/LSTM_GRF.pt',
-                 size='280',
-                 paretic_side = 'L',
-                 BW = float(100)):
+    def __init__(self, start_time: float,
+                 leftPath: str,
+                 rightPath: str,
+                 pareticPath: str,
+                 nonpareticPath: str,
+                 modelPathCalib: str,
+                 modelPathGRF: str,
+                 size: str,
+                 paretic_side: str,
+                 BW: float):
+        '''
+        Parameters
+        ----------
+        start_time : float
+        leftPath : str
+            The example is
+            '../../bag/log_2023-08-04-16-26-19/afo_sensor-soleSensor_left.csv'.
+        rightPath : str
+            The example is
+            '../../bag/log_2023-08-04-16-26-19/afo_sensor-soleSensor_right.csv'.
+        pareticPath : str
+            The example is
+            '../../bag/log_2023-08-04-16-26-19/afo_detector-gait_paretic.csv'.
+        nonpareticPath : str
+            The example is
+            '../../bag/log_2023-08-04-16-26-19/afo_detector-gait_nonparetic.csv'.
+        modelPathCalib : str
+            The example is
+            '../../model/CHAR_230815_280_LP/'.
+        modelPathGRF : str
+            The example is
+            '../../model/GRF_230815/LSTM_GRF.pt'.
+        size : str
+            The example is '280'
+        paretic_side : str
+            The example is 'L'.
+        BW : float
+
+        Returns
+        -------
+        None.
+
+        '''
+
         self.start_time = float(start_time)
         self.pareticPath = pareticPath
         self.nonpareticPath = nonpareticPath
@@ -176,7 +212,7 @@ class GRF_predictor:
         # Calibration model inference
         self.Calib_total_prediction()
         self.GRF_preprocessing()
-        
+
         left_stance_time = pd.DataFrame(
             self.leftTime.isin(self.SyncedLeftTime) * 1.0
             )
@@ -186,10 +222,10 @@ class GRF_predictor:
 
         left_stance_time.columns = ["stance time"]
         right_stance_time.columns = ["stance time"]
-        
+
         left_voltage = pd.concat([self.leftData, left_stance_time], axis=1)
         right_voltage = pd.concat([self.rightData, right_stance_time], axis=1)
-        
+
         return left_voltage, right_voltage
 
     def get_force_raw_data(self):
@@ -200,14 +236,14 @@ class GRF_predictor:
         # Calibration model inference
         self.Calib_total_prediction()
         self.GRF_preprocessing()
-        
+
         left_stance_time = pd.DataFrame(
             self.leftTime.isin(self.SyncedLeftTime) * 1.0
             )
         right_stance_time = pd.DataFrame(
             self.rightTime.isin(self.SyncedRightTime) * 1.0
             )
-        
+
         left_stance_time.columns = ["stance time"]
         right_stance_time.columns = ["stance time"]
 
@@ -225,14 +261,14 @@ class GRF_predictor:
     # Set GRF values of swing phase as zero
     def get_GRF_raw_data(self):
         self.GRF_initialization()
-        
+
         left_GRF_stance = pd.concat(
             [self.SyncedLeftTime, pd.DataFrame(self.GRFleftData)], axis=1
             )
         right_GRF_stance = pd.concat(
             [self.SyncedRightTime, pd.DataFrame(self.GRFrightData)], axis=1
             )
-        
+
         left_GRF = self.leftTime.to_frame().merge(
             left_GRF_stance, how='left', on="time"
             )
@@ -256,7 +292,7 @@ class GRF_predictor:
         self.GRF_model_load()
         # GRF model inference
         self.GRF_total_prediction()
-        
+
     def vout_data_read(self):
         leftData = pd.read_csv(self.leftPath, header=0)
         rightData = pd.read_csv(self.rightPath, header=0)
@@ -294,10 +330,10 @@ class GRF_predictor:
                                    num_layers=6,
                                    drop_p=0.1)
             rightmodel = LSTM_Calib(hidden_size_1=self.calib_input_length,
-                                   hidden_size_2=45,
-                                   hidden_size_3=35,
-                                   num_layers=6,
-                                   drop_p=0.1)
+                                    hidden_size_2=45,
+                                    hidden_size_3=35,
+                                    num_layers=6,
+                                    drop_p=0.1)
             leftmodel.load_state_dict(torch.load(
                 self.modelPathCalib + self.size + "Left_" +
                 str(num + 1) + ".pt",
@@ -313,32 +349,40 @@ class GRF_predictor:
         if sensor_dir == "L":
             # leftData
             if len(self.leftVout) < self.calib_input_length:
-                extra_row = np.repeat([self.leftVout[0]], repeats=
-                                      self.calib_input_length -\
-                                          len(self.leftVout), axis=0)
+                extra_row = np.repeat(
+                    [self.leftVout[0]],
+                    repeats=self.calib_input_length - len(self.leftVout),
+                    axis=0
+                    )
                 input_data = np.concatenate((extra_row, self.leftVout), axis=0)
-                x = input_data[(len(input_data) - self.calib_input_length) :\
-                               len(input_data),
-                               (num - 1)]
+                x = input_data[
+                    (len(input_data) - self.calib_input_length):
+                        len(input_data), (num - 1)
+                        ]
             else:
                 input_data = self.leftVout
                 x = input_data[
-                    (len(self.leftVout) - self.calib_input_length) :\
+                    (len(self.leftVout) - self.calib_input_length):
                         len(self.leftVout), (num - 1)]
         else:
             # rightData
             if len(self.rightVout) < self.calib_input_length:
-                extra_row = np.repeat([self.rightVout[0]], repeats=
-                                      self.calib_input_length -\
-                                          len(self.rightVout), axis=0)
-                input_data = np.concatenate((extra_row, self.rightVout), axis=0)
-                x = input_data[(len(input_data) - self.calib_input_length) :\
+                extra_row = np.repeat(
+                    [self.rightVout[0]],
+                    repeats=self.calib_input_length - len(self.rightVout),
+                    axis=0
+                    )
+                input_data = np.concatenate(
+                    (extra_row, self.rightVout),
+                    axis=0
+                    )
+                x = input_data[(len(input_data) - self.calib_input_length):
                                len(input_data),
                                (num - 1)]
             else:
                 input_data = self.rightVout
                 x = input_data[
-                    (len(self.rightVout) - self.calib_input_length) :\
+                    (len(self.rightVout) - self.calib_input_length):
                         len(self.rightVout), (num - 1)]
         x = torch.from_numpy(x)
         x = x.unsqueeze(1)
@@ -355,12 +399,14 @@ class GRF_predictor:
                 self.leftVout = self.leftVout.iloc[:, 1:]
                 self.leftVout = np.array(self.leftVout)
             else:
-                self.leftVout = np.zeros((1,6))
+                self.leftVout = np.zeros((1, 6))
             # leftData prediction
             _, left_name_list = folder_path_name(
                 self.modelPathCalib, "include", "Left")
-            left_name_list = [name for name in left_name_list if \
-                                int(name[-4]) <= self.sensor_num]
+            left_name_list = [
+                name for name in left_name_list
+                if int(name[-4]) <= self.sensor_num
+                ]
             left_name_list = sorted(left_name_list, key=lambda x: int(x[-4]),
                                     reverse=False)
             leftOutput = np.array([])
@@ -382,12 +428,14 @@ class GRF_predictor:
                 self.rightVout = self.rightVout.iloc[:, 1:]
                 self.rightVout = np.array(self.rightVout)
             else:
-                self.rightVout = np.zeros((1,6))
+                self.rightVout = np.zeros((1, 6))
             # rightData prediction
             _, right_name_list = folder_path_name(
                 self.modelPathCalib, "include", "Right")
-            right_name_list = [name for name in right_name_list if \
-                                int(name[-4]) <= self.sensor_num]
+            right_name_list = [
+                name for name in right_name_list
+                if int(name[-4]) <= self.sensor_num
+                ]
             right_name_list = sorted(right_name_list, key=lambda x: int(x[-4]),
                                      reverse=False)
             rightOutput = np.array([])
@@ -416,10 +464,11 @@ class GRF_predictor:
         self.rightForce = self.Calib_one_prediction(idx=0, sensor_dir="R")
         right_idx = 1
         for _ in np.arange(1, len(self.rightData)):
-            self.rightForce = np.append(self.rightForce,
-                                        self.Calib_one_prediction(
-                                           idx=right_idx, sensor_dir="R"),
-                                       axis=0)
+            self.rightForce = np.append(
+                self.rightForce,
+                self.Calib_one_prediction(
+                    idx=right_idx, sensor_dir="R"
+                    ), axis=0)
             right_idx += 1
 
     def Gait_detection_data_read(self):
@@ -430,12 +479,12 @@ class GRF_predictor:
         # Time initialization with respect to start time
         pareticData = pareticData.astype(float)
         nonpareticData = nonpareticData.astype(float)
-        pareticData.Time -=  self.start_time
-        nonpareticData.Time -=  self.start_time
+        pareticData.Time -= self.start_time
+        nonpareticData.Time -= self.start_time
         # stance start timing, end timing, duration
         # paretic side
-        pareticEvent_df = pd.DataFrame(columns = [
-            "start time", "end time", "duration"])
+        pareticEvent_df = pd.DataFrame(
+            columns=["start time", "end time", "duration"])
         par_flag = 0
         for par_idx in np.arange(len(pareticData)):
             # start time
@@ -455,26 +504,32 @@ class GRF_predictor:
                 pareticEvent_df = pd.concat([pareticEvent_df, paretic_add],
                                             axis=0, ignore_index=True)
         # nonparetic side
-        nonpareticEvent_df = pd.DataFrame(columns = [
-            "start time", "end time", "duration"])
+        nonpareticEvent_df = pd.DataFrame(
+            columns=["start time", "end time", "duration"])
         nonpar_flag = 0
         for nonpar_idx in np.arange(len(nonpareticData)):
             # start time
             if nonpareticData.iloc[nonpar_idx, 1] == 1:
                 nonparetic_start = nonpareticData.iloc[nonpar_idx, 0]
                 nonpar_flag = 1
-            elif (nonpareticData.iloc[nonpar_idx, 1] == 2) & (nonpar_flag == 1):
+            elif (nonpareticData.iloc[nonpar_idx, 1] == 2) &\
+                 (nonpar_flag == 1):
                 nonparetic_end = nonpareticData.iloc[nonpar_idx, 0]
                 nonpar_flag = 2
             else:
                 pass
             if nonpar_flag == 2:
                 nonparetic_duration = nonparetic_end - nonparetic_start
-                nonparetic_add = pd.DataFrame({'start time': [nonparetic_start],
-                                               'end time': [nonparetic_end],
-                                               'duration': [nonparetic_duration]})
-                nonpareticEvent_df = pd.concat([nonpareticEvent_df, nonparetic_add],
-                                            axis=0, ignore_index=True)
+                nonparetic_add = pd.DataFrame(
+                    {'start time': [nonparetic_start],
+                     'end time': [nonparetic_end],
+                     'duration': [nonparetic_duration]}
+                    )
+                nonpareticEvent_df = pd.concat(
+                    [nonpareticEvent_df, nonparetic_add],
+                    axis=0,
+                    ignore_index=True
+                    )
         # df update - L, R designation
         if self.paretic_side == 'L':
             self.leftTiming_df = pareticEvent_df
@@ -496,8 +551,11 @@ class GRF_predictor:
         rightForce_df = pd.DataFrame()
         rightForce_df["time"] = self.rightTime
         right_df_add = pd.DataFrame(self.rightForce)
-        rightForce_df = pd.concat([rightForce_df, right_df_add], axis=1,
-                                 ignore_index=True)
+        rightForce_df = pd.concat(
+            [rightForce_df, right_df_add],
+            axis=1,
+            ignore_index=True
+            )
         rightForce_df.columns = ["time",
                                  "f1", "f2", "f3",
                                  "f4", "f5", "f6"]
@@ -506,17 +564,26 @@ class GRF_predictor:
         for left_idx in np.arange(len(self.leftTiming_df)):
             if left_idx == 0:
                 SyncedLeftForce = leftForce_df[
-                    (leftForce_df.time >= self.leftTiming_df.loc[
-                        left_idx, "start time"]) &\
-                        (leftForce_df.time <= self.leftTiming_df.loc[
-                            left_idx, "end time"])]
+                    (
+                        leftForce_df.time
+                        >= self.leftTiming_df.loc[left_idx, "start time"]
+                    ) &
+                    (
+                        leftForce_df.time
+                        <= self.leftTiming_df.loc[left_idx, "end time"]
+                    )
+                    ]
             else:
                 SyncedLeftForce = pd.concat([SyncedLeftForce, leftForce_df[
-                    (leftForce_df.time >= self.leftTiming_df.loc[
-                        left_idx, "start time"]) &\
-                        (leftForce_df.time <= self.leftTiming_df.loc[
-                            left_idx, "end time"])]], axis=0,
-                        ignore_index=True)
+                    (
+                        leftForce_df.time
+                        >= self.leftTiming_df.loc[left_idx, "start time"]
+                    ) &
+                    (
+                        leftForce_df.time
+                        <= self.leftTiming_df.loc[left_idx, "end time"]
+                    )
+                    ]], axis=0, ignore_index=True)
         self.SyncedLeftTime = SyncedLeftForce.iloc[:, 0]
         self.SyncedLeftTime.reset_index(drop=True, inplace=True)
         self.SyncedLeftForce = np.array(SyncedLeftForce.iloc[:, 1:])
@@ -524,17 +591,26 @@ class GRF_predictor:
         for right_idx in np.arange(len(self.rightTiming_df)):
             if right_idx == 0:
                 SyncedRightForce = rightForce_df[
-                    (rightForce_df.time >= self.rightTiming_df.loc[
-                        right_idx, "start time"]) &\
-                        (rightForce_df.time <= self.rightTiming_df.loc[
-                            right_idx, "end time"])]
+                    (
+                        rightForce_df.time
+                        >= self.rightTiming_df.loc[right_idx, "start time"]
+                    ) &
+                    (
+                        rightForce_df.time
+                        <= self.rightTiming_df.loc[right_idx, "end time"]
+                    )
+                    ]
             else:
                 SyncedRightForce = pd.concat([SyncedRightForce, rightForce_df[
-                    (rightForce_df.time >= self.rightTiming_df.loc[
-                        right_idx, "start time"]) &\
-                        (rightForce_df.time <= self.rightTiming_df.loc[
-                            right_idx, "end time"])]], axis=0,
-                        ignore_index=True)
+                    (
+                        rightForce_df.time
+                        >= self.rightTiming_df.loc[right_idx, "start time"]
+                    ) &
+                    (
+                        rightForce_df.time
+                        <= self.rightTiming_df.loc[right_idx, "end time"]
+                    )
+                    ]], axis=0, ignore_index=True)
         self.SyncedRightTime = SyncedRightForce.iloc[:, 0]
         self.SyncedRightTime.reset_index(drop=True, inplace=True)
         self.SyncedRightForce = np.array(SyncedRightForce.iloc[:, 1:])
@@ -551,53 +627,49 @@ class GRF_predictor:
         if sensor_dir == 'L':
             if (int(idx) + 1) < self.GRF_input_length:
                 for x_num in np.arange(self.sensor_num):
-                    if x_num==0:
-                        x = np.append(self.SyncedLeftForce[0, x_num] *
-                                      np.ones(
-                                          (1,
-                                           self.GRF_input_length -\
-                                               int(idx) - 1)),
-                                      self.SyncedLeftForce[0:int(idx) + 1,
-                                                           x_num])
+                    if x_num == 0:
+                        x = np.append(
+                            self.SyncedLeftForce[0, x_num]
+                            * np.ones(
+                                (1, self.GRF_input_length - int(idx) - 1)
+                                ),
+                            self.SyncedLeftForce[0:int(idx) + 1, x_num])
                         x = x.reshape(self.GRF_input_length, 1)
                     else:
-                        x_temp = np.append(self.SyncedLeftForce[0, x_num] *
-                                           np.ones(
-                                               (1,
-                                                self.GRF_input_length -\
-                                                    int(idx) - 1)),
-                                           self.SyncedLeftForce[0:int(idx) + 1,
-                                                                x_num])
+                        x_temp = np.append(
+                            self.SyncedLeftForce[0, x_num]
+                            * np.ones(
+                                (1, self.GRF_input_length - int(idx) - 1)
+                                ),
+                            self.SyncedLeftForce[0:int(idx) + 1, x_num])
                         x_temp = x_temp.reshape(self.GRF_input_length, 1)
                         x = np.append(x, x_temp, axis=1)
             else:
-                x = self.SyncedLeftForce[int(idx) + 1 - self.GRF_input_length:\
-                                     int(idx) + 1, :]
+                x = self.SyncedLeftForce[
+                    int(idx) + 1 - self.GRF_input_length:int(idx) + 1, :]
         else:
             if (int(idx) + 1) < self.GRF_input_length:
                 for x_num in np.arange(self.sensor_num):
-                    if x_num==0:
-                        x = np.append(self.SyncedRightForce[0, x_num] *
-                                      np.ones(
-                                          (1,
-                                           self.GRF_input_length -\
-                                               int(idx) - 1)),
-                                      self.SyncedRightForce[0:int(idx) + 1,
-                                                            x_num])
+                    if x_num == 0:
+                        x = np.append(
+                            self.SyncedRightForce[0, x_num]
+                            * np.ones(
+                                (1, self.GRF_input_length - int(idx) - 1)
+                                ),
+                            self.SyncedRightForce[0:int(idx) + 1, x_num])
                         x = x.reshape(self.GRF_input_length, 1)
                     else:
-                        x_temp = np.append(self.SyncedRightForce[0, x_num] *
-                                           np.ones(
-                                               (1,
-                                                self.GRF_input_length -\
-                                                    int(idx) - 1)),
-                                           self.SyncedRightForce[0:int(idx) + 1,
-                                                                 x_num])
+                        x_temp = np.append(
+                            self.SyncedRightForce[0, x_num]
+                            * np.ones(
+                                (1, self.GRF_input_length - int(idx) - 1)
+                                ),
+                            self.SyncedRightForce[0:int(idx) + 1, x_num])
                         x_temp = x_temp.reshape(self.GRF_input_length, 1)
                         x = np.append(x, x_temp, axis=1)
             else:
-                x = self.SyncedRightForce[int(idx) + 1 - self.GRF_input_length:\
-                                     int(idx) + 1, :]
+                x = self.SyncedRightForce[
+                    int(idx) + 1 - self.GRF_input_length:int(idx) + 1, :]
         x = torch.from_numpy(x)
         x = torch.stack([x], dim=0).float()
 
@@ -612,7 +684,7 @@ class GRF_predictor:
             output = output.squeeze(0)
 
         return output
-        
+
     def GRF_total_prediction(self):
         self.GRFleftData = np.array([])
         self.GRFrightData = np.array([])
@@ -633,22 +705,27 @@ class GRF_predictor:
             # post-processing
             rightOutput /= np.sum(self.SyncedRightForce[g_ind])
             rightOutput *= (self.BW * 9.807)
-            self.GRFrightData = np.append(self.GRFrightData,
-                                         rightOutput,
-                                         axis=0)
+            self.GRFrightData = np.append(
+                self.GRFrightData, rightOutput, axis=0)
 
     def GRF_trimmed_by_gait(self):
         # trimmed with respect to stance timing
-        self.leftGRFtrimmed = pd.DataFrame(columns = ['impulse', 'maximum'])
-        self.rightGRFtrimmed = pd.DataFrame(columns = ['impulse', 'maximum'])
+        self.leftGRFtrimmed = pd.DataFrame(columns=['impulse', 'maximum'])
+        self.rightGRFtrimmed = pd.DataFrame(columns=['impulse', 'maximum'])
         # left
         for left_idx in np.arange(len(self.leftTiming_df)):
             # index determination
-            index_list = list(self.SyncedLeftTime[(
-                self.SyncedLeftTime >= self.leftTiming_df.loc[
-                    left_idx, "start time"]) &\
-                    (self.SyncedLeftTime <= self.leftTiming_df.loc[
-                        left_idx, "end time"])].index)
+            index_list = list(
+                self.SyncedLeftTime[
+                    (
+                        self.SyncedLeftTime
+                        >= self.leftTiming_df.loc[left_idx, "start time"]
+                    ) &
+                    (
+                        self.SyncedLeftTime
+                        <= self.leftTiming_df.loc[left_idx, "end time"]
+                    )
+                    ].index)
             # impulse calculation
             GRF_leftImpulse = 0
             for L_idx in index_list[:-1]:
@@ -667,11 +744,17 @@ class GRF_predictor:
         # right
         for right_idx in np.arange(len(self.rightTiming_df)):
             # index determination
-            index_list = list(self.SyncedRightTime[(
-                self.SyncedRightTime >= self.rightTiming_df.loc[
-                    right_idx, "start time"]) &\
-                    (self.SyncedRightTime <= self.rightTiming_df.loc[
-                        right_idx, "end time"])].index)
+            index_list = list(
+                self.SyncedRightTime[
+                    (
+                        self.SyncedRightTime
+                        >= self.rightTiming_df.loc[right_idx, "start time"]
+                    ) &
+                    (
+                        self.SyncedRightTime
+                        <= self.rightTiming_df.loc[right_idx, "end time"]
+                    )
+                    ].index)
             # impulse calculation
             GRF_rightImpulse = 0
             for R_idx in index_list[:-1]:
@@ -694,10 +777,10 @@ class ClinicalIndexMH:
     def get_symmetry_index_stanceTime(start_time,
                                       pareticPath, nonpareticPath,
                                       paretic_side='L'):
-        ST = GRF_predictor(start_time = float(start_time),
-                           pareticPath = pareticPath,
-                           nonpareticPath = nonpareticPath,
-                           paretic_side = paretic_side)
+        ST = GRF_predictor(start_time=float(start_time),
+                           pareticPath=pareticPath,
+                           nonpareticPath=nonpareticPath,
+                           paretic_side=paretic_side)
         if paretic_side == 'L':
             pareticTiming = ST.leftTiming_df
             nonpareticTiming = ST.rightTiming_df
@@ -712,8 +795,8 @@ class ClinicalIndexMH:
         # mean based calculation
         symmetry = mean_paretic / (mean_paretic + mean_non_paretic) * 100
 
-        return [mean_paretic, std_paretic,\
-            mean_non_paretic, std_non_paretic, symmetry]
+        return [mean_paretic, std_paretic,
+                mean_non_paretic, std_non_paretic, symmetry]
 
     @staticmethod
     def get_symmetry_index_GRFmax(start_time, leftPath, rightPath,
@@ -721,16 +804,16 @@ class ClinicalIndexMH:
                                   modelPathCalib, modelPathGRF,
                                   size='280', paretic_side='L',
                                   BW=float(100)):
-        grf_max = GRF_predictor(start_time = float(start_time),
-                                leftPath = leftPath,
-                                rightPath = rightPath,
-                                pareticPath = pareticPath,
-                                nonpareticPath = nonpareticPath,
-                                modelPathCalib = modelPathCalib,
-                                modelPathGRF = modelPathGRF,
-                                size = size,
-                                paretic_side = paretic_side,
-                                BW = BW)
+        grf_max = GRF_predictor(start_time=float(start_time),
+                                leftPath=leftPath,
+                                rightPath=rightPath,
+                                pareticPath=pareticPath,
+                                nonpareticPath=nonpareticPath,
+                                modelPathCalib=modelPathCalib,
+                                modelPathGRF=modelPathGRF,
+                                size=size,
+                                paretic_side=paretic_side,
+                                BW=BW)
         grf_max.GRF_initialization()
         grf_max.GRF_trimmed_by_gait()
 
@@ -741,16 +824,6 @@ class ClinicalIndexMH:
             nonpareticMaximum = grf_max.leftGRFtrimmed
             pareticMaximum = grf_max.rightGRFtrimmed
         # Calculation
-        print("Paretic")
-        print(pareticMaximum.maximum)
-        print("Nonparetic")
-        print(nonpareticMaximum.maximum)
-        
-        pareticMaximum.to_csv('../../data/report/log_2023-08-16-16-23-57_paretic_GRFmax_bare_2MWT_example.csv',
-                              sep=',')
-        nonpareticMaximum.to_csv('../../data/report/log_2023-08-16-16-23-57_nonparetic_GRFmax_bare_2MWT_example.csv',
-                              sep=',')
-
         mean_paretic = np.mean(pareticMaximum.maximum)
         std_paretic = np.std(pareticMaximum.maximum)
         mean_non_paretic = np.mean(nonpareticMaximum.maximum)
@@ -758,8 +831,8 @@ class ClinicalIndexMH:
         # mean based calculation
         symmetry = mean_paretic / (mean_paretic + mean_non_paretic) * 100
 
-        return [mean_paretic, std_paretic,\
-            mean_non_paretic, std_non_paretic, symmetry]
+        return [mean_paretic, std_paretic,
+                mean_non_paretic, std_non_paretic, symmetry]
 
     @staticmethod
     def get_symmetry_index_GRFimpulse(start_time, leftPath, rightPath,
@@ -767,16 +840,16 @@ class ClinicalIndexMH:
                                       modelPathCalib, modelPathGRF,
                                       size='280', paretic_side='L',
                                       BW=float(100)):
-        grf_impulse = GRF_predictor(start_time = float(start_time),
-                                    leftPath = leftPath,
-                                    rightPath = rightPath,
-                                    pareticPath = pareticPath,
-                                    nonpareticPath = nonpareticPath,
-                                    modelPathCalib = modelPathCalib,
-                                    modelPathGRF = modelPathGRF,
-                                    size = size,
-                                    paretic_side = paretic_side,
-                                    BW = BW)
+        grf_impulse = GRF_predictor(start_time=float(start_time),
+                                    leftPath=leftPath,
+                                    rightPath=rightPath,
+                                    pareticPath=pareticPath,
+                                    nonpareticPath=nonpareticPath,
+                                    modelPathCalib=modelPathCalib,
+                                    modelPathGRF=modelPathGRF,
+                                    size=size,
+                                    paretic_side=paretic_side,
+                                    BW=BW)
         grf_impulse.GRF_initialization()
         grf_impulse.GRF_trimmed_by_gait()
 
@@ -794,29 +867,29 @@ class ClinicalIndexMH:
         # mean based calculation
         symmetry = mean_paretic / (mean_paretic + mean_non_paretic) * 100
 
-        return [mean_paretic, std_paretic,\
-            mean_non_paretic, std_non_paretic, symmetry]
-    
+        return [mean_paretic, std_paretic,
+                mean_non_paretic, std_non_paretic, symmetry]
+
     @staticmethod
     def save_raw_data(
-            start_time:float, left_path:str, right_path:str,
-            paretic_path:str, nonparetic_path:str,
-            model_path_calib:str, model_path_GRF:str,
-            shoe_size:str, paretic_side:str, body_weight:float,
-            save_folder:str, session_name:str
+            start_time: float, left_path: str, right_path: str,
+            paretic_path: str, nonparetic_path: str,
+            model_path_calib: str, model_path_GRF: str,
+            shoe_size: str, paretic_side: str, body_weight: float,
+            save_folder: str, session_name: str
             ):
 
         grf_class = GRF_predictor(
-            start_time = start_time,
-            leftPath = left_path,
-            rightPath = right_path,
-            pareticPath = paretic_path,
-            nonpareticPath = nonparetic_path,
-            modelPathCalib = model_path_calib,
-            modelPathGRF = model_path_GRF,
-            size = shoe_size,
-            paretic_side = paretic_side,
-            BW = body_weight)
+            start_time=start_time,
+            leftPath=left_path,
+            rightPath=right_path,
+            pareticPath=paretic_path,
+            nonpareticPath=nonparetic_path,
+            modelPathCalib=model_path_calib,
+            modelPathGRF=model_path_GRF,
+            size=shoe_size,
+            paretic_side=paretic_side,
+            BW=body_weight)
 
         # raw data - voltage, force, GRF
         raw_voltage_left, raw_voltage_right =\
@@ -863,10 +936,13 @@ def basic_test():
 def stanceTime_test():
     CI = ClinicalIndexMH()
     mean_paretic, std_paretic, mean_non_paretic, std_non_paretic, symmetry =\
-        CI.get_symmetry_index_stanceTime(start_time=float(1691133979.160155),
-                                          pareticPath='../../bag/log_2023-08-04-16-26-19/afo_detector-gait_paretic.csv',
-                                          nonpareticPath='../../bag/log_2023-08-04-16-26-19/afo_detector-gait_nonparetic.csv',
-                                          paretic_side='L')
+        CI.get_symmetry_index_stanceTime(
+            start_time=float(1691133979.160155),
+            pareticPath='../../bag/log_2023-08-04-16-26-19'
+            + '/afo_detector-gait_paretic.csv',
+            nonpareticPath='../../bag/log_2023-08-04-16-26-19'
+            + '/afo_detector-gait_nonparetic.csv',
+            paretic_side='L')
     print(mean_paretic)
     print(std_paretic)
     print(mean_non_paretic)
@@ -877,15 +953,22 @@ def stanceTime_test():
 def GRFimpulse_test():
     CI = ClinicalIndexMH()
     mean_paretic, std_paretic, mean_non_paretic, std_non_paretic, symmetry =\
-        CI.get_symmetry_index_GRFimpulse(start_time=float(1691133979.160155),
-                                          leftPath='../../bag/log_2023-08-04-16-26-19/afo_sensor-soleSensor_left.csv',
-                                          rightPath='../../bag/log_2023-08-04-16-26-19/afo_sensor-soleSensor_right.csv',
-                                          pareticPath='../../bag/log_2023-08-04-16-26-19/afo_detector-gait_paretic.csv',
-                                          nonpareticPath='../../bag/log_2023-08-04-16-26-19/afo_detector-gait_nonparetic.csv',
-                                          modelPathCalib='../../model/CHAR_230815_280_LP/',
-                                          modelPathGRF='../../model/GRF_230815/LSTM_GRF.pt',
-                                          size='280',
-                                          paretic_side='L', BW=float(100))
+        CI.get_symmetry_index_GRFimpulse(
+            start_time=float(1691133979.160155),
+            leftPath='../../bag/log_2023-08-04-16-26-19'
+            + '/afo_sensor-soleSensor_left.csv',
+            rightPath='../../bag/log_2023-08-04-16-26-19'
+            + '/afo_sensor-soleSensor_right.csv',
+            pareticPath='../../bag/log_2023-08-04-16-26-19'
+            + '/afo_detector-gait_paretic.csv',
+            nonpareticPath='../../bag/log_2023-08-04-16-26-19'
+            + '/afo_detector-gait_nonparetic.csv',
+            modelPathCalib='../../model/CHAR_230815_280_LP/',
+            modelPathGRF='../../model/GRF_230815/LSTM_GRF.pt',
+            size='280',
+            paretic_side='L',
+            BW=float(100)
+            )
     print(mean_paretic)
     print(std_paretic)
     print(mean_non_paretic)
@@ -896,15 +979,22 @@ def GRFimpulse_test():
 def GRFmax_test():
     CI = ClinicalIndexMH()
     mean_paretic, std_paretic, mean_non_paretic, std_non_paretic, symmetry =\
-        CI.get_symmetry_index_GRFmax(start_time=float(1691133979.160155),
-                                          leftPath='../../bag/log_2023-08-04-16-26-19/afo_sensor-soleSensor_left.csv',
-                                          rightPath='../../bag/log_2023-08-04-16-26-19/afo_sensor-soleSensor_right.csv',
-                                          pareticPath='../../bag/log_2023-08-04-16-26-19/afo_detector-gait_paretic.csv',
-                                          nonpareticPath='../../bag/log_2023-08-04-16-26-19/afo_detector-gait_nonparetic.csv',
-                                          modelPathCalib='../../model/CHAR_230815_280_LP/',
-                                          modelPathGRF='../../model/GRF_230815/LSTM_GRF.pt',
-                                          size='280',
-                                          paretic_side='L', BW=float(100))
+        CI.get_symmetry_index_GRFmax(
+            start_time=float(1691133979.160155),
+            leftPath='../../bag/log_2023-08-04-16-26-19'
+            + '/afo_sensor-soleSensor_left.csv',
+            rightPath='../../bag/log_2023-08-04-16-26-19'
+            + '/afo_sensor-soleSensor_right.csv',
+            pareticPath='../../bag/log_2023-08-04-16-26-19'
+            + '/afo_detector-gait_paretic.csv',
+            nonpareticPath='../../bag/log_2023-08-04-16-26-19'
+            + '/afo_detector-gait_nonparetic.csv',
+            modelPathCalib='../../model/CHAR_230815_280_LP/',
+            modelPathGRF='../../model/GRF_230815/LSTM_GRF.pt',
+            size='280',
+            paretic_side='L',
+            BW=float(100)
+            )
     print(mean_paretic)
     print(std_paretic)
     print(mean_non_paretic)
@@ -913,9 +1003,9 @@ def GRFmax_test():
 
 
 def Rawdata_saving(
-        bag_name:str, session_name:str,
-        calib_folder_name:str, GRF_model_name:str, 
-        shoe_size:str, paretic_side:str, body_weight:float
+        bag_name: str, session_name: str,
+        calib_folder_name: str, GRF_model_name: str,
+        shoe_size: str, paretic_side: str, body_weight: float
         ):
     # Read bag file
     # example_path = ../../bag/log_2023-08-16-15-40-08.bag
@@ -924,7 +1014,7 @@ def Rawdata_saving(
     save_folder = '../../data/report/' + bag_name[4:-9] + '/'
     create_folder(save_folder)
     # example_path = ../../data/report/2023-08-16/10MWT_OFF_CueOFF.csv
-    save_path = save_folder + session_name + '.csv'
+    # save_path = save_folder + session_name + '.csv'
 
     bag = bagreader(path)
     start_time = bag.start_time
@@ -942,15 +1032,17 @@ def Rawdata_saving(
     right_sole_path = ""
     paretic_gait_path = ""
     nonparetic_gait_path = ""
-    
+
     # calib_model_path example = ../../model/CHAR_230815_280_LP/
     # GRF_model_path example = ../../model/GRF_230815/LSTM_GRF.pt
     calib_model_path = '../../model/' + calib_folder_name + '/'
     GRF_model_path = '../../model/' + GRF_model_name
-    
-    BW = body_weight # 85.1
-    paretic_side = paretic_side # 'L'
-    size = shoe_size # '280'
+    # 85.1
+    BW = body_weight
+    # 'L'
+    paretic_side = paretic_side
+    # '280'
+    size = shoe_size
 
     # Read Topics and calculate clinical index
     for topic in bag.topics:
@@ -965,7 +1057,7 @@ def Rawdata_saving(
             paretic_gait_path = msg_topic
         elif topic == TOPIC_MH[3]:
             nonparetic_gait_path = msg_topic
-    
+
     # Raw data saving
     CI = ClinicalIndexMH()
     CI.save_raw_data(
@@ -988,48 +1080,48 @@ def Rawdata_saving(
     #                                     'symmetry'],
     #                          index = ['toeClearance', 'stride', 'GRFmax',
     #                                   'GRFimpulse', 'stanceTime'])
-
-    # GRF_maximum_data = \
-    #     ClinicalIndexMH.get_symmetry_index_GRFmax(start_time = start_time,
-    #                                               leftPath = left_sole_path,
-    #                                               rightPath = right_sole_path,
-    #                                               pareticPath = paretic_gait_path,
-    #                                               nonpareticPath = nonparetic_gait_path,
-    #                                               modelPathCalib = calib_model_path,
-    #                                               modelPathGRF = GRF_model_path,
-    #                                               size=size,
-    #                                               paretic_side=paretic_side,
-    #                                               BW=BW)
-
-    # GRF_impulse_data = \
-    #     ClinicalIndexMH.get_symmetry_index_GRFimpulse(start_time = start_time,
-    #                                                   leftPath = left_sole_path,
-    #                                                   rightPath = right_sole_path,
-    #                                                   pareticPath = paretic_gait_path,
-    #                                                   nonpareticPath = nonparetic_gait_path,
-    #                                                   modelPathCalib = calib_model_path,
-    #                                                   modelPathGRF = GRF_model_path,
-    #                                                   size=size,
-    #                                                   paretic_side=paretic_side,
-    #                                                   BW=BW)
-
+    # GRF_maximum_data =\
+    #     ClinicalIndexMH.get_symmetry_index_GRFmax(
+    #         start_time=start_time,
+    #         leftPath=left_sole_path,
+    #         rightPath=right_sole_path,
+    #         pareticPath=paretic_gait_path,
+    #         nonpareticPath=nonparetic_gait_path,
+    #         modelPathCalib=calib_model_path,
+    #         modelPathGRF=GRF_model_path,
+    #         size=size,
+    #         paretic_side=paretic_side,
+    #         BW=BW
+    #         )
+    # GRF_impulse_data =\
+    #     ClinicalIndexMH.get_symmetry_index_GRFimpulse(
+    #         start_time=start_time,
+    #         leftPath=left_sole_path,
+    #         rightPath=right_sole_path,
+    #         pareticPath=paretic_gait_path,
+    #         nonpareticPath=nonparetic_gait_path,
+    #         modelPathCalib=calib_model_path,
+    #         modelPathGRF=GRF_model_path,
+    #         size=size,
+    #         paretic_side=paretic_side,
+    #         BW=BW
+    #         )
     # stance_time_data = ClinicalIndexMH.get_symmetry_index_stanceTime(
     #     start_time = start_time,
     #     pareticPath = paretic_gait_path,
     #     nonpareticPath = nonparetic_gait_path,
     #     paretic_side='L')
-    
-    
+    #
     # # add report df
-
     # report_df.loc['GRFmax', :] = GRF_maximum_data
     # report_df.loc['GRFimpulse', :] = GRF_impulse_data
     # report_df.loc['stanceTime', :] = stance_time_data
 
 
 if __name__ == "__main__":
-    
+
     bag_list = [
+        "log_2023-08-16-15-40-08",
         "log_2023-08-16-15-41-19",
         "log_2023-08-16-15-43-10",
         "log_2023-08-16-15-44-06",
@@ -1042,6 +1134,7 @@ if __name__ == "__main__":
         "log_2023-08-16-16-29-04"
         ]
     session_list = [
+        "10MWT_OFF_CueOFF",
         "10MWT_ON_CueOFF",
         "10MWT_ON_CueON_1",
         "10MWT_ON_CueON_2",
@@ -1055,15 +1148,16 @@ if __name__ == "__main__":
         ]
 
     for bag_ind in np.arange(len(bag_list)):
-        
+
         bag_name = bag_list[bag_ind]
         session_name = session_list[bag_ind]
         calib_folder_name = 'CHAR_230815_280_LP'
         GRF_model_name = 'GRF_230815/LSTM_GRF.pt'
-        body_weight = 85.1 # 장비 무게 포함
+        # 장비 무게 포함
+        body_weight = 85.1
         paretic_side = 'L'
         shoe_size = '280'
-        
+
         Rawdata_saving(
             bag_name=bag_name,
             session_name=session_name,
