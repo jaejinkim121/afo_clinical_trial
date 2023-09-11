@@ -10,6 +10,8 @@ class DataProcess:
             x_target = np.linspace(0, 1, x_num)
 
         x_target = x_target / x_target[-1]
+        x -= x[0]
+        x = x / x[-1]
         y_n = np.interp(x_target, x, y)
 
         return y_n
@@ -35,14 +37,14 @@ class DataProcess:
             ind_end = DataProcess.search_index(x[ind_start:], target)
 
             y_cropped = DataProcess.normalize_time_series(
-                x[ind_start:ind_end+1],
-                y[ind_start:ind_end+1],
+                x[ind_start:ind_start + ind_end+1],
+                y[ind_start:ind_start + ind_end+1],
                 x_num=x_num)
             crop_time_series.append(y_cropped)
 
         crop_time_series = np.array(crop_time_series)
         mean_time_series = np.mean(crop_time_series, axis=0)
-        std_time_series = np.mean(crop_time_series, axis=0)
+        std_time_series = np.std(crop_time_series, axis=0)
 
         return mean_time_series, std_time_series
 
