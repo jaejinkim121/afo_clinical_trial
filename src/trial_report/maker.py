@@ -14,6 +14,7 @@ import numpy as np
 
 from jj import ClinicalIndexJJ
 from mh import ClinicalIndexMH
+import document
 
 
 class ReportMaker:
@@ -27,7 +28,7 @@ class ReportMaker:
 
         self._path_bag_file = "C:/"
         self._path_calibration_model_directory = "C:/"
-        self._path_grf_model_directory = "C:/"
+        self._path_grf_model_file = "C:/"
         self._path_output_file = "C:/"
         self._shoe_size_list = [
             255, 260, 265, 270, 275, 280, 285
@@ -201,7 +202,7 @@ class ReportMaker:
         )
         self._string_var_sub5_grf_model_path = tk.StringVar()
         self._string_var_sub5_grf_model_path.set(
-            self._path_grf_model_directory
+            self._path_grf_model_file
         )
         self._entry_sub5_calibration = tk.Entry(
             self._root, width=30,
@@ -371,13 +372,13 @@ class ReportMaker:
         )
 
     def search_grf_model_path(self):
-        self._path_grf_model_directory = \
-            filedialog.askdirectory(
+        self._path_grf_model_file = \
+            filedialog.askopenfilename(
                 initialdir="C:\\Users\\",
-                title='Select GRF model directory'
+                title='Select GRF model file'
             )
         self._string_var_sub5_grf_model_path.set(
-            self._path_grf_model_directory
+            self._path_grf_model_file
         )
 
     def search_output_path(self):
@@ -423,12 +424,15 @@ class ReportMaker:
         paretic_gait_path = ""
         nonparetic_gait_path = ""
 
-        calib_model_path = '../../model/CHAR_230815_280_LP/'
-        GRF_model_path = '../../model/GRF_230815/LSTM_GRF.pt'
+        calib_model_path = self._path_calibration_model_directory + '/'
+        GRF_model_path = self._path_grf_model_file
 
-        BW = float(85.1)  # 장비무게포함
-        paretic_side = 'L'
-        size = '280'
+        body_weight = self._string_var_sub3_body_weight.get()  # 장비무게포함
+        if self._var_paretic_side == 1:
+            paretic_side = 'L'
+        else:
+            paretic_side = 'R'
+        sole_size = self._int_var_sub3_shoe_size.get()
 
         # Read Topics and calculate clinical index
         for topic in bag.topics:
@@ -457,12 +461,15 @@ class ReportMaker:
                                  index=['toeClearance', 'stride', 'GRFmax'
                                                                   'GRFimpulse',
                                         'stanceTime'])
-        toe_clearance_data = \
-            ClinicalIndexJJ.get_clinical_index_max_toe_clearance(
-                left_toe_path, right_toe_path)
+        # toe_clearance_data = \
+        #     ClinicalIndexJJ.get_clinical_index_max_toe_clearance(
+        #         left_toe_path, right_toe_path)
+        toe_clearance_data = [1,1,1]
 
-        stride_data = ClinicalIndexJJ.get_clinical_index_gait_speed_imu(
-            stride_path)
+        # stride_data = ClinicalIndexJJ.get_clinical_index_gait_speed_imu(
+        #     stride_path)
+        gait_speed_imu_data = [1, 1, 1]
+        gait_speed_distance_data = [1, 1, 1]
 
         GRF_maximum_data = \
             ClinicalIndexMH.get_symmetry_index_GRFmax(start_time=start_time,
@@ -472,9 +479,10 @@ class ReportMaker:
                                                       nonpareticPath=nonparetic_gait_path,
                                                       modelPathCalib=calib_model_path,
                                                       modelPathGRF=GRF_model_path,
-                                                      size=size,
+                                                      size=str(sole_size),
                                                       paretic_side=paretic_side,
-                                                      BW=BW)
+                                                      BW=float(body_weight)
+                                                      )
 
         GRF_impulse_data = \
             ClinicalIndexMH.get_symmetry_index_GRFimpulse(
@@ -485,9 +493,10 @@ class ReportMaker:
                 nonpareticPath=nonparetic_gait_path,
                 modelPathCalib=calib_model_path,
                 modelPathGRF=GRF_model_path,
-                size=size,
+                size=str(sole_size),
                 paretic_side=paretic_side,
-                BW=BW)
+                BW=float(body_weight)
+            )
 
         stance_time_data = ClinicalIndexMH.get_symmetry_index_stanceTime(
             start_time=start_time,
@@ -512,37 +521,27 @@ class ReportMaker:
                    'GRFimpulse', 'stanceTime']
         )
 
-        # Document Formatting
-        story = []
+        data_analysis = document.ClinicalAnalysis()
+        data_analysis.grf_max = GRF_maximum_data
+        data_analysis.grf_impulse = GRF_impulse_data
+        data_analysis.toe_clearance = toe_clearance_data
+        data_analysis.stance_time = stance_time_data
+        data_analysis.gait_speed_imu = gait_speed_imu_data
+        data_analysis.gait_speed_distance = gait_speed_distance_data
+        data_analysis.subject_name = self._string_var_sub3_name.get()
+        data_analysis.age = str(30)
+        data_analysis.weight = body_weight
+        # data_analysis.test_date = None
+        # data_analysis.test_label = None
+        # data_analysis.session_type = None
+        if self._var_paretic_side == 1:
+            data_analysis.paretic_side = "Left"
+        else:
+            data_analysis.paretic_side = "Right"
+        data_analysis.sole_size = sole_size
+        # data_analysis.sensor_calibration_date = None
 
-        doc = SimpleDocTemplate(
-            "test.pdf",
-            pagesize=A4,
-            rightMargin=72,
-            leftMargin=72,
-            topMargin=72,
-            bottomMargin=18)
-        styles = getSampleStyleSheet()
-
-        story.append(
-            Paragraph(
-                "Ankle Foot Orthosis - Clinical Trial Report",
-                styles['Title']))
-        data = []
-        for i in range(10):
-            data.append([])
-        data[0].append("Subject Name: ")
-        data[0].append("KJJ")
-        data[1].append("Subject ID: ")
-        data[1].append("RH-23-01")
-        data[2].append()
-
-        story.append(
-
-            Table(data)
-        )
-        doc.build(story)
-        ...
+        document.make_report(save_path, data_analysis)
 
     def exit_program(self):
         self._root.quit()
