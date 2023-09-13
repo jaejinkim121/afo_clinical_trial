@@ -46,9 +46,12 @@ class ClinicalIndexJJ:
         return np.sum(stride) / 120.0
 
     @staticmethod
-    def get_clinical_index_gait_speed_distance(file_path):
-        clinical_index = 0.0
+    def get_clinical_index_gait_speed_analog(distance=None, time_sec=None):
+        if distance is not None:
+            gait_speed = distance / 120.0
+        elif time_sec is not None:
+            gait_speed = 10.0 / time_sec
+        else:
+            ...
 
-        ...
-
-        return clinical_index
+        return gait_speed
