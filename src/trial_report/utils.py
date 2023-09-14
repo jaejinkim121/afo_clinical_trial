@@ -49,6 +49,21 @@ class DataProcess:
         return mean_time_series, std_time_series
 
     @staticmethod
+    def average_cropped_time_series(collection_data, x_num=101):
+        crop_time_series = []
+        for data in collection_data:
+            y_cropped = DataProcess.normalize_time_series(data[:,0],
+                                                          data[:,1],
+                                                          x_num=x_num)
+            crop_time_series.append(y_cropped)
+        crop_time_series = np.array(crop_time_series)
+        mean_time_series = np.mean(crop_time_series, axis=0)
+        std_time_series = np.std(crop_time_series, axis=0)
+
+        return mean_time_series, std_time_series
+
+
+    @staticmethod
     def search_index(sorted_array, search_target):
         ind = 0
         for x in sorted_array:
