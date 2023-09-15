@@ -2,9 +2,10 @@ import pandas as pd
 import numpy as np
 import csv
 from utils import DataProcess
+import matplotlib.pyplot as plt
 
 
-def get_initial_contact_time(gait_phase:pd.DataFrame):
+def get_initial_contact_time(gait_phase:pd.DataFrame, data_name="value"):
     if 'time' not in gait_phase.columns:
         print("Time data missing")
         return -1
@@ -12,12 +13,81 @@ def get_initial_contact_time(gait_phase:pd.DataFrame):
         print("Value data missing")
         return -1
 
-    time_initial_contact = gait_phase[gait_phase["value"] == 1]["time"]
+    time_initial_contact = gait_phase[gait_phase[data_name] == 1]["time"]
 
     return time_initial_contact.tolist()
 
 
-def divider_data_by_gait_phase(data_path, gait_phase_path):
+def get_foot_off_time(gait_phase:pd.DataFrame, data_name="value"):
+    if 'time' not in gait_phase.columns:
+        print("Time data missing")
+        return -1
+    if 'value' not in gait_phase.columns:
+        print("Value data missing")
+        return -1
+
+    time_foot_off = gait_phase[gait_phase[data_name] == 2]["time"]
+
+    return time_foot_off.tolist()
+
+
+def get_gait_event_time(gait_phase:pd.DataFrame, data_name="value"):
+    time_initial_contact = get_initial_contact_time(gait_phase, data_name)
+    time_foot_off = get_foot_off_time(gait_phase, data_name)
+
+    return time_initial_contact, time_foot_off
+
+
+def gait_phase_pre_processing(
+        gait_phase_paretic:pd.DataFrame,
+        gait_phase_nonparetic:pd.DataFrame, data_name="value"):
+    paretic_ic, paretic_fo = \
+        get_gait_event_time(gait_phase_paretic, data_name)
+    nonparetic_ic, nonparetic_fo = \
+        get_gait_event_time(gait_phase_nonparetic, data_name)
+
+    mean_cycle = (paretic_ic[-1] - paretic_ic[0]) / (len(paretic_ic) - 1)
+
+    idx_np = 0
+    time_diff = []
+    for tic in paretic_ic:
+        idx_np += DataProcess.search_index(nonparetic_ic[idx_np:], tic)
+        time_diff.append(nonparetic_ic[idx_np] - tic)
+
+    time_diff = np.array(time_diff)
+    mean_diff = np.mean(time_diff) / mean_cycle
+    std_diff = np.std(time_diff) / mean_cycle
+
+    if paretic_ic[0] > paretic_fo[0]:
+        paretic_fo = paretic_fo[1:]
+    if paretic_ic[-1] > paretic_fo[-1]:
+        paretic_ic = paretic_ic[:-1]
+
+    time_diff = []
+    for tic, tfo in zip(paretic_ic, paretic_fo):
+        time_diff.append(tfo-tic)
+    time_diff = np.array(time_diff)
+    mean_cycle_time_paretic = np.mean(time_diff) / mean_cycle
+    std_cycle_time_paretic = np.std(time_diff) / mean_cycle
+
+    if nonparetic_ic[0] > nonparetic_fo[0]:
+        nonparetic_fo = nonparetic_fo[1:]
+    if nonparetic_ic[-1] > nonparetic_fo[-1]:
+        nonparetic_ic = nonparetic_ic[:-1]
+
+    time_diff = []
+    for tic, tfo in zip(nonparetic_ic, nonparetic_fo):
+        time_diff.append(tfo - tic)
+    time_diff = np.array(time_diff)
+    mean_cycle_time_nonparetic = np.mean(time_diff) / mean_cycle
+    std_cycle_time_nonparetic = np.std(time_diff) / mean_cycle
+
+    return [mean_diff, std_diff,
+            mean_cycle_time_paretic, std_cycle_time_paretic,
+            mean_cycle_time_nonparetic, std_cycle_time_nonparetic]
+
+
+def divider_data_by_gait_phase_path(data_path, gait_phase_path, data_name="value"):
     data = pd.DataFrame()
     gait_phase = pd.DataFrame()
 
@@ -43,12 +113,12 @@ def divider_data_by_gait_phase(data_path, gait_phase_path):
             time_gait_phase.append(float(csv_row[0]))
 
     data["time"] = time_data
-    data["value"] = value_data
+    data[data_name] = value_data
     gait_phase["time"] = time_gait_phase
-    gait_phase["value"] = value_gait_phase
+    gait_phase[data_name] = value_gait_phase
 
     divided_array = []
-    time_initial_contact = get_initial_contact_time(gait_phase)
+    time_initial_contact = get_initial_contact_time(gait_phase, data_name)
     time_initial_contact.append(time_data[-1])
 
     for i in range(len(time_initial_contact) - 1):
@@ -59,18 +129,73 @@ def divider_data_by_gait_phase(data_path, gait_phase_path):
             ]
         divided_array.append(divided_df_current.to_numpy())
 
+    return divided_array, gait_phase
+
+
+def divider_data_by_gait_phase_df(data_df, gait_phase_df, data_name="value"):
+    divided_array = []
+    time_initial_contact = get_initial_contact_time(gait_phase_df, data_name)
+    time_initial_contact.append(data_df["time"].iloc(-1))
+
+    for i in range(len(time_initial_contact) - 1):
+        divided_df_current = \
+            data_df[
+                (data_df["time"] >= time_initial_contact[i]) &
+                (data_df["time"] < time_initial_contact[i+1])
+            ]
+        divided_array.append(divided_df_current.to_numpy())
+
     return divided_array
 
 
-def graph_averaged_data(collection_data, x_num=101):
+def graph_averaged_data(collection_data, title_graph, data_label, x_num=101):
     mean, std = DataProcess.average_cropped_time_series(
         collection_data, x_num
     )
     x = np.linspace(0, 100, x_num)
+    plt.plot(x, mean, 'k-')
+    plt.fill_between(x, mean - std, mean + std)
+    plt.xlabel("Cycle Percentage")
+    plt.xlim(0, 100)
+    plt.ylabel(data_label)
+    plt.title(title_graph)
+    plt.show()
 
 
+def graph_both_cycle_data(collection_data_paretic, collection_data_nonparetic,
+                          data_gait_paretic, data_gait_nonparetic,
+                          data_gait_label="value",
+                          title_graph=None, data_label=None, x_num=101):
+    [mean_diff_both, std_diff_both,
+     mean_diff_paretic, std_diff_paretic,
+     mean_diff_nonparetic, std_diff_nonparetic] = gait_phase_pre_processing(
+        data_gait_paretic, data_gait_nonparetic, data_gait_label)
 
-    ...
+    mean_paretic, std_paretic = DataProcess.average_cropped_time_series(
+        collection_data_paretic, x_num
+    )
+    mean_nonparetic, std_nonparetic = DataProcess.average_cropped_time_series(
+        collection_data_nonparetic, x_num
+    )
+
+    x_paretic = np.linspace(0, 100, x_num)
+    x_nonparetic = np.linspace(mean_diff_both*100, (1+mean_diff_both)*100,
+                               x_num)
+
+    plt.plot(x_paretic, mean_paretic, 'k-')
+    plt.fill_between(x_paretic,
+                     mean_paretic - std_paretic,
+                     mean_paretic + std_paretic)
+    plt.plot(x_nonparetic, mean_nonparetic, 'r-')
+    plt.fill_between(x_nonparetic,
+                     mean_nonparetic - std_nonparetic,
+                     mean_nonparetic + std_nonparetic)
+
+    plt.xlabel("Cycle Percentage")
+    plt.ylabel(data_label)
+    plt.title(title_graph)
+    plt.xlim(0, (1+mean_diff_both)*100)
+    plt.show()
 
 
 class ClinicalIndexJJ:
@@ -79,16 +204,24 @@ class ClinicalIndexJJ:
                                    paretic_gait_path,
                                    non_paretic_data_path,
                                    non_paretic_gait_path):
-
-        collection_paretic_toe_clearance = \
-            divider_data_by_gait_phase(paretic_data_path,
-                                       paretic_gait_path)
-        collection_non_paretic_toe_clearance = \
-            divider_data_by_gait_phase(non_paretic_data_path,
-                                       non_paretic_gait_path)
+        collection_paretic_toe_clearance, gait_phase_paretic = \
+            divider_data_by_gait_phase_path(paretic_data_path,
+                                            paretic_gait_path)
+        collection_non_paretic_toe_clearance, gait_phase_nonparetic = \
+            divider_data_by_gait_phase_path(non_paretic_data_path,
+                                            non_paretic_gait_path)
 
         # Graph Processing
-
+        # graph_averaged_data(collection_paretic_toe_clearance,
+        #                     "Toe clearance - paretic",
+        #                     "height [m]")
+        # graph_averaged_data(collection_non_paretic_toe_clearance,
+        #                     "Toe clearance - nonparetic",
+        #                     "height [m]")
+        graph_both_cycle_data(collection_paretic_toe_clearance,
+                              collection_non_paretic_toe_clearance,
+                              gait_phase_paretic, gait_phase_nonparetic,
+                              x_num=101)
 
         # Statistics Processing
         max_toe_clearance_paretic = []
@@ -142,6 +275,11 @@ class ClinicalIndexJJ:
 
 path_paretic = "../../dummy.csv"
 path_nonparetic = "../../dummy.csv"
-path_gait_paretic = "../../dummy_gait_phase.csv"
+path_gait_paretic = "../../dummy_gait_phase_p.csv"
+path_gait_nonparetic = "../../dummy_gait_phase_np.csv"
 
-divider_data_by_gait_phase(path_paretic, path_gait_paretic)
+divider_data_by_gait_phase_path(path_paretic, path_gait_paretic)
+ClinicalIndexJJ.data_process_toe_clearance(path_paretic,
+                                           path_gait_paretic,
+                                           path_nonparetic,
+                                           path_gait_nonparetic)

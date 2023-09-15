@@ -32,13 +32,13 @@ class DataProcess:
 
         for i in range(len(x_start)):
             target = x_start[i]
-            ind_start = DataProcess.search_index(x[ind_end:], target)
+            ind_start = DataProcess.search_index(x[ind_end:], target) + ind_end
             target = x_end[i]
-            ind_end = DataProcess.search_index(x[ind_start:], target)
+            ind_end = DataProcess.search_index(x[ind_start:], target) + ind_start
 
             y_cropped = DataProcess.normalize_time_series(
-                x[ind_start:ind_start + ind_end+1],
-                y[ind_start:ind_start + ind_end+1],
+                x[ind_start:ind_end+1],
+                y[ind_start:ind_end+1],
                 x_num=x_num)
             crop_time_series.append(y_cropped)
 
