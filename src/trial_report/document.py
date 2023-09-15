@@ -71,15 +71,13 @@ def make_report(path, data_report: ClinicalAnalysis):
     ])
 
     style_sub2_table = TableStyle([
-        ('FONTSIZE', (0,0), (-1, -1), 11),
+        ('FONTSIZE', (0,0), (-1, -1), 9),
         ('ALIGN', (0, 0), (0, -1), 'LEFT'),
-        ('ALIGN', (2, 1), (2, -1), 'RIGHT'),
-        ('ALIGN', (1, 1), (1, -1), 'RIGHT'),
-        ('ALIGN', (3, 1), (3, -1), 'RIGHT'),
+        ('ALIGN', (1, 1), (-1, -1), 'RIGHT'),
         ('ALIGN', (0,0), (-1, 0), 'CENTER'),
         ('LINEAFTER', (0, 0), (-2, -1), 0.5, colors.gray),
         ('VALIGN', (0,0), (-1, -1), 'MIDDLE'),
-        ('RIGHTPADDING', (1,0), (-1, -1), 10),
+        ('RIGHTPADDING', (1,1), (-1, -1), 10),
         ('LINEABOVE', (0, 0), (-1, 0), 2, colors.black),
         ('LINEBELOW', (0, -1), (-1, -1), 2, colors.black),
         ('LINEBELOW', (0, 0), (-1, 0), 0.5, colors.gray),
@@ -98,14 +96,16 @@ def make_report(path, data_report: ClinicalAnalysis):
     label_sub1_right = ["Test Date",
                         "Test Label",
                         "Session Type",
-                        "Cue"
+                        "Cue",
                         "Sensor Calibration date", ""]
 
     sub3_title = "3. Limb Length"
     label_sub3_column = ["Femur", "Tibia", "Foot", "Pelvis"]
 
     sub2_title = "2. Symmetry Analysis"
-    label_sub2_column = ["Mean", "Std", "Symmetry"]
+    label_sub2_column = ["Paretic\nMean", "Paretic\nStd",
+                         "Non-paretic\nMean", "Non-paretic\nStd",
+                         "Symmetry"]
     label_sub2_row = [
         "GRF max [N]",
         "GRF Impulse",
@@ -176,7 +176,7 @@ def make_report(path, data_report: ClinicalAnalysis):
                  ["Gait Speed (Distance)"] + gait_speed_distance]
     table_sub2 = Table(text_sub2,
                        style=style_sub2_table,
-                       colWidths=(160, 95, 95, 95),
+                       colWidths=(130, 65, 65, 65, 65, 65),
                        rowHeights=30)
 
     text_sub3 = limb_length
