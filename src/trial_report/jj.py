@@ -47,7 +47,7 @@ def gait_phase_pre_processing(
         get_gait_event_time(gait_phase_nonparetic, data_name)
 
     mean_cycle = (paretic_ic[-1] - paretic_ic[0]) / (len(paretic_ic) - 1)
-
+    mean_cycle = mean_cycle / 100.0
     idx_np = 0
     time_diff = []
     for tic in paretic_ic:
@@ -179,22 +179,63 @@ def graph_both_cycle_data(collection_data_paretic, collection_data_nonparetic,
     )
 
     x_paretic = np.linspace(0, 100, x_num)
-    x_nonparetic = np.linspace(mean_diff_both*100, (1+mean_diff_both)*100,
+    x_paretic_sub = np.linspace(100, 200, x_num)
+    x_nonparetic = np.linspace(mean_diff_both, 100 + mean_diff_both,
                                x_num)
 
-    plt.plot(x_paretic, mean_paretic, 'k-')
-    plt.fill_between(x_paretic,
-                     mean_paretic - std_paretic,
-                     mean_paretic + std_paretic)
-    plt.plot(x_nonparetic, mean_nonparetic, 'r-')
-    plt.fill_between(x_nonparetic,
-                     mean_nonparetic - std_nonparetic,
-                     mean_nonparetic + std_nonparetic)
+    fig, axs = plt.subplots(2, 1, gridspec_kw={'height_ratios': [5, 1]})
+    fig.subplots_adjust(hspace=0.3)
 
-    plt.xlabel("Cycle Percentage")
-    plt.ylabel(data_label)
-    plt.title(title_graph)
-    plt.xlim(0, (1+mean_diff_both)*100)
+    axs[0].plot(x_paretic, mean_paretic, 'b-')
+    axs[0].fill_between(x_paretic,
+                        mean_paretic - std_paretic,
+                        mean_paretic + std_paretic,
+                        color=(0.1, 0.1, 0.9, 0.2),
+                        linewidth=0)
+    axs[0].plot(x_nonparetic, mean_nonparetic, 'r-')
+    axs[0].fill_between(x_nonparetic,
+                        mean_nonparetic - std_nonparetic,
+                        mean_nonparetic + std_nonparetic,
+                        color=(0.9,0.1,0.1,0.2),
+                        linewidth=0)
+
+    axs[0].set_ylabel(data_label)
+    axs[0].set_title(title_graph)
+
+    axs[1].axis('off')
+    axs[1].barh(
+        np.arange(2),
+        [mean_diff_both + mean_diff_nonparetic + std_diff_nonparetic,
+         mean_diff_paretic + std_diff_paretic],
+        color=[[0.9, 0.1, 0.1, 0.2], [0.1, 0.1, 0.9, 0.2]]
+    )
+    axs[1].barh(
+        np.arange(2),
+        [mean_diff_both + mean_diff_nonparetic - std_diff_nonparetic,
+         mean_diff_paretic - std_diff_paretic],
+        color=['w', 'w'],
+    )
+    axs[1].barh(np.arange(2), [100, 100],
+                left=[mean_diff_both, 0],
+                color=[[0, 0, 0, 0], [0, 0, 0, 0]],
+                edgecolor=['k', 'k'])
+    axs[1].barh(np.arange(1),
+                2 * std_diff_both,
+                left=mean_diff_both - std_diff_both,
+                color=[0.2, 0.2, 0.2, 0.2]
+                )
+
+    axs[1].plot([mean_diff_paretic, mean_diff_paretic], [0.6, 1.38], 'b-')
+    axs[1].plot([mean_diff_nonparetic + mean_diff_both,
+                 mean_diff_nonparetic + mean_diff_both],
+                [-0.4, 0.37], 'r-')
+
+    xlim_upper = max(mean_diff_nonparetic + std_diff_nonparetic + 1,
+                     101 + mean_diff_both)
+
+    axs[0].set_xlim(0, xlim_upper)
+    axs[1].set_xlim(0, xlim_upper)
+
     plt.show()
 
 
