@@ -3,12 +3,167 @@ import os
 import glob
 import pandas as pd
 import numpy as np
+import csv
 import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 
 from utils import DataProcess
 
+
+#############################################################################
+#############################################################################
+# BY JJ
+#############################################################################
+def get_initial_contact_time(gait_phase:pd.DataFrame, data_name="value"):
+    if 'time' not in gait_phase.columns:
+        print("Time data missing")
+        return -1
+    if data_name not in gait_phase.columns:
+        print("Value data missing")
+        return -1
+
+    time_initial_contact = gait_phase[gait_phase[data_name] == 1]["time"]
+
+    return time_initial_contact.tolist()
+
+
+def get_foot_off_time(gait_phase:pd.DataFrame, data_name="value"):
+    if 'time' not in gait_phase.columns:
+        print("Time data missing")
+        return -1
+    if data_name not in gait_phase.columns:
+        print("Value data missing")
+        return -1
+
+    time_foot_off = gait_phase[gait_phase[data_name] == 2]["time"]
+
+    return time_foot_off.tolist()
+
+
+def get_gait_event_time(gait_phase:pd.DataFrame, data_name="value"):
+    time_initial_contact = get_initial_contact_time(gait_phase, data_name)
+    time_foot_off = get_foot_off_time(gait_phase, data_name)
+
+    return time_initial_contact, time_foot_off
+
+
+def gait_phase_pre_processing(
+        gait_phase_paretic:pd.DataFrame,
+        gait_phase_nonparetic:pd.DataFrame, data_name="value"):
+    paretic_ic, paretic_fo = \
+        get_gait_event_time(gait_phase_paretic, data_name)
+    nonparetic_ic, nonparetic_fo = \
+        get_gait_event_time(gait_phase_nonparetic, data_name)
+    
+    mean_cycle = (paretic_ic[-1] - paretic_ic[0]) / (len(paretic_ic) - 1)
+
+    idx_np = 0
+    time_diff = []
+    for tic in paretic_ic:
+        idx_np += DataProcess.search_index(nonparetic_ic[idx_np:], tic)
+        time_diff.append(nonparetic_ic[idx_np] - tic)
+
+    time_diff = np.array(time_diff)
+    mean_diff = np.mean(time_diff) / mean_cycle
+    std_diff = np.std(time_diff) / mean_cycle
+
+    if paretic_ic[0] > paretic_fo[0]:
+        paretic_fo = paretic_fo[1:]
+    if paretic_ic[-1] > paretic_fo[-1]:
+        paretic_ic = paretic_ic[:-1]
+
+    time_diff = []
+    for tic, tfo in zip(paretic_ic, paretic_fo):
+        time_diff.append(tfo-tic)
+    time_diff = np.array(time_diff)
+    mean_cycle_time_paretic = np.mean(time_diff) / mean_cycle
+    std_cycle_time_paretic = np.std(time_diff) / mean_cycle
+
+    if nonparetic_ic[0] > nonparetic_fo[0]:
+        nonparetic_fo = nonparetic_fo[1:]
+    if nonparetic_ic[-1] > nonparetic_fo[-1]:
+        nonparetic_ic = nonparetic_ic[:-1]
+
+    time_diff = []
+    for tic, tfo in zip(nonparetic_ic, nonparetic_fo):
+        time_diff.append(tfo - tic)
+    time_diff = np.array(time_diff)
+    mean_cycle_time_nonparetic = np.mean(time_diff) / mean_cycle
+    std_cycle_time_nonparetic = np.std(time_diff) / mean_cycle
+
+    return [mean_diff, std_diff,
+            mean_cycle_time_paretic, std_cycle_time_paretic,
+            mean_cycle_time_nonparetic, std_cycle_time_nonparetic]
+
+
+def divider_data_by_gait_phase_df(data_df, gait_phase_df, data_name="value"):
+    divided_array = []
+    time_initial_contact = get_initial_contact_time(gait_phase_df, data_name)
+    time_initial_contact.append(data_df["time"].iloc[-1])
+
+    for i in range(len(time_initial_contact) - 1):
+        divided_df_current = \
+            data_df[
+                (data_df["time"] >= time_initial_contact[i]) &
+                (data_df["time"] < time_initial_contact[i+1])
+            ]
+        divided_array.append(divided_df_current.to_numpy())
+
+    return divided_array
+
+
+def graph_averaged_data(collection_data, title_graph, data_label, x_num=101):
+    mean, std = DataProcess.average_cropped_time_series(
+        collection_data, x_num
+    )
+    x = np.linspace(0, 100, x_num)
+    plt.plot(x, mean, 'k-')
+    plt.fill_between(x, mean - std, mean + std)
+    plt.xlabel("Cycle Percentage")
+    plt.xlim(0, 100)
+    plt.ylabel(data_label)
+    plt.title(title_graph)
+    plt.show()
+
+
+def graph_both_cycle_data(collection_data_paretic, collection_data_nonparetic,
+                          data_gait_paretic, data_gait_nonparetic,
+                          data_gait_label="value",
+                          title_graph=None, data_label=None, x_num=101):
+    [mean_diff_both, std_diff_both,
+     mean_diff_paretic, std_diff_paretic,
+     mean_diff_nonparetic, std_diff_nonparetic] = gait_phase_pre_processing(
+        data_gait_paretic, data_gait_nonparetic, data_gait_label)
+
+    mean_paretic, std_paretic = DataProcess.average_cropped_time_series(
+        collection_data_paretic, x_num
+    )
+    mean_nonparetic, std_nonparetic = DataProcess.average_cropped_time_series(
+        collection_data_nonparetic, x_num
+    )
+
+    x_paretic = np.linspace(0, 100, x_num)
+    x_nonparetic = np.linspace(mean_diff_both*100, (1+mean_diff_both)*100,
+                               x_num)
+
+    plt.plot(x_paretic, mean_paretic, 'k-')
+    plt.fill_between(x_paretic,
+                     mean_paretic - std_paretic,
+                     mean_paretic + std_paretic)
+    plt.plot(x_nonparetic, mean_nonparetic, 'r-')
+    plt.fill_between(x_nonparetic,
+                     mean_nonparetic - std_nonparetic,
+                     mean_nonparetic + std_nonparetic)
+
+    plt.xlabel("Cycle Percentage")
+    plt.ylabel(data_label)
+    plt.title(title_graph)
+    plt.xlim(0, (1+mean_diff_both)*100)
+    plt.show()
+
+#############################################################################
+#############################################################################
 
 # Create Directory
 def create_folder(directory):
@@ -1275,6 +1430,48 @@ class ClinicalIndexMH:
         fig6.savefig(cycle_report_path + 'GRF_impulse.png')
 
 
+def df_for_raw_GRF_make_plot(
+        session_name: str, base_path: str,
+        raw_data_path: str, paretic_side: str
+        ):
+    # GRF raw data
+    raw_report_path = base_path + raw_data_path + session_name + "/"
+    raw_left_path_list, raw_left_name_list =\
+        folder_path_name(
+            raw_report_path,
+            option='start',
+            char='RAW_GRF_LEFT',
+            T_F=1
+            )
+    raw_right_path_list, raw_right_name_list =\
+        folder_path_name(
+            raw_report_path,
+            option='start',
+            char='RAW_GRF_RIGHT',
+            T_F=1
+            )
+
+    if paretic_side == 'L':
+        paretic_raw_data_path = raw_left_path_list[0]
+        nonparetic_raw_data_path = raw_right_path_list[0]
+    elif paretic_side == 'R':
+        paretic_raw_data_path = raw_right_path_list[0]
+        nonparetic_raw_data_path = raw_left_path_list[0]
+
+    df_raw_paretic = pd.read_csv(
+        paretic_raw_data_path,
+        header=0,
+        delimiter=",")
+    df_raw_paretic.columns = ["time", "grf"]
+    df_raw_nonparetic = pd.read_csv(
+        nonparetic_raw_data_path,
+        header=0,
+        delimiter=",")
+    df_raw_nonparetic.columns = ["time", "grf"]
+
+    return df_raw_paretic, df_raw_nonparetic
+
+
 def gait_start_time(df, time_column_name: str, column_name: str):
     start_time_array = np.array([])
     # swing: 0, stance: 1
@@ -1618,16 +1815,21 @@ def raw_data_save_test():
         "10MWT_BARE_CueOFF_2"
         ]
 
+    base_path =\
+        'D:/OneDrive - SNU/범부처-DESKTOP-2JL44HH/C_임상_2023/2023-08-16/'
+    cycle_data_path = 'report_CYCLE/'
+    raw_data_path = 'report_RAW/'
+    calib_folder_name = 'CHAR_230815_280_LP'
+    GRF_model_name = 'GRF_230815/LSTM_GRF.pt'
+    # 장비 무게 포함
+    body_weight = 85.1
+    paretic_side = 'L'
+    shoe_size = '280'
+
     for bag_ind in np.arange(len(bag_list)):
 
         bag_name = bag_list[bag_ind]
         session_name = session_list[bag_ind]
-        calib_folder_name = 'CHAR_230815_280_LP'
-        GRF_model_name = 'GRF_230815/LSTM_GRF.pt'
-        # 장비 무게 포함
-        body_weight = 85.1
-        paretic_side = 'L'
-        shoe_size = '280'
 
         Rawdata_saving(
             bag_name=bag_name,
@@ -1639,33 +1841,53 @@ def raw_data_save_test():
             body_weight=body_weight
             )
 
+        Gaitcycledata_saving(
+            base_path=base_path,
+            cycle_data_path=cycle_data_path,
+            bag_name=bag_name,
+            session_name=session_name,
+            calib_folder_name=calib_folder_name,
+            GRF_model_name=GRF_model_name,
+            shoe_size=shoe_size,
+            paretic_side=paretic_side,
+            body_weight=body_weight
+            )
+
 
 def make_plot_test():
+    # bag_list = [
+    #     "log_2023-08-16-15-40-08",
+    #     "log_2023-08-16-15-41-19",
+    #     "log_2023-08-16-15-43-10",
+    #     "log_2023-08-16-15-44-06",
+    #     "log_2023-08-16-15-46-14",
+    #     "log_2023-08-16-15-51-39",
+    #     "log_2023-08-16-15-56-59",
+    #     "log_2023-08-16-16-02-17",
+    #     "log_2023-08-16-16-23-57",
+    #     "log_2023-08-16-16-27-28",
+    #     "log_2023-08-16-16-29-04"
+    #     ]
+    # session_list = [
+    #     "10MWT_OFF_CueOFF",
+    #     "10MWT_ON_CueOFF",
+    #     "10MWT_ON_CueON_1",
+    #     "10MWT_ON_CueON_2",
+    #     "10MWT_ON_CueON_3",
+    #     "2MWT_OFF_CueOFF_89.4m",
+    #     "2MWT_ON_CueOFF_88.2m",
+    #     "2MWT_ON_CueON_64.2m",
+    #     "2MWT_BARE_CueOFF_90m",
+    #     "10MWT_BARE_CueOFF_1",
+    #     "10MWT_BARE_CueOFF_2"
+    #     ]
     bag_list = [
-        "log_2023-08-16-15-40-08",
-        "log_2023-08-16-15-41-19",
-        "log_2023-08-16-15-43-10",
-        "log_2023-08-16-15-44-06",
-        "log_2023-08-16-15-46-14",
-        "log_2023-08-16-15-51-39",
         "log_2023-08-16-15-56-59",
-        "log_2023-08-16-16-02-17",
-        "log_2023-08-16-16-23-57",
-        "log_2023-08-16-16-27-28",
-        "log_2023-08-16-16-29-04"
+        "log_2023-08-16-16-02-17"
         ]
     session_list = [
-        "10MWT_OFF_CueOFF",
-        "10MWT_ON_CueOFF",
-        "10MWT_ON_CueON_1",
-        "10MWT_ON_CueON_2",
-        "10MWT_ON_CueON_3",
-        "2MWT_OFF_CueOFF_89.4m",
         "2MWT_ON_CueOFF_88.2m",
-        "2MWT_ON_CueON_64.2m",
-        "2MWT_BARE_CueOFF_90m",
-        "10MWT_BARE_CueOFF_1",
-        "10MWT_BARE_CueOFF_2"
+        "2MWT_ON_CueON_64.2m"
         ]
 
     base_path =\
@@ -1683,18 +1905,6 @@ def make_plot_test():
 
         bag_name = bag_list[bag_ind]
         session_name = session_list[bag_ind]
-        
-        # Gaitcycledata_saving(
-        #     base_path=base_path,
-        #     cycle_data_path=cycle_data_path,
-        #     bag_name=bag_name,
-        #     session_name=session_name,
-        #     calib_folder_name=calib_folder_name,
-        #     GRF_model_name=GRF_model_name,
-        #     shoe_size=shoe_size,
-        #     paretic_side=paretic_side,
-        #     body_weight=body_weight
-        #     )
 
         ClinicalIndexMH.make_plot(
             session_name=session_name,
@@ -1707,5 +1917,112 @@ def make_plot_test():
             std_alpha=0.35
             )
 
+
+def main():
+    bag_list = [
+        "log_2023-08-16-15-56-59",
+        "log_2023-08-16-16-02-17"
+        ]
+    session_list = [
+        "2MWT_ON_CueOFF_88.2m",
+        "2MWT_ON_CueON_64.2m"
+        ]
+
+    base_path =\
+        'D:/OneDrive - SNU/범부처-DESKTOP-2JL44HH/C_임상_2023/2023-08-16/'
+    cycle_data_path = 'report_CYCLE/'
+    raw_data_path = 'report_RAW/'
+    calib_folder_name = 'CHAR_230815_280_LP'
+    GRF_model_name = 'GRF_230815/LSTM_GRF.pt'
+    # 장비 무게 포함
+    body_weight = 85.1
+    paretic_side = 'L'
+    shoe_size = '280'
+
+    for bag_ind in np.arange(len(bag_list)):
+
+        bag_name = bag_list[bag_ind]
+        session_name = session_list[bag_ind]
+
+        # Read bag file
+        path = base_path + 'bag/' + bag_name + '.bag'
+        # bag_name[4:-9] = 2023-08-16
+        save_folder = base_path + raw_data_path + session_name + '/'
+        create_folder(save_folder)
+
+        bag = bagreader(path)
+        start_time = bag.start_time
+
+        # To filter specific topics with interests
+        TOPIC_MH = (
+            "/afo_sensor/soleSensor_left",
+            "/afo_sensor/soleSensor_right",
+            "/afo_detector/gait_paretic",
+            "/afo_detector/gait_nonparetic"
+        )
+
+        # Definition of Clinical Indices
+        left_sole_path = ""
+        right_sole_path = ""
+        paretic_gait_path = ""
+        nonparetic_gait_path = ""
+
+        # calib_model_path example = ../../model/CHAR_230815_280_LP/
+        # GRF_model_path example = ../../model/GRF_230815/LSTM_GRF.pt
+        calib_model_path = '../../model/' + calib_folder_name + '/'
+        GRF_model_path = '../../model/' + GRF_model_name
+        # 85.1
+        BW = body_weight
+        # 'L'
+        paretic_side = paretic_side
+        # '280'
+        size = shoe_size
+
+        # Read Topics and calculate clinical index
+        for topic in bag.topics:
+            msg_topic = bag.message_by_topic(topic)
+
+            # Use own module and methods
+            if topic == TOPIC_MH[0]:
+                left_sole_path = msg_topic
+            elif topic == TOPIC_MH[1]:
+                right_sole_path = msg_topic
+            elif topic == TOPIC_MH[2]:
+                paretic_gait_path = msg_topic
+            elif topic == TOPIC_MH[3]:
+                nonparetic_gait_path = msg_topic
+        
+        # gait phase df read
+        gait_phase_paretic = pd.read_csv(paretic_gait_path, header=0)
+        gait_phase_nonparetic = pd.read_csv(nonparetic_gait_path, header=0)
+        # Time initialization with respect to start time
+        gait_phase_paretic = gait_phase_paretic.astype(float)
+        gait_phase_nonparetic = gait_phase_nonparetic.astype(float)
+        gait_phase_paretic.Time -= start_time
+        gait_phase_nonparetic.Time -= start_time
+        # column change
+        gait_phase_paretic.columns = ["time", "grf"]
+        gait_phase_nonparetic.columns = ["time", "grf"]
+        
+        # For raw GRF plot
+        df_paretic_raw_data, df_nonparetic_raw_data =\
+            df_for_raw_GRF_make_plot(
+                session_name=session_name, base_path=base_path,
+                raw_data_path=raw_data_path, paretic_side=paretic_side
+                )
+        collection_paretic_raw_grf = \
+            divider_data_by_gait_phase_df(df_paretic_raw_data,
+                                            gait_phase_paretic, "grf")
+        collection_nonparetic_raw_grf = \
+            divider_data_by_gait_phase_df(df_nonparetic_raw_data,
+                                            gait_phase_nonparetic, "grf")
+
+        graph_both_cycle_data(collection_paretic_raw_grf,
+                              collection_nonparetic_raw_grf,
+                              gait_phase_paretic, gait_phase_nonparetic,
+                              data_gait_label="grf",
+                              x_num=101)
+
+
 if __name__ == "__main__":
-    make_plot_test()
+    main()
