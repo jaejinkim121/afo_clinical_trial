@@ -52,8 +52,8 @@ class DataProcess:
     def average_cropped_time_series(collection_data, x_num=101):
         crop_time_series = []
         for data in collection_data:
-            y_cropped = DataProcess.normalize_time_series(data[:,0],
-                                                          data[:,1],
+            y_cropped = DataProcess.normalize_time_series(data[:, 0],
+                                                          data[:, 1],
                                                           x_num=x_num)
             crop_time_series.append(y_cropped)
         crop_time_series = np.array(crop_time_series)
