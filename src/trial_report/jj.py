@@ -5,11 +5,11 @@ from utils import DataProcess
 import matplotlib.pyplot as plt
 
 
-def get_initial_contact_time(gait_phase:pd.DataFrame, data_name="value"):
+def get_initial_contact_time(gait_phase: pd.DataFrame, data_name="value"):
     if 'time' not in gait_phase.columns:
         print("Time data missing")
         return -1
-    if 'value' not in gait_phase.columns:
+    if data_name not in gait_phase.columns:
         print("Value data missing")
         return -1
 
@@ -18,11 +18,11 @@ def get_initial_contact_time(gait_phase:pd.DataFrame, data_name="value"):
     return time_initial_contact.tolist()
 
 
-def get_foot_off_time(gait_phase:pd.DataFrame, data_name="value"):
+def get_foot_off_time(gait_phase: pd.DataFrame, data_name="value"):
     if 'time' not in gait_phase.columns:
         print("Time data missing")
         return -1
-    if 'value' not in gait_phase.columns:
+    if data_name not in gait_phase.columns:
         print("Value data missing")
         return -1
 
@@ -31,7 +31,7 @@ def get_foot_off_time(gait_phase:pd.DataFrame, data_name="value"):
     return time_foot_off.tolist()
 
 
-def get_gait_event_time(gait_phase:pd.DataFrame, data_name="value"):
+def get_gait_event_time(gait_phase: pd.DataFrame, data_name="value"):
     time_initial_contact = get_initial_contact_time(gait_phase, data_name)
     time_foot_off = get_foot_off_time(gait_phase, data_name)
 
@@ -39,8 +39,8 @@ def get_gait_event_time(gait_phase:pd.DataFrame, data_name="value"):
 
 
 def gait_phase_pre_processing(
-        gait_phase_paretic:pd.DataFrame,
-        gait_phase_nonparetic:pd.DataFrame, data_name="value"):
+        gait_phase_paretic: pd.DataFrame,
+        gait_phase_nonparetic: pd.DataFrame, data_name="value"):
     paretic_ic, paretic_fo = \
         get_gait_event_time(gait_phase_paretic, data_name)
     nonparetic_ic, nonparetic_fo = \
@@ -87,7 +87,8 @@ def gait_phase_pre_processing(
             mean_cycle_time_nonparetic, std_cycle_time_nonparetic]
 
 
-def divider_data_by_gait_phase_path(data_path, gait_phase_path, data_name="value"):
+def divider_data_by_gait_phase_path(
+        data_path, gait_phase_path, data_name="value"):
     data = pd.DataFrame()
     gait_phase = pd.DataFrame()
 
@@ -135,7 +136,7 @@ def divider_data_by_gait_phase_path(data_path, gait_phase_path, data_name="value
 def divider_data_by_gait_phase_df(data_df, gait_phase_df, data_name="value"):
     divided_array = []
     time_initial_contact = get_initial_contact_time(gait_phase_df, data_name)
-    time_initial_contact.append(data_df["time"].iloc(-1))
+    time_initial_contact.append(data_df["time"].iloc[-1])
 
     for i in range(len(time_initial_contact) - 1):
         divided_df_current = \
@@ -186,17 +187,17 @@ def graph_both_cycle_data(collection_data_paretic, collection_data_nonparetic,
     fig, axs = plt.subplots(2, 1, gridspec_kw={'height_ratios': [5, 1]})
     fig.subplots_adjust(hspace=0.3)
 
-    axs[0].plot(x_paretic, mean_paretic, 'b-')
+    axs[0].plot(x_paretic, mean_paretic, 'r-')
     axs[0].fill_between(x_paretic,
                         mean_paretic - std_paretic,
                         mean_paretic + std_paretic,
-                        color=(0.1, 0.1, 0.9, 0.2),
+                        color=(0.9, 0.1, 0.1, 0.2),
                         linewidth=0)
-    axs[0].plot(x_nonparetic, mean_nonparetic, 'r-')
+    axs[0].plot(x_nonparetic, mean_nonparetic, 'b-')
     axs[0].fill_between(x_nonparetic,
                         mean_nonparetic - std_nonparetic,
                         mean_nonparetic + std_nonparetic,
-                        color=(0.9,0.1,0.1,0.2),
+                        color=(0.1, 0.1, 0.9, 0.2),
                         linewidth=0)
 
     axs[0].set_ylabel(data_label)
@@ -207,7 +208,7 @@ def graph_both_cycle_data(collection_data_paretic, collection_data_nonparetic,
         np.arange(2),
         [mean_diff_both + mean_diff_nonparetic + std_diff_nonparetic,
          mean_diff_paretic + std_diff_paretic],
-        color=[[0.9, 0.1, 0.1, 0.2], [0.1, 0.1, 0.9, 0.2]]
+        color=[[0.1, 0.1, 0.9, 0.2], [0.9, 0.1, 0.1, 0.2]]
     )
     axs[1].barh(
         np.arange(2),
@@ -225,10 +226,10 @@ def graph_both_cycle_data(collection_data_paretic, collection_data_nonparetic,
                 color=[0.2, 0.2, 0.2, 0.2]
                 )
 
-    axs[1].plot([mean_diff_paretic, mean_diff_paretic], [0.6, 1.38], 'b-')
+    axs[1].plot([mean_diff_paretic, mean_diff_paretic], [0.6, 1.38], 'r-')
     axs[1].plot([mean_diff_nonparetic + mean_diff_both,
                  mean_diff_nonparetic + mean_diff_both],
-                [-0.4, 0.37], 'r-')
+                [-0.4, 0.37], 'b-')
 
     xlim_upper = max(mean_diff_nonparetic + std_diff_nonparetic + 1,
                      101 + mean_diff_both)
