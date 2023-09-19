@@ -3,6 +3,24 @@ import copy
 import matplotlib.pyplot as plt
 import pandas as pd
 import csv
+from bagpy import bagreader
+
+
+def get_ignored_cycle(array_df, cycle_num):
+    if cycle_num[1] is None:
+        array_df = array_df[cycle_num[0]:]
+    else:
+        array_df = array_df[cycle_num[0]:-cycle_num[1]]
+    return array_df
+
+
+def save_each_cycle_data(collection_data, data_label, title_label, save_path):
+    ...
+
+
+def save_stance_time_plot():
+    ...
+
 
 class DataProcess:
     @staticmethod
@@ -77,48 +95,35 @@ class DataProcess:
         return -1
 
     @staticmethod
-    def get_initial_contact_time(gait_phase: pd.DataFrame, data_name="value"):
-        if 'time' not in gait_phase.columns:
-            print("Time data missing")
-            return -1
-        if data_name not in gait_phase.columns:
-            print("Value data missing")
-            return -1
-
-        time_initial_contact = gait_phase[gait_phase[data_name] == 1]["time"]
-
+    def get_initial_contact_time(gait_phase: pd.DataFrame):
+        time_initial_contact = \
+            gait_phase[gait_phase.iloc[:, 1] == 1].iloc[:, 0]
         return time_initial_contact.tolist()
 
     @staticmethod
-    def get_foot_off_time(gait_phase: pd.DataFrame, data_name="value"):
-        if 'time' not in gait_phase.columns:
-            print("Time data missing")
-            return -1
-        if data_name not in gait_phase.columns:
-            print("Value data missing")
-            return -1
-
-        time_foot_off = gait_phase[gait_phase[data_name] == 2]["time"]
+    def get_foot_off_time(gait_phase: pd.DataFrame):
+        time_foot_off = \
+            gait_phase[gait_phase.iloc[:, 1] == 2].iloc[:, 0]
 
         return time_foot_off.tolist()
 
     @staticmethod
-    def get_gait_event_time(gait_phase: pd.DataFrame, data_name="value"):
+    def get_gait_event_time(gait_phase: pd.DataFrame):
         time_initial_contact = \
-            DataProcess.get_initial_contact_time(gait_phase, data_name)
+            DataProcess.get_initial_contact_time(gait_phase)
         time_foot_off = \
-            DataProcess.get_foot_off_time(gait_phase, data_name)
+            DataProcess.get_foot_off_time(gait_phase)
 
         return time_initial_contact, time_foot_off
 
     @staticmethod
     def gait_phase_pre_processing(
             gait_phase_paretic: pd.DataFrame,
-            gait_phase_nonparetic: pd.DataFrame, data_name="value"):
+            gait_phase_nonparetic: pd.DataFrame):
         paretic_ic, paretic_fo = \
-            DataProcess.get_gait_event_time(gait_phase_paretic, data_name)
+            DataProcess.get_gait_event_time(gait_phase_paretic)
         nonparetic_ic, nonparetic_fo = \
-            DataProcess.get_gait_event_time(gait_phase_nonparetic, data_name)
+            DataProcess.get_gait_event_time(gait_phase_nonparetic)
 
         mean_cycle = (paretic_ic[-1] - paretic_ic[0]) / (len(paretic_ic) - 1)
         mean_cycle = mean_cycle / 100.0
@@ -170,61 +175,15 @@ class DataProcess:
         with open(data_path) as csvfile:
             csv_reader = csv.reader(csvfile)
             for csv_row in csv_reader:
-                if csv_row[0] == "time":
+                try:
+                    time_data.append(float(csv_row[0]))
+                    value_data.append(float(csv_row[1]))
+                except ValueError:
                     continue
-                value_data.append(float(csv_row[1]))
-                time_data.append(float(csv_row[0]))
 
         data["time"] = time_data
         data["value"] = value_data
         return data
-
-    @staticmethod
-    def divider_data_by_gait_phase_path(
-            data_path, gait_phase_path, data_name="value"):
-        data = pd.DataFrame()
-        gait_phase = pd.DataFrame()
-
-        value_data = []
-        time_data = []
-        value_gait_phase = []
-        time_gait_phase = []
-
-        with open(data_path) as csvfile:
-            csv_reader = csv.reader(csvfile)
-            for csv_row in csv_reader:
-                if csv_row[0] == "time":
-                    continue
-                value_data.append(float(csv_row[1]))
-                time_data.append(float(csv_row[0]))
-
-        with open(gait_phase_path) as csvfile:
-            csv_reader = csv.reader(csvfile)
-            for csv_row in csv_reader:
-                if csv_row[0] == "time":
-                    continue
-                value_gait_phase.append(float(csv_row[1]))
-                time_gait_phase.append(float(csv_row[0]))
-
-        data["time"] = time_data
-        data[data_name] = value_data
-        gait_phase["time"] = time_gait_phase
-        gait_phase[data_name] = value_gait_phase
-
-        divided_array = []
-        time_initial_contact = \
-            DataProcess.get_initial_contact_time(gait_phase, data_name)
-        time_initial_contact.append(time_data[-1])
-
-        for i in range(len(time_initial_contact) - 1):
-            divided_df_current = \
-                data[
-                    (data["time"] >= time_initial_contact[i]) &
-                    (data["time"] < time_initial_contact[i + 1])
-                    ]
-            divided_array.append(divided_df_current.to_numpy())
-
-        return divided_array, gait_phase
 
     @staticmethod
     def divider_data_by_gait_phase_df(data_df, gait_phase_df, ignore_cycle):
@@ -241,10 +200,7 @@ class DataProcess:
                     ]
             divided_array.append(divided_df_current.to_numpy())
 
-        if ignore_cycle[1] is None:
-            divided_array = divided_array[ignore_cycle[0]:]
-        else:
-            divided_array = divided_array[ignore_cycle[0]:ignore_cycle[1]]
+        divided_array = get_ignored_cycle(divided_array, ignore_cycle)
 
         return divided_array
 
@@ -267,13 +223,12 @@ class DataProcess:
     def graph_both_cycle_data(collection_data_paretic,
                               collection_data_nonparetic,
                               data_gait_paretic, data_gait_nonparetic,
-                              data_gait_label="value",
                               title_graph=None, data_label=None, x_num=101):
         [mean_diff_both, std_diff_both,
          mean_diff_paretic, std_diff_paretic,
          mean_diff_nonparetic,
          std_diff_nonparetic] = DataProcess.gait_phase_pre_processing(
-            data_gait_paretic, data_gait_nonparetic, data_gait_label)
+            data_gait_paretic, data_gait_nonparetic)
 
         mean_paretic, std_paretic = DataProcess.average_cropped_time_series(
             collection_data_paretic, x_num
@@ -343,13 +298,15 @@ class DataProcess:
         plt.show()
 
     @staticmethod
-    def data_process_toe_clearance(
+    def data_process(
             paretic_data,
-            paretic_gait_path,
             non_paretic_data,
+            paretic_gait_path,
             non_paretic_gait_path,
-            data_name="data",
-            ignore_cycle=(None, None)
+            data_label="data",
+            title_label="data",
+            ignore_cycle=(None, None),
+            start_time=0.0
     ):
         if type(paretic_data) != pd.DataFrame:
             df_paretic = \
@@ -366,26 +323,40 @@ class DataProcess:
         df_paretic_gait = DataProcess.read_data_file_by_path(
             paretic_gait_path)
         df_non_paretic_gait = DataProcess.read_data_file_by_path(
-            non_paretic_gait_path
-        )
+            non_paretic_gait_path)
 
-        collection_paretic, gait_phase_paretic = \
+        df_paretic_gait.iloc[:, 0] -= start_time
+        df_non_paretic_gait.iloc[:, 0] -= start_time
+
+        collection_paretic = \
             DataProcess.divider_data_by_gait_phase_df(
                 df_paretic, df_paretic_gait,
                 ignore_cycle
             )
-        collection_non_paretic, gait_phase_non_paretic = \
-            DataProcess.divider_data_by_gait_phase_path(
+
+        collection_non_paretic = \
+            DataProcess.divider_data_by_gait_phase_df(
                 df_non_paretic,
                 df_non_paretic_gait,
                 ignore_cycle
             )
 
+        save_each_cycle_data(collection_paretic,
+                             data_label="a",
+                             title_label="a",
+                             save_path="a")
+
+        df_paretic_gait = \
+            get_ignored_cycle(df_paretic_gait, ignore_cycle)
+        df_non_paretic_gait = \
+            get_ignored_cycle(df_non_paretic_gait, ignore_cycle)
+
         DataProcess.graph_both_cycle_data(
             collection_paretic,
             collection_non_paretic,
-            gait_phase_paretic, gait_phase_non_paretic,
-            x_num=101)
+            df_paretic_gait, df_non_paretic_gait,
+            x_num=101,
+            data_label=data_label)
 
         # Statistics Processing
         max_paretic = []
@@ -393,11 +364,11 @@ class DataProcess:
 
         for da in collection_paretic:
             max_paretic.append(
-                np.mean(da[:, 1])
+                np.max(da[:, 1])
             )
         for da in collection_non_paretic:
             max_non_paretic.append(
-                np.mean(da[:, 1])
+                np.max(da[:, 1])
             )
 
         np_ptc = np.array(max_paretic)
@@ -413,3 +384,24 @@ class DataProcess:
                 non_paretic_mean, non_paretic_stdev,
                 symmetry
                 ]
+
+
+def main():
+    bag = bagreader("../../bag.bag")
+    path_paretic = "../../grf_l.csv"
+    path_nonparetic = "../../grf_r.csv"
+    path_gait_paretic = "../../gait_p.csv"
+    path_gait_nonparetic = "../../gait_np.csv"
+
+    DataProcess.data_process(
+        path_paretic,
+        path_nonparetic,
+        path_gait_paretic,
+        path_gait_nonparetic,
+        ignore_cycle=(None, 3),
+        start_time=bag.start_time
+    )
+
+
+if __name__ == "__main__":
+    main()
