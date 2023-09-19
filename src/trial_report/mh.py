@@ -9,7 +9,7 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 
 from utils import DataProcess
-
+from jj import *
 
 #############################################################################
 #############################################################################
@@ -55,9 +55,9 @@ def gait_phase_pre_processing(
         get_gait_event_time(gait_phase_paretic, data_name)
     nonparetic_ic, nonparetic_fo = \
         get_gait_event_time(gait_phase_nonparetic, data_name)
-    
-    mean_cycle = (paretic_ic[-1] - paretic_ic[0]) / (len(paretic_ic) - 1)
 
+    mean_cycle = (paretic_ic[-1] - paretic_ic[0]) / (len(paretic_ic) - 1)
+    mean_cycle = mean_cycle / 100.0
     idx_np = 0
     time_diff = []
     for tic in paretic_ic:
@@ -144,26 +144,170 @@ def graph_both_cycle_data(collection_data_paretic, collection_data_nonparetic,
     )
 
     x_paretic = np.linspace(0, 100, x_num)
-    x_nonparetic = np.linspace(mean_diff_both*100, (1+mean_diff_both)*100,
+    x_paretic_sub = np.linspace(100, 200, x_num)
+    x_nonparetic = np.linspace(mean_diff_both, 100 + mean_diff_both,
                                x_num)
 
-    plt.plot(x_paretic, mean_paretic, 'k-')
-    plt.fill_between(x_paretic,
-                     mean_paretic - std_paretic,
-                     mean_paretic + std_paretic)
-    plt.plot(x_nonparetic, mean_nonparetic, 'r-')
-    plt.fill_between(x_nonparetic,
-                     mean_nonparetic - std_nonparetic,
-                     mean_nonparetic + std_nonparetic)
+    fig, axs = plt.subplots(2, 1, gridspec_kw={'height_ratios': [5, 1]})
+    fig.subplots_adjust(hspace=0.3)
 
-    plt.xlabel("Cycle Percentage")
-    plt.ylabel(data_label)
-    plt.title(title_graph)
-    plt.xlim(0, (1+mean_diff_both)*100)
+    axs[0].plot(x_paretic, mean_paretic, 'r-')
+    axs[0].fill_between(x_paretic,
+                        mean_paretic - std_paretic,
+                        mean_paretic + std_paretic,
+                        color=(0.9, 0.1, 0.1, 0.2),
+                        linewidth=0)
+    axs[0].plot(x_nonparetic, mean_nonparetic, 'b-')
+    axs[0].fill_between(x_nonparetic,
+                        mean_nonparetic - std_nonparetic,
+                        mean_nonparetic + std_nonparetic,
+                        color=(0.1, 0.1, 0.9, 0.2),
+                        linewidth=0)
+
+    axs[0].set_ylabel(data_label)
+    axs[0].set_title(title_graph)
+
+    axs[1].axis('off')
+    axs[1].barh(
+        np.arange(2),
+        [mean_diff_both + mean_diff_nonparetic + std_diff_nonparetic,
+         mean_diff_paretic + std_diff_paretic],
+        color=[[0.1, 0.1, 0.9, 0.2], [0.9, 0.1, 0.1, 0.2]]
+    )
+    axs[1].barh(
+        np.arange(2),
+        [mean_diff_both + mean_diff_nonparetic - std_diff_nonparetic,
+         mean_diff_paretic - std_diff_paretic],
+        color=['w', 'w'],
+    )
+    axs[1].barh(np.arange(2), [100, 100],
+                left=[mean_diff_both, 0],
+                color=[[0, 0, 0, 0], [0, 0, 0, 0]],
+                edgecolor=['k', 'k'])
+    axs[1].barh(np.arange(1),
+                2 * std_diff_both,
+                left=mean_diff_both - std_diff_both,
+                color=[0.2, 0.2, 0.2, 0.2]
+                )
+
+    axs[1].plot([mean_diff_paretic, mean_diff_paretic], [0.6, 1.38], 'r-')
+    axs[1].plot([mean_diff_nonparetic + mean_diff_both,
+                 mean_diff_nonparetic + mean_diff_both],
+                [-0.4, 0.37], 'b-')
+
+    xlim_upper = max(mean_diff_nonparetic + std_diff_nonparetic + 1,
+                     101 + mean_diff_both)
+
+    axs[0].set_xlim(0, xlim_upper)
+    axs[1].set_xlim(0, xlim_upper)
+
     plt.show()
 
 #############################################################################
 #############################################################################
+def df_for_raw_GRF_make_plot(
+        session_name: str, base_path: str,
+        raw_data_path: str, paretic_side: str
+        ):
+    # GRF raw data
+    raw_report_path = base_path + raw_data_path + session_name + "/"
+    raw_left_path_list, raw_left_name_list =\
+        folder_path_name(
+            raw_report_path,
+            option='start',
+            char='RAW_GRF_LEFT',
+            T_F=1
+            )
+    raw_right_path_list, raw_right_name_list =\
+        folder_path_name(
+            raw_report_path,
+            option='start',
+            char='RAW_GRF_RIGHT',
+            T_F=1
+            )
+
+    if paretic_side == 'L':
+        paretic_raw_data_path = raw_left_path_list[0]
+        nonparetic_raw_data_path = raw_right_path_list[0]
+    elif paretic_side == 'R':
+        paretic_raw_data_path = raw_right_path_list[0]
+        nonparetic_raw_data_path = raw_left_path_list[0]
+
+    df_raw_paretic = pd.read_csv(
+        paretic_raw_data_path,
+        header=0,
+        delimiter=",")
+    df_raw_paretic.columns = ["time", "grf"]
+    df_raw_nonparetic = pd.read_csv(
+        nonparetic_raw_data_path,
+        header=0,
+        delimiter=",")
+    df_raw_nonparetic.columns = ["time", "grf"]
+
+    return df_raw_paretic, df_raw_nonparetic
+
+
+def gait_start_time(df, time_column_name: str, column_name: str):
+    start_time_array = np.array([])
+    # swing: 0, stance: 1
+    phase_flag = 0
+    for idx in np.arange(len(df)):
+        if (df.loc[idx, column_name] != 0) & (phase_flag == 0):
+            start_time = df.loc[idx, time_column_name]
+            start_time_array = np.append(start_time_array, start_time)
+            phase_flag = 1
+        elif (df.loc[idx, column_name] == 0) & (phase_flag == 1):
+            phase_flag = 0
+        else:
+            pass
+
+    return start_time_array
+
+
+def gait_end_time(df, time_column_name: str, column_name: str):
+    end_time_array = np.array([])
+    # swing: 0, stance: 1
+    phase_flag = 0
+    for idx in np.arange(len(df)):
+        if (df.loc[idx, column_name] != 0) & (phase_flag == 0):
+            if idx == 0:
+                continue
+            end_time = df.loc[idx - 1, time_column_name]
+            end_time_array = np.append(end_time_array, end_time)
+            phase_flag = 1
+        elif (df.loc[idx, column_name] == 0) & (phase_flag == 1):
+            phase_flag = 0
+        else:
+            pass
+
+    # Dismiss the first end time
+    end_time_array = end_time_array[1:]
+
+    # Add the last end time
+    end_time_array = np.append(
+        end_time_array,
+        df.loc[len(df) - 1, time_column_name])
+
+    return end_time_array
+
+
+# Get stance time
+def get_stance_time(
+        gait_phase: pd.DataFrame, data_name="value"):
+    time_initial_contact, time_foot_off = \
+        get_gait_event_time(gait_phase, data_name)
+
+    if time_initial_contact[0] > time_foot_off[0]:
+        time_foot_off = time_foot_off[1:]
+    if time_initial_contact[-1] > time_foot_off[-1]:
+        time_initial_contact = time_initial_contact[:-1]
+
+    stance_time = []
+    for ic, fo in zip(time_initial_contact, time_foot_off):
+        stance_time.append(fo - ic)
+
+    return stance_time, time_initial_contact, time_foot_off
+
 
 # Create Directory
 def create_folder(directory):
@@ -300,44 +444,46 @@ class LSTM_GRF(nn.Module):
 
 # 후에 force output에 filtering하고 GRF 추정하도록 수정하기
 # GRF output이 음수가 나오지 않도록 재확인해보자
-class GRF_predictor:
+###
+# maker도 수정해야 함
+class GrfPredictor:
     def __init__(self, start_time: float,
-                 leftPath: str,
-                 rightPath: str,
-                 pareticPath: str,
-                 nonpareticPath: str,
-                 modelPathCalib: str,
-                 modelPathGRF: str,
+                 left_path: str,
+                 right_path: str,
+                 paretic_path: str,
+                 non_paretic_path: str,
+                 model_path_calibration: str,
+                 model_path_grf: str,
                  size: str,
                  paretic_side: str,
-                 BW: float):
+                 body_weight: float):
         '''
         Parameters
         ----------
         start_time : float
-        leftPath : str
+        left_path : str
             The example is
             '../../bag/log_2023-08-04-16-26-19/afo_sensor-soleSensor_left.csv'.
-        rightPath : str
+        right_path : str
             The example is
             '../../bag/log_2023-08-04-16-26-19/afo_sensor-soleSensor_right.csv'.
-        pareticPath : str
+        paretic_path : str
             The example is
             '../../bag/log_2023-08-04-16-26-19/afo_detector-gait_paretic.csv'.
-        nonpareticPath : str
+        non_paretic_path : str
             The example is
             '../../bag/log_2023-08-04-16-26-19/afo_detector-gait_nonparetic.csv'.
-        modelPathCalib : str
+        model_path_calibration : str
             The example is
             '../../model/CHAR_230815_280_LP/'.
-        modelPathGRF : str
+        model_path_grf : str
             The example is
             '../../model/GRF_230815/LSTM_GRF.pt'.
         size : str
             The example is '280'
         paretic_side : str
             The example is 'L'.
-        BW : float
+        body_weight : float
 
         Returns
         -------
@@ -346,21 +492,164 @@ class GRF_predictor:
         '''
 
         self.start_time = float(start_time)
-        self.pareticPath = pareticPath
-        self.nonpareticPath = nonpareticPath
+        self.paretic_path = paretic_path
+        self.non_paretic_path = non_paretic_path
         self.paretic_side = str(paretic_side)
-        self.BW = BW
-        self.leftPath = leftPath
-        self.rightPath = rightPath
-        self.modelPathCalib = modelPathCalib
-        self.modelPathGRF = modelPathGRF
+        self.body_weight = body_weight
+        self.left_path = left_path
+        self.right_path = right_path
+        self.model_path_calibration = model_path_calibration
+        self.model_path_grf = model_path_grf
         self.device = torch.device('cpu')
         self.size = str(size)
-        self.sensor_num = int(6)
-        self.calib_input_length = int(15)
-        self.GRF_input_length = int(25)
+        self.sensor_number = int(6)
+        self.calibration_input_length = int(15)
+        self.grf_input_length = int(25)
         # Read gait detection data
-        self.Gait_detection_data_read()
+        self.gait_data_read()
+
+    def gait_data_read(self):
+        # stance = 1, swing = 2
+        # stance time: 1 -> 2
+        paretic_data = pd.read_csv(self.paretic_path, header=0)
+        non_paretic_data = pd.read_csv(self.non_paretic_path, header=0)
+        paretic_data = paretic_data.astype(float)
+        non_paretic_data = non_paretic_data.astype(float)
+
+        # Time initialization with respect to start time
+        paretic_data.columns = ["time", "data"]
+        non_paretic_data.columns = ["time", "data"]
+        paretic_data.time -= self.start_time
+        non_paretic_data.time -= self.start_time
+
+        # paretic side
+        self.paretic_stance_time_list,
+        self.paretic_initial_contact_time_list,
+        self.paretic_initial_contact_time_list = \
+            get_stance_time(paretic_data, "data")
+
+        # non paretic side
+        self.non_paretic_stance_time_list,
+        self.non_paretic_initial_contact_time_list,
+        self.non_paretic_initial_contact_time_list = \
+            get_stance_time(non_paretic_data, "data")
+
+    def voltage_data_read(self):
+        left_voltage_data = pd.read_csv(self.left_path, header=0)
+        right_voltage_data = pd.read_csv(self.right_path, header=0)
+
+        # Column selection - time, vout only
+        column_list = ["time", "v1", "v2", "v3", "v4", "v5", "v6"]
+
+        # time column index
+        column_num_list = [0]
+        # Ignore column 1, 2
+        # Start sensor voltage data from column index 3
+        column_num_list.extend(list(np.arange(3, 3+self.sensor_number)))
+
+        left_voltage_data = left_voltage_data.iloc[:, column_num_list]
+        right_voltage_data = right_voltage_data.iloc[:, column_num_list]
+        left_voltage_data.columns = column_list
+        right_voltage_data.columns = column_list
+
+        # Time initialization with respect to start time
+        left_voltage_data = left_voltage_data.astype(float)
+        right_voltage_data = right_voltage_data.astype(float)
+        left_voltage_data.time -= self.start_time
+        right_voltage_data.time -= self.start_time
+
+        # Voltage data update
+        if self.paretic_side == "L":
+            self.paretic_voltage_data = left_voltage_data
+            self.paretic_time = left_voltage_data.time
+            self.non_paretic_voltage_data = right_voltage_data
+            self.non_paretic_time = right_voltage_data
+        else:
+            self.paretic_voltage_data = right_voltage_data
+            self.paretic_time = right_voltage_data.time
+            self.non_paretic_voltage_data = left_voltage_data
+            self.non_paretic_time = left_voltage_data
+
+    def get_stance_time_df(self):
+        
+# 여기부터 수정!!!!!
+    def GRF_preprocessing(self):
+        # stance phase만 골라서 GRF inference에 활용
+        leftForce_df = pd.DataFrame()
+        leftForce_df["time"] = self.leftTime
+        left_df_add = pd.DataFrame(self.leftForce)
+        leftForce_df = pd.concat([leftForce_df, left_df_add], axis=1,
+                                 ignore_index=True)
+        leftForce_df.columns = ["time",
+                                "f1", "f2", "f3",
+                                "f4", "f5", "f6"]
+        rightForce_df = pd.DataFrame()
+        rightForce_df["time"] = self.rightTime
+        right_df_add = pd.DataFrame(self.rightForce)
+        rightForce_df = pd.concat(
+            [rightForce_df, right_df_add],
+            axis=1,
+            ignore_index=True
+            )
+        rightForce_df.columns = ["time",
+                                 "f1", "f2", "f3",
+                                 "f4", "f5", "f6"]
+        # Synced df with respect to stance timing
+        # left
+        for left_idx in np.arange(len(self.leftTiming_df)):
+            if left_idx == 0:
+                SyncedLeftForce = leftForce_df[
+                    (
+                        leftForce_df.time
+                        >= self.leftTiming_df.loc[left_idx, "start time"]
+                    ) &
+                    (
+                        leftForce_df.time
+                        <= self.leftTiming_df.loc[left_idx, "end time"]
+                    )
+                    ]
+            else:
+                SyncedLeftForce = pd.concat([SyncedLeftForce, leftForce_df[
+                    (
+                        leftForce_df.time
+                        >= self.leftTiming_df.loc[left_idx, "start time"]
+                    ) &
+                    (
+                        leftForce_df.time
+                        <= self.leftTiming_df.loc[left_idx, "end time"]
+                    )
+                    ]], axis=0, ignore_index=True)
+        self.SyncedLeftTime = SyncedLeftForce.iloc[:, 0]
+        self.SyncedLeftTime.reset_index(drop=True, inplace=True)
+        self.SyncedLeftForce = np.array(SyncedLeftForce.iloc[:, 1:])
+        # right
+        for right_idx in np.arange(len(self.rightTiming_df)):
+            if right_idx == 0:
+                SyncedRightForce = rightForce_df[
+                    (
+                        rightForce_df.time
+                        >= self.rightTiming_df.loc[right_idx, "start time"]
+                    ) &
+                    (
+                        rightForce_df.time
+                        <= self.rightTiming_df.loc[right_idx, "end time"]
+                    )
+                    ]
+            else:
+                SyncedRightForce = pd.concat([SyncedRightForce, rightForce_df[
+                    (
+                        rightForce_df.time
+                        >= self.rightTiming_df.loc[right_idx, "start time"]
+                    ) &
+                    (
+                        rightForce_df.time
+                        <= self.rightTiming_df.loc[right_idx, "end time"]
+                    )
+                    ]], axis=0, ignore_index=True)
+        self.SyncedRightTime = SyncedRightForce.iloc[:, 0]
+        self.SyncedRightTime.reset_index(drop=True, inplace=True)
+        self.SyncedRightForce = np.array(SyncedRightForce.iloc[:, 1:])
+
 
     def get_voltage_raw_data(self):
         # Read vout data
@@ -628,73 +917,6 @@ class GRF_predictor:
                     idx=right_idx, sensor_dir="R"
                     ), axis=0)
             right_idx += 1
-
-    def Gait_detection_data_read(self):
-        # stance = 1, swing = 2
-        # stance time: 1 -> 2
-        pareticData = pd.read_csv(self.pareticPath, header=0)
-        nonpareticData = pd.read_csv(self.nonpareticPath, header=0)
-        # Time initialization with respect to start time
-        pareticData = pareticData.astype(float)
-        nonpareticData = nonpareticData.astype(float)
-        pareticData.Time -= self.start_time
-        nonpareticData.Time -= self.start_time
-        # stance start timing, end timing, duration
-        # paretic side
-        pareticEvent_df = pd.DataFrame(
-            columns=["start time", "end time", "duration"])
-        par_flag = 0
-        for par_idx in np.arange(len(pareticData)):
-            # start time
-            if pareticData.iloc[par_idx, 1] == 1:
-                paretic_start = pareticData.iloc[par_idx, 0]
-                par_flag = 1
-            elif (pareticData.iloc[par_idx, 1] == 2) & (par_flag == 1):
-                paretic_end = pareticData.iloc[par_idx, 0]
-                par_flag = 2
-            else:
-                pass
-            if par_flag == 2:
-                paretic_duration = paretic_end - paretic_start
-                paretic_add = pd.DataFrame({'start time': [paretic_start],
-                                            'end time': [paretic_end],
-                                            'duration': [paretic_duration]})
-                pareticEvent_df = pd.concat([pareticEvent_df, paretic_add],
-                                            axis=0, ignore_index=True)
-        # nonparetic side
-        nonpareticEvent_df = pd.DataFrame(
-            columns=["start time", "end time", "duration"])
-        nonpar_flag = 0
-        for nonpar_idx in np.arange(len(nonpareticData)):
-            # start time
-            if nonpareticData.iloc[nonpar_idx, 1] == 1:
-                nonparetic_start = nonpareticData.iloc[nonpar_idx, 0]
-                nonpar_flag = 1
-            elif (nonpareticData.iloc[nonpar_idx, 1] == 2) &\
-                 (nonpar_flag == 1):
-                nonparetic_end = nonpareticData.iloc[nonpar_idx, 0]
-                nonpar_flag = 2
-            else:
-                pass
-            if nonpar_flag == 2:
-                nonparetic_duration = nonparetic_end - nonparetic_start
-                nonparetic_add = pd.DataFrame(
-                    {'start time': [nonparetic_start],
-                     'end time': [nonparetic_end],
-                     'duration': [nonparetic_duration]}
-                    )
-                nonpareticEvent_df = pd.concat(
-                    [nonpareticEvent_df, nonparetic_add],
-                    axis=0,
-                    ignore_index=True
-                    )
-        # df update - L, R designation
-        if self.paretic_side == 'L':
-            self.leftTiming_df = pareticEvent_df
-            self.rightTiming_df = nonpareticEvent_df
-        else:
-            self.leftTiming_df = nonpareticEvent_df
-            self.rightTiming_df = pareticEvent_df
 
     def GRF_preprocessing(self):
         # stance phase만 골라서 GRF inference에 활용
@@ -1428,92 +1650,6 @@ class ClinicalIndexMH:
         plt.legend(loc='upper left', fontsize=25)
         plt.show()
         fig6.savefig(cycle_report_path + 'GRF_impulse.png')
-
-
-def df_for_raw_GRF_make_plot(
-        session_name: str, base_path: str,
-        raw_data_path: str, paretic_side: str
-        ):
-    # GRF raw data
-    raw_report_path = base_path + raw_data_path + session_name + "/"
-    raw_left_path_list, raw_left_name_list =\
-        folder_path_name(
-            raw_report_path,
-            option='start',
-            char='RAW_GRF_LEFT',
-            T_F=1
-            )
-    raw_right_path_list, raw_right_name_list =\
-        folder_path_name(
-            raw_report_path,
-            option='start',
-            char='RAW_GRF_RIGHT',
-            T_F=1
-            )
-
-    if paretic_side == 'L':
-        paretic_raw_data_path = raw_left_path_list[0]
-        nonparetic_raw_data_path = raw_right_path_list[0]
-    elif paretic_side == 'R':
-        paretic_raw_data_path = raw_right_path_list[0]
-        nonparetic_raw_data_path = raw_left_path_list[0]
-
-    df_raw_paretic = pd.read_csv(
-        paretic_raw_data_path,
-        header=0,
-        delimiter=",")
-    df_raw_paretic.columns = ["time", "grf"]
-    df_raw_nonparetic = pd.read_csv(
-        nonparetic_raw_data_path,
-        header=0,
-        delimiter=",")
-    df_raw_nonparetic.columns = ["time", "grf"]
-
-    return df_raw_paretic, df_raw_nonparetic
-
-
-def gait_start_time(df, time_column_name: str, column_name: str):
-    start_time_array = np.array([])
-    # swing: 0, stance: 1
-    phase_flag = 0
-    for idx in np.arange(len(df)):
-        if (df.loc[idx, column_name] != 0) & (phase_flag == 0):
-            start_time = df.loc[idx, time_column_name]
-            start_time_array = np.append(start_time_array, start_time)
-            phase_flag = 1
-        elif (df.loc[idx, column_name] == 0) & (phase_flag == 1):
-            phase_flag = 0
-        else:
-            pass
-
-    return start_time_array
-
-
-def gait_end_time(df, time_column_name: str, column_name: str):
-    end_time_array = np.array([])
-    # swing: 0, stance: 1
-    phase_flag = 0
-    for idx in np.arange(len(df)):
-        if (df.loc[idx, column_name] != 0) & (phase_flag == 0):
-            if idx == 0:
-                continue
-            end_time = df.loc[idx - 1, time_column_name]
-            end_time_array = np.append(end_time_array, end_time)
-            phase_flag = 1
-        elif (df.loc[idx, column_name] == 0) & (phase_flag == 1):
-            phase_flag = 0
-        else:
-            pass
-
-    # Dismiss the first end time
-    end_time_array = end_time_array[1:]
-
-    # Add the last end time
-    end_time_array = np.append(
-        end_time_array,
-        df.loc[len(df) - 1, time_column_name])
-
-    return end_time_array
 
 
 ##############################################################################
