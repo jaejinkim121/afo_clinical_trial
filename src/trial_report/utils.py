@@ -2,7 +2,7 @@ import numpy as np
 import copy
 import matplotlib.pyplot as plt
 import pandas as pd
-
+import csv
 
 class DataProcess:
     @staticmethod
@@ -161,6 +161,25 @@ class DataProcess:
                 mean_cycle_time_nonparetic, std_cycle_time_nonparetic]
 
     @staticmethod
+    def read_data_file_by_path(data_path):
+        data = pd.DataFrame()
+
+        value_data = []
+        time_data = []
+
+        with open(data_path) as csvfile:
+            csv_reader = csv.reader(csvfile)
+            for csv_row in csv_reader:
+                if csv_row[0] == "time":
+                    continue
+                value_data.append(float(csv_row[1]))
+                time_data.append(float(csv_row[0]))
+
+        data["time"] = time_data
+        data["value"] = value_data
+        return data
+
+    @staticmethod
     def divider_data_by_gait_phase_path(
             data_path, gait_phase_path, data_name="value"):
         data = pd.DataFrame()
@@ -208,12 +227,10 @@ class DataProcess:
         return divided_array, gait_phase
 
     @staticmethod
-    def divider_data_by_gait_phase_df(data_df, gait_phase_df,
-                                      data_name="value"):
+    def divider_data_by_gait_phase_df(data_df, gait_phase_df, ignore_cycle):
         divided_array = []
         time_initial_contact = \
-            DataProcess.get_initial_contact_time(
-                gait_phase_df, data_name)
+            DataProcess.get_initial_contact_time(gait_phase_df)
         time_initial_contact.append(data_df["time"].iloc[-1])
 
         for i in range(len(time_initial_contact) - 1):
@@ -223,6 +240,11 @@ class DataProcess:
                     (data_df["time"] < time_initial_contact[i + 1])
                     ]
             divided_array.append(divided_df_current.to_numpy())
+
+        if ignore_cycle[1] is None:
+            divided_array = divided_array[ignore_cycle[0]:]
+        else:
+            divided_array = divided_array[ignore_cycle[0]:ignore_cycle[1]]
 
         return divided_array
 
@@ -319,3 +341,75 @@ class DataProcess:
         axs[1].set_xlim(0, xlim_upper)
 
         plt.show()
+
+    @staticmethod
+    def data_process_toe_clearance(
+            paretic_data,
+            paretic_gait_path,
+            non_paretic_data,
+            non_paretic_gait_path,
+            data_name="data",
+            ignore_cycle=(None, None)
+    ):
+        if type(paretic_data) != pd.DataFrame:
+            df_paretic = \
+                DataProcess.read_data_file_by_path(paretic_data)
+        else:
+            df_paretic = copy.deepcopy(paretic_data)
+
+        if type(non_paretic_data) != pd.DataFrame:
+            df_non_paretic = \
+                DataProcess.read_data_file_by_path(non_paretic_data)
+        else:
+            df_non_paretic = copy.deepcopy(non_paretic_data)
+
+        df_paretic_gait = DataProcess.read_data_file_by_path(
+            paretic_gait_path)
+        df_non_paretic_gait = DataProcess.read_data_file_by_path(
+            non_paretic_gait_path
+        )
+
+        collection_paretic, gait_phase_paretic = \
+            DataProcess.divider_data_by_gait_phase_df(
+                df_paretic, df_paretic_gait,
+                ignore_cycle
+            )
+        collection_non_paretic, gait_phase_non_paretic = \
+            DataProcess.divider_data_by_gait_phase_path(
+                df_non_paretic,
+                df_non_paretic_gait,
+                ignore_cycle
+            )
+
+        DataProcess.graph_both_cycle_data(
+            collection_paretic,
+            collection_non_paretic,
+            gait_phase_paretic, gait_phase_non_paretic,
+            x_num=101)
+
+        # Statistics Processing
+        max_paretic = []
+        max_non_paretic = []
+
+        for da in collection_paretic:
+            max_paretic.append(
+                np.mean(da[:, 1])
+            )
+        for da in collection_non_paretic:
+            max_non_paretic.append(
+                np.mean(da[:, 1])
+            )
+
+        np_ptc = np.array(max_paretic)
+        np_nptc = np.array(max_non_paretic)
+
+        paretic_mean = np.mean(np_ptc)
+        paretic_stdev = np.std(np_ptc)
+        non_paretic_mean = np.mean(np_nptc)
+        non_paretic_stdev = np.std(np_nptc)
+        symmetry = paretic_mean / (paretic_mean + non_paretic_mean)
+
+        return [paretic_mean, paretic_stdev,
+                non_paretic_mean, non_paretic_stdev,
+                symmetry
+                ]
