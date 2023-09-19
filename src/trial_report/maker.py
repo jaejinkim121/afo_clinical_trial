@@ -394,7 +394,7 @@ class ReportMaker:
     def make_clinical_report(self):
         # Read bag file
         path = self._path_bag_file
-        save_path = self._path_output_file + 'report_df_230816_.csv'
+        save_path = self._path_output_file + 'report_230816_.pdf'
         bag = bagreader(path)
         start_time = bag.start_time
 
@@ -425,7 +425,7 @@ class ReportMaker:
         nonparetic_gait_path = ""
 
         calib_model_path = self._path_calibration_model_directory + '/'
-        GRF_model_path = self._path_grf_model_file
+        grf_model_path = self._path_grf_model_file
 
         body_weight = self._string_var_sub3_body_weight.get()  # 장비무게포함
         if self._var_paretic_side == 1:
@@ -455,12 +455,6 @@ class ReportMaker:
             elif topic == TOPIC_JJ[2]:
                 stride_path = msg_topic
 
-        report_df = pd.DataFrame(columns=['mean_paretic', 'std_paretic',
-                                          'mean_nonparetic', 'std_nonparetic',
-                                          'symmetry'],
-                                 index=['toeClearance', 'stride', 'GRFmax'
-                                                                  'GRFimpulse',
-                                        'stanceTime'])
         # toe_clearance_data = \
         #     ClinicalIndexJJ.get_clinical_index_max_toe_clearance(
         #         left_toe_path, right_toe_path)
@@ -471,59 +465,37 @@ class ReportMaker:
         gait_speed_imu_data = [1, 1, 1]
         gait_speed_distance_data = [1, 1, 1]
 
-        GRF_maximum_data = \
-            ClinicalIndexMH.get_symmetry_index_GRFmax(start_time=start_time,
-                                                      leftPath=left_sole_path,
-                                                      rightPath=right_sole_path,
-                                                      pareticPath=paretic_gait_path,
-                                                      nonpareticPath=nonparetic_gait_path,
-                                                      modelPathCalib=calib_model_path,
-                                                      modelPathGRF=GRF_model_path,
-                                                      size=str(sole_size),
-                                                      paretic_side=paretic_side,
-                                                      BW=float(body_weight)
-                                                      )
-
-        GRF_impulse_data = \
-            ClinicalIndexMH.get_symmetry_index_GRFimpulse(
+        grf_max_data, grf_impulse_data = \
+            ClinicalIndexMH.get_symmetry_index_grf(
                 start_time=start_time,
-                leftPath=left_sole_path,
-                rightPath=right_sole_path,
-                pareticPath=paretic_gait_path,
-                nonpareticPath=nonparetic_gait_path,
-                modelPathCalib=calib_model_path,
-                modelPathGRF=GRF_model_path,
+                left_path=left_sole_path,
+                right_path=right_sole_path,
+                paretic_path=paretic_gait_path,
+                non_paretic_path=nonparetic_gait_path,
+                model_path_calib=calib_model_path,
+                model_path_grf=grf_model_path,
+                # GRF raw data 저장 경로
+                raw_data_save_path=\
+                    '../../data/report/2023-08-16/session_name/',
+                # cycle별 timeseries data 저장 경로
+                cycle_timeseries_data_save_path=\
+                    '../../graph/2023-08-16/session_name/',
                 size=str(sole_size),
                 paretic_side=paretic_side,
-                BW=float(body_weight)
-            )
+                body_weight=float(body_weight),
+                ignore_cycle=(None, None)
+                )
 
         stance_time_data = ClinicalIndexMH.get_symmetry_index_stanceTime(
             start_time=start_time,
-            pareticPath=paretic_gait_path,
-            nonpareticPath=nonparetic_gait_path,
-            paretic_side='L')
-
-        # add report df
-        # report_df.loc['toeClearance', :] = toe_clearance_data
-        # report_df.loc['stride', :] = stride_data
-        report_df.loc['GRFmax', :] = GRF_maximum_data
-        report_df.loc['GRFimpulse', :] = GRF_impulse_data
-        report_df.loc['stanceTime', :] = stance_time_data
-
-        report_df.to_csv(
-            save_path,
-            sep=',',
-            columns=['mean_paretic', 'std_paretic',
-                     'mean_nonparetic', 'std_nonparetic',
-                     'symmetry'],
-            index=['toeClearance', 'stride', 'GRFmax',
-                   'GRFimpulse', 'stanceTime']
-        )
+            paretic_path=paretic_gait_path,
+            non_paretic_path=nonparetic_gait_path,
+            ignore_cycle=(None, None)
+            )
 
         data_analysis = document.ClinicalAnalysis()
-        data_analysis.grf_max = GRF_maximum_data
-        data_analysis.grf_impulse = GRF_impulse_data
+        data_analysis.grf_max = grf_max_data
+        data_analysis.grf_impulse = grf_impulse_data
         data_analysis.toe_clearance = toe_clearance_data
         data_analysis.stance_time = stance_time_data
         data_analysis.gait_speed_imu = gait_speed_imu_data
