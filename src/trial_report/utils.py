@@ -14,11 +14,18 @@ def get_ignored_cycle(array_df, cycle_num):
     return array_df
 
 
-def save_each_cycle_data(collection_data, data_label, title_label, save_path):
+def save_each_cycle_timeseries_plot(
+        collection_data, data_label, title_label, save_path):
     ...
 
 
-def save_stance_time_plot():
+def save_each_cycle_bar_plot():
+    # Matching Part
+
+
+    ### MH Part
+    # 2 Array with same length: paretic / non-paretic
+    # Plotting Part
     ...
 
 
@@ -146,8 +153,8 @@ class DataProcess:
         for tic, tfo in zip(paretic_ic, paretic_fo):
             time_diff.append(tfo - tic)
         time_diff = np.array(time_diff)
-        mean_cycle_time_paretic = np.mean(time_diff) / mean_cycle
-        std_cycle_time_paretic = np.std(time_diff) / mean_cycle
+        mean_diff_paretic = np.mean(time_diff) / mean_cycle
+        std_diff_paretic = np.std(time_diff) / mean_cycle
 
         if nonparetic_ic[0] > nonparetic_fo[0]:
             nonparetic_fo = nonparetic_fo[1:]
@@ -158,12 +165,12 @@ class DataProcess:
         for tic, tfo in zip(nonparetic_ic, nonparetic_fo):
             time_diff.append(tfo - tic)
         time_diff = np.array(time_diff)
-        mean_cycle_time_nonparetic = np.mean(time_diff) / mean_cycle
-        std_cycle_time_nonparetic = np.std(time_diff) / mean_cycle
+        mean_diff_nonparetic = np.mean(time_diff) / mean_cycle
+        std_diff_nonparetic = np.std(time_diff) / mean_cycle
 
         return [mean_diff, std_diff,
-                mean_cycle_time_paretic, std_cycle_time_paretic,
-                mean_cycle_time_nonparetic, std_cycle_time_nonparetic]
+                mean_diff_paretic, std_diff_paretic,
+                mean_diff_nonparetic, std_diff_nonparetic]
 
     @staticmethod
     def read_data_file_by_path(data_path):
@@ -226,9 +233,9 @@ class DataProcess:
                               title_graph=None, data_label=None, x_num=101):
         [mean_diff_both, std_diff_both,
          mean_diff_paretic, std_diff_paretic,
-         mean_diff_nonparetic,
-         std_diff_nonparetic] = DataProcess.gait_phase_pre_processing(
-            data_gait_paretic, data_gait_nonparetic)
+         mean_diff_nonparetic, std_diff_nonparetic] = \
+            DataProcess.gait_phase_pre_processing(data_gait_paretic,
+                                                  data_gait_nonparetic)
 
         mean_paretic, std_paretic = DataProcess.average_cropped_time_series(
             collection_data_paretic, x_num
@@ -341,10 +348,10 @@ class DataProcess:
                 ignore_cycle
             )
 
-        save_each_cycle_data(collection_paretic,
-                             data_label="a",
-                             title_label="a",
-                             save_path="a")
+        save_each_cycle_timeseries_plot(collection_paretic,
+                                        data_label="a",
+                                        title_label="a",
+                                        save_path="a")
 
         df_paretic_gait = \
             get_ignored_cycle(df_paretic_gait, ignore_cycle)
@@ -357,7 +364,7 @@ class DataProcess:
             df_paretic_gait, df_non_paretic_gait,
             x_num=101,
             data_label=data_label)
-
+        ###
         # Statistics Processing
         max_paretic = []
         max_non_paretic = []
