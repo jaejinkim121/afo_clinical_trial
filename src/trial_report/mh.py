@@ -2031,10 +2031,30 @@ class ClinicalIndexMH:
 if __name__ == "__main__":
     start_run_time = time.time()
     bag_list = [
-        "log_2023-08-16-15-56-59"
+        "log_2023-08-16-15-40-08",
+        "log_2023-08-16-15-41-19",
+        "log_2023-08-16-15-43-10",
+        "log_2023-08-16-15-44-06",
+        "log_2023-08-16-15-46-14",
+        "log_2023-08-16-15-51-39",
+        "log_2023-08-16-15-56-59",
+        "log_2023-08-16-16-02-17",
+        "log_2023-08-16-16-23-57",
+        "log_2023-08-16-16-27-28",
+        "log_2023-08-16-16-29-04"
         ]
     session_list = [
-        "2MWT_ON_CueOFF_88.2m"
+        "10MWT_OFF_CueOFF",
+        "10MWT_ON_CueOFF",
+        "10MWT_ON_CueON_1",
+        "10MWT_ON_CueON_2",
+        "10MWT_ON_CueON_3",
+        "2MWT_OFF_CueOFF_89.4m",
+        "2MWT_ON_CueOFF_88.2m",
+        "2MWT_ON_CueON_64.2m",
+        "2MWT_BARE_CueOFF_90m",
+        "10MWT_BARE_CueOFF_1",
+        "10MWT_BARE_CueOFF_2"
         ]
 
     base_path =\
@@ -2092,24 +2112,48 @@ if __name__ == "__main__":
                 paretic_gait_path = msg_topic
             elif topic == TOPIC_MH[3]:
                 non_paretic_gait_path = msg_topic
+
+        raw_data_path = '../../data/report/2023-08-16/' + session_name + '/'
+        cycle_timeseries_data_save_path =\
+            '../../graph/2023-08-16/' + session_name + '/'
+        # create directory
+        create_folder(raw_data_path)
+        create_folder(cycle_timeseries_data_save_path)
+
         start_inference_time = time.time()
-        grf_class = GRF_predictor(
+
+        ClinicalIndexMH.get_symmetry_index_grf(
             start_time=float(start_time),
-            leftPath=left_sole_path,
-            rightPath=right_sole_path,
-            pareticPath=paretic_gait_path,
-            nonpareticPath=non_paretic_gait_path,
-            modelPathCalib=calib_model_path,
-            modelPathGRF=GRF_model_path,
-            save_path=save_folder,
+            left_path=left_sole_path,
+            right_path=right_sole_path,
+            paretic_path=paretic_gait_path,
+            non_paretic_path=non_paretic_gait_path,
+            model_path_calib=calib_model_path,
+            model_path_grf=GRF_model_path,
+            raw_data_save_path=raw_data_path,
+            cycle_timeseries_data_save_path=cycle_timeseries_data_save_path,
             size=size,
             paretic_side=paretic_side,
-            BW=body_weight
+            body_weight=body_weight,
+            ignore_cycle=(None, None)
             )
+        # grf_class = GRF_predictor(
+        #     start_time=float(start_time),
+        #     leftPath=left_sole_path,
+        #     rightPath=right_sole_path,
+        #     pareticPath=paretic_gait_path,
+        #     nonpareticPath=non_paretic_gait_path,
+        #     modelPathCalib=calib_model_path,
+        #     modelPathGRF=GRF_model_path,
+        #     save_path=save_folder,
+        #     size=size,
+        #     paretic_side=paretic_side,
+        #     BW=body_weight
+        #     )
         end_inference_time = time.time()
+        print("Inference time: ", end_inference_time - start_inference_time)
     end_run_time = time.time()
     print("Running time: ", end_run_time - start_run_time)
-    print("Inference time: ", end_inference_time - start_inference_time)
 
     # raw data plotting
     
