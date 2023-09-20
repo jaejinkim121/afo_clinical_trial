@@ -14,19 +14,43 @@ def get_ignored_cycle(array_df, cycle_num):
     return array_df
 
 
-def save_each_cycle_timeseries_plot(
-        collection_data, data_label, title_label, save_path):
-    ...
+def save_each_cycle_timeseries_data(
+        collection_data, data_label, title_label, color, save_path):
+    for num, data in enumerate(collection_data):
+        fig = plt.figure(figsize=(16, 8))
+        plt.plot(data[:, 0], data[:, 1], color=color)
+        plt.xlabel("Time [s]", fontsize=30)
+        plt.ylabel(data_label, fontsize=30)
+        plt.title(title_label + '_cycle_number_' + str(num), fontsize=45)
+        plt.show()
+        fig.savefig(
+            save_path + title_label + '_cycle_number_' + str(num) + '.png'
+            )
 
 
-def save_each_cycle_bar_plot():
-    # Matching Part
+def save_each_cycle_bar_plot(data_label, title_label, save_path):
+    # Matching
+    
+    # 2 array input
+    # Plotting & Saving
+    np_paretic = np.array([])
+    np_non_paretic = np.array([])
 
-
-    ### MH Part
-    # 2 Array with same length: paretic / non-paretic
-    # Plotting Part
-    ...
+    fig = plt.figure(figsize=(16, 8))
+    plt.plot(
+        np.arange(1, len(np_paretic) + 1), np_paretic,
+        color='red', label='paretic side'
+        )
+    plt.plot(
+        np.arange(1, len(np_non_paretic) + 1), np_non_paretic,
+        color='blue', label='non-paretic side'
+        )
+    plt.xlabel("Gait cycle number", fontsize=30)
+    plt.ylabel(data_label, fontsize=30)
+    plt.title(title_label, fontsize=45)
+    plt.legend(loc='best', fontsize=25)
+    plt.show()
+    fig.savefig(save_path + title_label + '.png')
 
 
 class DataProcess:
@@ -141,8 +165,8 @@ class DataProcess:
             time_diff.append(nonparetic_ic[idx_np] - tic)
 
         time_diff = np.array(time_diff)
-        mean_diff = np.mean(time_diff) / mean_cycle
-        std_diff = np.std(time_diff) / mean_cycle
+        mean_ic_diff = np.mean(time_diff) / mean_cycle
+        std_ic_diff = np.std(time_diff) / mean_cycle
 
         if paretic_ic[0] > paretic_fo[0]:
             paretic_fo = paretic_fo[1:]
@@ -153,8 +177,10 @@ class DataProcess:
         for tic, tfo in zip(paretic_ic, paretic_fo):
             time_diff.append(tfo - tic)
         time_diff = np.array(time_diff)
-        mean_diff_paretic = np.mean(time_diff) / mean_cycle
-        std_diff_paretic = np.std(time_diff) / mean_cycle
+        mean_stance_time_paretic = np.mean(time_diff)
+        std_stance_time_paretic = np.std(time_diff)
+        mean_stance_percent_paretic = mean_stance_time_paretic / mean_cycle
+        std_stance_percent_paretic = std_stance_time_paretic / mean_cycle
 
         if nonparetic_ic[0] > nonparetic_fo[0]:
             nonparetic_fo = nonparetic_fo[1:]
@@ -165,12 +191,16 @@ class DataProcess:
         for tic, tfo in zip(nonparetic_ic, nonparetic_fo):
             time_diff.append(tfo - tic)
         time_diff = np.array(time_diff)
-        mean_diff_nonparetic = np.mean(time_diff) / mean_cycle
-        std_diff_nonparetic = np.std(time_diff) / mean_cycle
+        mean_stance_time_nonparetic = np.mean(time_diff)
+        std_stance_time_nonparetic = np.std(time_diff)
+        mean_stance_percent_nonparetic = mean_stance_time_nonparetic / mean_cycle
+        std_stance_percent_nonparetic = std_stance_time_nonparetic / mean_cycle
 
-        return [mean_diff, std_diff,
-                mean_diff_paretic, std_diff_paretic,
-                mean_diff_nonparetic, std_diff_nonparetic]
+        return [mean_ic_diff, std_ic_diff,
+                mean_stance_percent_paretic, std_stance_percent_paretic,
+                mean_stance_percent_nonparetic, std_stance_percent_nonparetic,
+                mean_stance_time_paretic, std_stance_time_paretic,
+                mean_stance_time_nonparetic, std_stance_time_nonparetic]
 
     @staticmethod
     def read_data_file_by_path(data_path):
@@ -233,9 +263,10 @@ class DataProcess:
                               title_graph=None, data_label=None, x_num=101):
         [mean_diff_both, std_diff_both,
          mean_diff_paretic, std_diff_paretic,
-         mean_diff_nonparetic, std_diff_nonparetic] = \
-            DataProcess.gait_phase_pre_processing(data_gait_paretic,
-                                                  data_gait_nonparetic)
+         mean_diff_nonparetic,
+         std_diff_nonparetic,
+         _, _, _, _] = DataProcess.gait_phase_pre_processing(
+            data_gait_paretic, data_gait_nonparetic)
 
         mean_paretic, std_paretic = DataProcess.average_cropped_time_series(
             collection_data_paretic, x_num
@@ -310,10 +341,13 @@ class DataProcess:
             non_paretic_data,
             paretic_gait_path,
             non_paretic_gait_path,
+            save_path,
             data_label="data",
             title_label="data",
             ignore_cycle=(None, None),
-            start_time=0.0
+            start_time=0.0,
+            max_flag=True,
+            impulse_flag=False
     ):
         if type(paretic_data) != pd.DataFrame:
             df_paretic = \
@@ -348,10 +382,19 @@ class DataProcess:
                 ignore_cycle
             )
 
-        save_each_cycle_timeseries_plot(collection_paretic,
-                                        data_label="a",
-                                        title_label="a",
-                                        save_path="a")
+        save_each_cycle_timeseries_data(
+            collection_paretic,
+            data_label=data_label,
+            title_label=title_label + '_paretic',
+            color='red',
+            save_path=save_path)
+
+        save_each_cycle_timeseries_data(
+            collection_non_paretic,
+            data_label=data_label,
+            title_label=title_label + '_non_paretic',
+            color='blue',
+            save_path=save_path)
 
         df_paretic_gait = \
             get_ignored_cycle(df_paretic_gait, ignore_cycle)
@@ -366,31 +409,71 @@ class DataProcess:
             data_label=data_label)
         ###
         # Statistics Processing
-        max_paretic = []
-        max_non_paretic = []
+        max_paretic_mean = 0
+        max_paretic_stdev = 0
+        max_non_paretic_mean = 0
+        max_non_paretic_stdev = 0
+        max_symmetry = 0
 
-        for da in collection_paretic:
-            max_paretic.append(
-                np.max(da[:, 1])
-            )
-        for da in collection_non_paretic:
-            max_non_paretic.append(
-                np.max(da[:, 1])
-            )
+        if max_flag == True:
+            max_paretic = []
+            max_non_paretic = []
+    
+            for da in collection_paretic:
+                max_paretic.append(
+                    np.max(da[:, 1])
+                )
+            for da in collection_non_paretic:
+                max_non_paretic.append(
+                    np.max(da[:, 1])
+                )
 
-        np_ptc = np.array(max_paretic)
-        np_nptc = np.array(max_non_paretic)
+            np_p_max = np.array(max_paretic)
+            np_np_max = np.array(max_non_paretic)
 
-        paretic_mean = np.mean(np_ptc)
-        paretic_stdev = np.std(np_ptc)
-        non_paretic_mean = np.mean(np_nptc)
-        non_paretic_stdev = np.std(np_nptc)
-        symmetry = paretic_mean / (paretic_mean + non_paretic_mean)
+            max_paretic_mean = np.mean(np_p_max)
+            max_paretic_stdev = np.std(np_p_max)
+            max_non_paretic_mean = np.mean(np_np_max)
+            max_non_paretic_stdev = np.std(np_np_max)
+            max_symmetry = max_paretic_mean\
+                / (max_paretic_mean + max_non_paretic_mean) * 100
 
-        return [paretic_mean, paretic_stdev,
-                non_paretic_mean, non_paretic_stdev,
-                symmetry
-                ]
+        impulse_paretic_mean = 0
+        impulse_paretic_stdev = 0
+        impulse_non_paretic_mean = 0
+        impulse_non_paretic_stdev = 0
+        impulse_symmetry = 0
+
+        if impulse_flag == True:
+            impulse_paretic = []
+            impulse_non_paretic = []
+    
+            for da in collection_paretic:
+                impulse_paretic.append(
+                    np.trapz(da[:, 1], x=da[:, 0])
+                )
+            for da in collection_non_paretic:
+                impulse_non_paretic.append(
+                    np.trapz(da[:, 1], x=da[:, 0])
+                )
+
+            np_p_impulse = np.array(impulse_paretic)
+            np_np_impulse = np.array(impulse_non_paretic)
+
+            impulse_paretic_mean = np.mean(np_p_impulse)
+            impulse_paretic_stdev = np.std(np_p_impulse)
+            impulse_non_paretic_mean = np.mean(np_np_impulse)
+            impulse_non_paretic_stdev = np.std(np_np_impulse)
+            impulse_symmetry = impulse_paretic_mean\
+                / (impulse_paretic_mean + impulse_non_paretic_mean) * 100
+
+        return [max_paretic_mean, max_paretic_stdev,
+                max_non_paretic_mean, max_non_paretic_stdev,
+                max_symmetry
+                ], [impulse_paretic_mean, impulse_paretic_stdev,
+                    impulse_non_paretic_mean, impulse_non_paretic_stdev,
+                    impulse_symmetry
+                    ]
 
 
 def main():
