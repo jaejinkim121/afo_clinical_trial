@@ -14,6 +14,32 @@ def get_ignored_cycle(array_df, cycle_num):
     return array_df
 
 
+def get_torque_info(path, start_time):
+    df_command = pd.DataFrame()
+    df_actual = pd.DataFrame()
+
+    command_data = []
+    actual_data = []
+    time_data = []
+
+    with open(path) as csvfile:
+        csv_reader = csv.reader(csvfile)
+        for csv_row in csv_reader:
+            try:
+                time_data.append(float(csv_row[0]) - start_time)
+                command_data.append(float(csv_row[2]))
+                actual_data.append(float(csv_row[5]))
+            except ValueError:
+                continue
+
+    df_command["time"] = time_data
+    df_command["command"] = command_data
+    df_actual["time"] = time_data
+    df_actual["actual"] = actual_data
+
+    return df_command, df_actual
+
+
 def save_each_cycle_timeseries_data(
         collection_data, data_label, title_label, color, save_path):
     for num, data in enumerate(collection_data):
@@ -22,19 +48,23 @@ def save_each_cycle_timeseries_data(
         plt.xlabel("Time [s]", fontsize=30)
         plt.ylabel(data_label, fontsize=30)
         plt.title(title_label + '_cycle_number_' + str(num), fontsize=45)
-        plt.show()
+        #plt.show()
         fig.savefig(
             save_path + title_label + '_cycle_number_' + str(num) + '.png'
             )
 
 
-def save_each_cycle_bar_plot(data_label, title_label, save_path):
+def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
+                             df_gait_paretic, df_gait_non_paretic,
+                             data_label, title_label, save_path):
     # Matching
-    
+    data_paretic, data_non_paretic = match_both_side_cycle(
+        data_paretic, data_non_paretic, df_gait_paretic, df_gait_non_paretic
+    )
     # 2 array input
     # Plotting & Saving
-    np_paretic = np.array([])
-    np_non_paretic = np.array([])
+    np_paretic = np.array(data_paretic)
+    np_non_paretic = np.array(data_non_paretic)
 
     fig = plt.figure(figsize=(16, 8))
     plt.plot(
@@ -49,8 +79,43 @@ def save_each_cycle_bar_plot(data_label, title_label, save_path):
     plt.ylabel(data_label, fontsize=30)
     plt.title(title_label, fontsize=45)
     plt.legend(loc='best', fontsize=25)
-    plt.show()
+    # plt.show()
     fig.savefig(save_path + title_label + '.png')
+
+
+def match_both_side_cycle(collection_paretic, collection_non_paretic,
+                          df_gait_paretic, df_gait_non_paretic):
+    time_ic_paretic = \
+        DataProcess.get_initial_contact_time(df_gait_paretic)
+    time_ic_non_paretic = \
+        DataProcess.get_initial_contact_time(df_gait_non_paretic)
+    collection_paretic_matched = []
+    collection_non_paretic_matched = []
+
+    idx_p, idx_np = (0, 0)
+
+    while True:
+        cur_p = time_ic_paretic[idx_p]
+        cur_np = time_ic_non_paretic[idx_np]
+        if idx_p == len(time_ic_paretic) - 1:
+            next_p = cur_np + 1
+        else:
+            next_p = time_ic_paretic[idx_p + 1]
+
+        if cur_p > cur_np:
+            idx_np += 1
+            continue
+        if next_p < cur_np:
+            idx_p += 1
+            continue
+
+        collection_paretic_matched.append(collection_paretic[idx_p])
+        collection_non_paretic_matched.append(collection_non_paretic[idx_np])
+
+        if idx_p == len(time_ic_paretic) - 1:
+            break
+
+    return collection_paretic_matched, collection_non_paretic_matched
 
 
 class DataProcess:
@@ -333,7 +398,7 @@ class DataProcess:
         axs[0].set_xlim(0, xlim_upper)
         axs[1].set_xlim(0, xlim_upper)
 
-        plt.show()
+        fig.savefig("../../"+data_label+".png")
 
     @staticmethod
     def data_process(
@@ -382,19 +447,19 @@ class DataProcess:
                 ignore_cycle
             )
 
-        save_each_cycle_timeseries_data(
-            collection_paretic,
-            data_label=data_label,
-            title_label=title_label + '_paretic',
-            color='red',
-            save_path=save_path)
-
-        save_each_cycle_timeseries_data(
-            collection_non_paretic,
-            data_label=data_label,
-            title_label=title_label + '_non_paretic',
-            color='blue',
-            save_path=save_path)
+        # save_each_cycle_timeseries_data(
+        #     collection_paretic,
+        #     data_label=data_label,
+        #     title_label=title_label + '_paretic',
+        #     color='red',
+        #     save_path=save_path)
+        #
+        # save_each_cycle_timeseries_data(
+        #     collection_non_paretic,
+        #     data_label=data_label,
+        #     title_label=title_label + '_non_paretic',
+        #     color='blue',
+        #     save_path=save_path)
 
         df_paretic_gait = \
             get_ignored_cycle(df_paretic_gait, ignore_cycle)
@@ -430,7 +495,11 @@ class DataProcess:
 
             np_p_max = np.array(max_paretic)
             np_np_max = np.array(max_non_paretic)
-
+            save_each_cycle_bar_plot(
+                np_p_max, np_np_max,
+                df_paretic_gait, df_non_paretic_gait,
+                data_label, title_label, save_path
+            )
             max_paretic_mean = np.mean(np_p_max)
             max_paretic_stdev = np.std(np_p_max)
             max_non_paretic_mean = np.mean(np_np_max)
@@ -459,7 +528,11 @@ class DataProcess:
 
             np_p_impulse = np.array(impulse_paretic)
             np_np_impulse = np.array(impulse_non_paretic)
-
+            save_each_cycle_bar_plot(
+                np_p_impulse, np_np_impulse,
+                df_paretic_gait, df_non_paretic_gait,
+                data_label, title_label, save_path
+            )
             impulse_paretic_mean = np.mean(np_p_impulse)
             impulse_paretic_stdev = np.std(np_p_impulse)
             impulse_non_paretic_mean = np.mean(np_np_impulse)
@@ -488,6 +561,7 @@ def main():
         path_nonparetic,
         path_gait_paretic,
         path_gait_nonparetic,
+        "../../",
         ignore_cycle=(None, 3),
         start_time=bag.start_time
     )
