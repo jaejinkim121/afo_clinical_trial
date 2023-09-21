@@ -328,7 +328,7 @@ class DataProcess:
     def graph_both_cycle_data(collection_data_paretic,
                               collection_data_nonparetic,
                               data_gait_paretic, data_gait_nonparetic,
-                              title_graph=None, data_label=None, x_num=101):
+                              title_graph="", data_label="", x_num=101):
         [mean_diff_both, std_diff_both,
          mean_diff_paretic, std_diff_paretic,
          mean_diff_nonparetic,
