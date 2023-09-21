@@ -56,11 +56,14 @@ def save_each_cycle_timeseries_data(
 
 def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
                              df_gait_paretic, df_gait_non_paretic,
-                             data_label, title_label, save_path):
+                             data_label, title_label, save_path,
+                             is_matching=True):
     # Matching
-    data_paretic, data_non_paretic = match_both_side_cycle(
-        data_paretic, data_non_paretic, df_gait_paretic, df_gait_non_paretic
-    )
+    if is_matching:
+        data_paretic, data_non_paretic = match_both_side_cycle(
+            data_paretic, data_non_paretic,
+            df_gait_paretic, df_gait_non_paretic
+        )
     # 2 array input
     # Plotting & Saving
     np_paretic = np.array(data_paretic)
