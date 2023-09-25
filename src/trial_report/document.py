@@ -9,26 +9,9 @@ from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 import numpy as np
 from dataclasses import dataclass
+from define import ClinicalAnalysis
 
 
-@dataclass
-class ClinicalAnalysis:
-    limb_length: dict
-    grf_max: list
-    grf_impulse: list
-    toe_clearance: list
-    stance_time: list
-    gait_speed_imu: list
-    gait_speed_distance: list
-    subject_name: str = "Name"
-    age: str = str(30)
-    weight: str = str(70.0)
-    test_date: str = "2023-01-01"
-    test_label: str = "RH-23-N/A"
-    session_type: str = "10m Cue on"
-    paretic_side: str = "LEFT"
-    sole_size: str = str(270)
-    sensor_calibration_date: str = "2023-07-01"
 
 
 def num_array_to_string_array(num_array):

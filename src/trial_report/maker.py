@@ -7,29 +7,42 @@ from reportlab.platypus import *
 from reportlab.lib.styles import *
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch
-import os
 from bagpy import bagreader
-import pandas as pd
 import numpy as np
+import json
+
 
 from jj import ClinicalIndexJJ
 from mh import ClinicalIndexMH
 import document
+from define import *
+
+
+def load_bag(bag: str, data_json):
+    for dict_ in [x for x in data_json if x["bag"] == bag]:
+        dict_["paretic_side"] = Side(dict_["paretic_side"])
+        dict_["session_type"] = Session(dict_["session_type"])
+        bag_ = from_dict(dict_)
+        return bag_
+    return None
 
 
 class ReportMaker:
-    def __init__(self):
+    def __init__(self, path):
         self._root = tk.Tk()
+
+        self._bag = None
 
         self._font_title = font.Font(family="Calibri", size=30, weight="bold")
         self._font_title_sub = font.Font(family="Calibri", size=15)
         self._font_sub_title = font.Font(family="Calibri", size=15, weight="bold")
         self._font_sub_sub = font.Font(family="Calibri", size=12)
 
-        self._path_bag_file = "C:/"
-        self._path_calibration_model_directory = "C:/"
-        self._path_grf_model_file = "C:/"
-        self._path_output_file = "C:/"
+        self._path_default = path
+        self._path_bag_file = path + '/bag'
+        self._path_calibration_model_directory = path + '/model/'
+        self._path_grf_model_file = path + '/model/'
+        self._path_output_file = path + '/report/'
         self._shoe_size_list = [
             255, 260, 265, 270, 275, 280, 285
         ]
@@ -56,41 +69,15 @@ class ReportMaker:
             relief=outline_label
         )
 
-        # Section 1 - select paretic side with radiobutton
+        # Section 1 - Select bag file and update file path
         self._label_sub1 = tk.Label(
             self._root,
-            text="1. Paretic side",
+            text="1. Bag file",
             font=self._font_sub_title,
             relief=outline_label
         )
 
-        self._var_paretic_side = tk.IntVar(value=1)
-        self._radiobutton_sub1_left = tk.Radiobutton(
-            self._root,
-            text="Left",
-            font=self._font_title_sub,
-            value=1,
-            variable=self._var_paretic_side,
-            relief=outline_label
-        )
-        self._radiobutton_sub1_right = tk.Radiobutton(
-            self._root,
-            text="Right",
-            font=self._font_title_sub,
-            value=2,
-            variable=self._var_paretic_side,
-            relief=outline_label
-        )
-
-        # Section 2 - Select bag file and update file path
-        self._label_sub2 = tk.Label(
-            self._root,
-            text="2. Bag file",
-            font=self._font_sub_title,
-            relief=outline_label
-        )
-
-        self._button_sub2_search = tk.Button(
+        self._button_sub1_search = tk.Button(
             self._root,
             width=10,
             text="Search",
@@ -98,13 +85,39 @@ class ReportMaker:
             relief=outline_button,
         )
 
-        self._string_var_sub2_search = tk.StringVar()
-        self._string_var_sub2_search.set(self._path_bag_file)
+        self._string_var_sub1_search = tk.StringVar()
+        self._string_var_sub1_search.set(self._path_bag_file)
 
-        self._entry_sub2_search = tk.Entry(
+        self._entry_sub1_search = tk.Entry(
             self._root, width=60, state='readonly',
-            textvariable=self._string_var_sub2_search,
+            textvariable=self._string_var_sub1_search,
             relief=outline_entry
+        )
+
+        # Section 2 - select paretic side with radiobutton
+        self._label_sub2 = tk.Label(
+            self._root,
+            text="1. Paretic side",
+            font=self._font_sub_title,
+            relief=outline_label
+        )
+
+        self._var_paretic_side = tk.IntVar(value=1)
+        self._radiobutton_sub2_left = tk.Radiobutton(
+            self._root,
+            text="Left",
+            font=self._font_title_sub,
+            value=1,
+            variable=self._var_paretic_side,
+            relief=outline_label
+        )
+        self._radiobutton_sub2_right = tk.Radiobutton(
+            self._root,
+            text="Right",
+            font=self._font_title_sub,
+            value=2,
+            variable=self._var_paretic_side,
+            relief=outline_label
         )
 
         # Section 3 - Patient info (Name, Body_weight, Shoe_size)
@@ -283,17 +296,18 @@ class ReportMaker:
 
         self._label_sub1.grid(row=2, column=0, columnspan=6,
                               sticky='w', padx='30', pady='5')
-        self._radiobutton_sub1_left.grid(row=3, column=0, columnspan=2,
-                                         pady='5')
-        self._radiobutton_sub1_right.grid(row=3, column=2, columnspan=2,
-                                          pady='5')
+        self._entry_sub1_search.grid(row=3, column=0, columnspan=4,
+                                     sticky='e', padx='5', pady='5')
+        self._button_sub1_search.grid(row=3, column=4,
+                                      sticky='w', padx='5', pady='5')
 
         self._label_sub2.grid(row=4, column=0, columnspan=6,
                               sticky='w', padx='30', pady='5')
-        self._entry_sub2_search.grid(row=5, column=0, columnspan=4,
-                                     sticky='e', padx='5', pady='5')
-        self._button_sub2_search.grid(row=5, column=4,
-                                      sticky='w', padx='5', pady='5')
+        self._radiobutton_sub2_left.grid(row=5, column=0, columnspan=2,
+                                         pady='5')
+        self._radiobutton_sub2_right.grid(row=5, column=2, columnspan=2,
+                                          pady='5')
+
 
         self._label_sub3.grid(row=6, column=0, columnspan=6,
                               sticky='w', padx='30', pady='5')
@@ -355,48 +369,129 @@ class ReportMaker:
         self._root.mainloop()
 
     def search_bag_file_path(self):
-        self._path_bag_file = filedialog.askopenfilename(
-            initialdir='C:\\Users\\',
-            title='Select Bag File',)
-        self._string_var_sub2_search.set(self._path_bag_file)
-        ...
+        file_name = filedialog.askopenfilename(
+            initialdir=self._path_default + '/bag',
+            title='Select Bag File',
+            filetypes=(("Bag files", "*.bag"), ("all files", "*.*"))
+        )
+        if not file_name:
+            return
+        self._path_bag_file = file_name
+        self._string_var_sub1_search.set(self._path_bag_file)
+
+        with open(self._path_default + '/bag_info.json', 'r') as f:
+            bag_ = load_bag(file_name.split('/')[-1], json.load(f))
+        if not bag_:
+            return
+
+        if bag_.paretic_side == Side.LEFT:
+            self._radiobutton_sub2_left.select()
+        else:
+            self._radiobutton_sub2_right.select()
+        self._string_var_sub3_name.set(bag.name)
+        self._string_var_sub3_body_weight.set(bag.body_weight)
+        self._int_var_sub3_shoe_size.set(bag.sole_size)
+        self._string_var_sub4_walking_distance.set(bag.distance)
+        self._string_var_sub5_calibraion_model_path.set(
+            self._path_default + '/model/' + bag.model_cell)
+        self._string_var_sub5_grf_model_path.set(
+            self._path_default + '/model/' + bag.model_grf)
+
 
     def search_calibration_model_path(self):
-        self._path_calibration_model_directory = \
+        folder_name = \
             filedialog.askdirectory(
-                initialdir="C:\\Users\\",
+                initialdir=self._path_default + '/model/',
                 title='Select calibration model directory'
             )
+
+        if not folder_name:
+            return
+        self._path_calibration_model_directory = folder_name
         self._string_var_sub5_calibraion_model_path.set(
             self._path_calibration_model_directory
         )
 
     def search_grf_model_path(self):
-        self._path_grf_model_file = \
+        file_name = \
             filedialog.askopenfilename(
-                initialdir="C:\\Users\\",
+                initialdir=self._path_default + '/model/',
                 title='Select GRF model file'
             )
+        if not file_name:
+            return
+        self._path_grf_model_file = file_name
         self._string_var_sub5_grf_model_path.set(
             self._path_grf_model_file
         )
 
     def search_output_path(self):
-        self._path_output_file = \
+        folder_name = \
             filedialog.askdirectory(
-                initialdir="C:\\Users\\",
+                initialdir=self._path_default + '/report/',
                 title='Select output file directory'
             )
+        if not folder_name:
+            return
+        self._path_output_file = folder_name
         self._string_var_sub6_output_path.set(
             self._path_output_file
         )
 
+    def update_bag_info_json(self):
+        bag_name = self._path_bag_file.split('/')[-1]
+        with open('bag_info.json', 'r') as f:
+            data = json.load(f)
+        new_data = load_bag(bag_name, data)
+
+        if new_data is None:
+            test_date = bag_name.split('_')[1].split('-')
+            test_date = test_date[0] + test_date[1] + test_date[2]
+            test_label = 'RH-' + test_date[2:4] + '-01'
+            model_cell = \
+                self._string_var_sub5_calibraion_model_path.get().split('/')[-1]
+            model_grf = \
+                self._string_var_sub5_grf_model_path.get().split('/')[-1]
+            if self._var_paretic_side == 1:
+                side = Side.LEFT
+            else:
+                side = Side.RIGHT
+
+            session = Session.TEN_METER_OFF_CUE_ON
+
+            new_data = \
+                Bag(bag_name,
+                    test_date,
+                    test_label,
+                    model_cell,
+                    model_grf,
+                    self._string_var_sub3_name.get(),
+                    float(self._string_var_sub3_body_weight.get()),
+                    self._int_var_sub3_shoe_size.get(),
+                    side,
+                    session,
+                    float(self._string_var_sub4_walking_distance.get()),
+                    float(self._string_var_sub4_walking_distance.get())
+                    )
+
+            data.append(new_data)
+
+            with open('bag_data.json', 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent='\t')
+
+        return new_data
+
     def make_clinical_report(self):
+        bag_ = self.update_bag_info_json()
+
         # Read bag file
-        path = self._path_bag_file
-        save_path = self._path_output_file + 'report_230816_.pdf'
-        bag = bagreader(path)
-        start_time = bag.start_time
+        path = self._path_bag_filemnm
+        save_path = self._path_output_file + \
+                    'report_' + \
+                    bag_.test_date + '_' + \
+                    bag_.session_type + '.pdf'
+        bag_raw = bagreader(path)
+        start_time = bag_raw.start_time
 
         # To filter specific topics with interests
         TOPIC_MH = (
@@ -435,8 +530,8 @@ class ReportMaker:
         sole_size = self._int_var_sub3_shoe_size.get()
 
         # Read Topics and calculate clinical index
-        for topic in bag.topics:
-            msg_topic = bag.message_by_topic(topic)
+        for topic in bag_raw.topics:
+            msg_topic = bag_raw.message_by_topic(topic)
 
             # Use own module and methods
             if topic == TOPIC_MH[0]:
@@ -465,6 +560,15 @@ class ReportMaker:
         gait_speed_imu_data = [1, 1, 1]
         gait_speed_distance_data = [1, 1, 1]
 
+        grf_raw_data_save_path = \
+            self._path_default + \
+            "/data/report/" + \
+            bag_.test_data + \
+            "/" + \
+            bag_.session_type + \
+            "/"
+
+
         grf_max_data, grf_impulse_data = \
             ClinicalIndexMH.get_symmetry_index_grf(
                 start_time=start_time,
@@ -475,8 +579,7 @@ class ReportMaker:
                 model_path_calib=calib_model_path,
                 model_path_grf=grf_model_path,
                 # GRF raw data 저장 경로
-                raw_data_save_path=\
-                    '../../data/report/2023-08-16/session_name/',
+                raw_data_save_path=grf_raw_data_save_path,
                 # cycle별 timeseries data 저장 경로
                 cycle_timeseries_data_save_path=\
                     '../../graph/2023-08-16/session_name/',
@@ -500,18 +603,7 @@ class ReportMaker:
         data_analysis.stance_time = stance_time_data
         data_analysis.gait_speed_imu = gait_speed_imu_data
         data_analysis.gait_speed_distance = gait_speed_distance_data
-        data_analysis.subject_name = self._string_var_sub3_name.get()
-        data_analysis.age = str(30)
-        data_analysis.weight = body_weight
-        # data_analysis.test_date = None
-        # data_analysis.test_label = None
-        # data_analysis.session_type = None
-        if self._var_paretic_side == 1:
-            data_analysis.paretic_side = "Left"
-        else:
-            data_analysis.paretic_side = "Right"
-        data_analysis.sole_size = sole_size
-        # data_analysis.sensor_calibration_date = None
+        data_analysis.data_bag = bag_
 
         document.make_report(save_path, data_analysis)
 
