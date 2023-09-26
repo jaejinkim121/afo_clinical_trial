@@ -8,6 +8,9 @@ from reportlab.lib.styles import *
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch
 from bagpy import bagreader
+
+import dataclasses
+from utils import create_folder
 import numpy as np
 import json
 
@@ -388,14 +391,14 @@ class ReportMaker:
             self._radiobutton_sub2_left.select()
         else:
             self._radiobutton_sub2_right.select()
-        self._string_var_sub3_name.set(bag.name)
-        self._string_var_sub3_body_weight.set(bag.body_weight)
-        self._int_var_sub3_shoe_size.set(bag.sole_size)
-        self._string_var_sub4_walking_distance.set(bag.distance)
+        self._string_var_sub3_name.set(bag_.name)
+        self._string_var_sub3_body_weight.set(bag_.body_weight)
+        self._int_var_sub3_shoe_size.set(bag_.sole_size)
+        self._string_var_sub4_walking_distance.set(bag_.distance)
         self._string_var_sub5_calibraion_model_path.set(
-            self._path_default + '/model/' + bag.model_cell)
+            self._path_default + '/model/' + bag_.model_cell)
         self._string_var_sub5_grf_model_path.set(
-            self._path_default + '/model/' + bag.model_grf)
+            self._path_default + '/model/' + bag_.model_grf)
 
 
     def search_calibration_model_path(self):
@@ -446,18 +449,19 @@ class ReportMaker:
 
         if new_data is None:
             test_date = bag_name.split('_')[1].split('-')
-            test_date = test_date[0] + test_date[1] + test_date[2]
+            test_date = test_date[0][2:] + test_date[1] + test_date[2]
             test_label = 'RH-' + test_date[2:4] + '-01'
             model_cell = \
                 self._string_var_sub5_calibraion_model_path.get().split('/')[-1]
             model_grf = \
                 self._string_var_sub5_grf_model_path.get().split('/')[-1]
-            if self._var_paretic_side == 1:
+            calib_date = model_cell.split('_')[1]
+            if self._var_paretic_side.get() == 1:
                 side = Side.LEFT
             else:
                 side = Side.RIGHT
 
-            session = Session.TEN_METER_OFF_CUE_ON
+            session = Session.TWO_MIN_OFF_CUE_OFF
 
             new_data = \
                 Bag(bag_name,
@@ -470,13 +474,14 @@ class ReportMaker:
                     self._int_var_sub3_shoe_size.get(),
                     side,
                     session,
+                    calib_date,
                     float(self._string_var_sub4_walking_distance.get()),
                     float(self._string_var_sub4_walking_distance.get())
                     )
 
-            data.append(new_data)
+            data.append(dataclasses.asdict(new_data))
 
-            with open('bag_data.json', 'w', encoding='utf-8') as f:
+            with open('bag_info.json', 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent='\t')
 
         return new_data
@@ -485,9 +490,9 @@ class ReportMaker:
         bag_ = self.update_bag_info_json()
 
         # Read bag file
-        path = self._path_bag_filemnm
+        path = self._path_bag_file
+        create_folder(self._path_output_file)
         save_path = self._path_output_file + \
-                    'report_' + \
                     bag_.test_date + '_' + \
                     bag_.session_type + '.pdf'
         bag_raw = bagreader(path)
@@ -563,11 +568,14 @@ class ReportMaker:
         grf_raw_data_save_path = \
             self._path_default + \
             "/data/report/" + \
-            bag_.test_data + \
+            bag_.test_date + \
             "/" + \
             bag_.session_type + \
             "/"
 
+        graph_save_path = \
+            self._path_default + "/data/graph/" + \
+            bag_.test_date + "/" + bag_.session_type + "/"
 
         grf_max_data, grf_impulse_data = \
             ClinicalIndexMH.get_symmetry_index_grf(
@@ -581,8 +589,7 @@ class ReportMaker:
                 # GRF raw data 저장 경로
                 raw_data_save_path=grf_raw_data_save_path,
                 # cycle별 timeseries data 저장 경로
-                cycle_timeseries_data_save_path=\
-                    '../../graph/2023-08-16/session_name/',
+                cycle_timeseries_data_save_path=graph_save_path,
                 size=str(sole_size),
                 paretic_side=paretic_side,
                 body_weight=float(body_weight),
@@ -596,16 +603,19 @@ class ReportMaker:
             ignore_cycle=(None, None)
             )
 
-        data_analysis = document.ClinicalAnalysis()
-        data_analysis.grf_max = grf_max_data
-        data_analysis.grf_impulse = grf_impulse_data
-        data_analysis.toe_clearance = toe_clearance_data
-        data_analysis.stance_time = stance_time_data
-        data_analysis.gait_speed_imu = gait_speed_imu_data
-        data_analysis.gait_speed_distance = gait_speed_distance_data
-        data_analysis.data_bag = bag_
+        data_analysis = document.ClinicalAnalysis(
+            limb_length={"Femur":1, "Tibia":2, "Foot":3, "Pelvis":4},
+            grf_max=grf_max_data,
+            grf_impulse=grf_impulse_data,
+            toe_clearance=toe_clearance_data,
+            stance_time=stance_time_data,
+            gait_speed_imu=gait_speed_imu_data,
+            gait_speed_distance=gait_speed_distance_data,
+            metadata=bag_
+        )
 
         document.make_report(save_path, data_analysis)
+        print("Complete report making")
 
     def exit_program(self):
         self._root.quit()

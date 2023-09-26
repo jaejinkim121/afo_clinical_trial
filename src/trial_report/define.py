@@ -20,6 +20,7 @@ def from_dict(dict_:dict):
         sole_size=dict_["sole_size"],
         paretic_side=dict_["paretic_side"],
         session_type=dict_["session_type"],
+        date_calibration=dict_["date_calibration"],
         distance=dict_["distance"],
         time=dict_["time"],
         bpm=dict_["bpm"],
@@ -60,10 +61,12 @@ class Bag:
     sole_size: int
     paretic_side: Side
     session_type: Session
+    date_calibration: str
     distance: float = None
     time: float = None
     bpm: tuple = (None, None)
     ignore_cycle: tuple = (None, None)
+    age: int = 30
 
 
 @dataclass
@@ -75,26 +78,26 @@ class ClinicalAnalysis:
     stance_time: list
     gait_speed_imu: list
     gait_speed_distance: list
-    data_bag: Bag
-
+    metadata: Bag
 #
-bag = Bag(
-    bag='log_2023-08-16-15-56-59.bag',
-    test_date='20230816',
-    test_label="RH-23-01",
-    model_cell="CHAR_230815_280_LP",
-    model_grf="GRF_230815/LSTM_GRF.pt",
-    name="KJJ",
-    body_weight=69.7,
-    sole_size=280,
-    paretic_side=Side.RIGHT,
-    session_type=Session.TEN_METER_BARE_CUE_OFF,
-    distance=23.2
-)
-d = dataclasses.asdict(bag)
-
-# p = "bag_info.json"
-# with open(p, 'w', encoding='utf-8') as f:
-#     json.dump(d, f, indent='\t')
-
-from_dict(d)
+# #
+# bag = Bag(
+#     bag='log_2023-08-16-15-56-59.bag',
+#     test_date='20230816',
+#     test_label="RH-23-01",
+#     model_cell="CHAR_230815_280_LP",
+#     model_grf="GRF_230815/LSTM_GRF.pt",
+#     name="KJJ",
+#     body_weight=69.7,
+#     sole_size=280,
+#     paretic_side=Side.RIGHT,
+#     session_type=Session.TEN_METER_BARE_CUE_OFF,
+#     distance=23.2
+# )
+# d = dataclasses.asdict(bag)
+#
+# # p = "bag_info.json"
+# # with open(p, 'w', encoding='utf-8') as f:
+# #     json.dump(d, f, indent='\t')
+#
+# from_dict(d)

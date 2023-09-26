@@ -3,7 +3,17 @@ import copy
 import matplotlib.pyplot as plt
 import pandas as pd
 import csv
+import os
 from bagpy import bagreader
+
+
+# Create Directory
+def create_folder(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print('Error: Creating directory. ' + directory)
 
 
 def get_ignored_cycle(array_df, cycle_num):
@@ -82,7 +92,7 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
     plt.ylabel(data_label, fontsize=30)
     plt.title(title_label, fontsize=45)
     plt.legend(loc='best', fontsize=25)
-    # plt.show()
+    create_folder(save_path)
     fig.savefig(save_path + title_label + '.png')
 
 
@@ -114,8 +124,8 @@ def match_both_side_cycle(collection_paretic, collection_non_paretic,
 
         collection_paretic_matched.append(collection_paretic[idx_p])
         collection_non_paretic_matched.append(collection_non_paretic[idx_np])
-
-        if idx_p == len(time_ic_paretic) - 1:
+        idx_p += 1
+        if idx_p >= len(time_ic_paretic) - 1:
             break
 
     return collection_paretic_matched, collection_non_paretic_matched
@@ -328,7 +338,8 @@ class DataProcess:
     def graph_both_cycle_data(collection_data_paretic,
                               collection_data_nonparetic,
                               data_gait_paretic, data_gait_nonparetic,
-                              title_graph="", data_label="", x_num=101):
+                              data_label, title_graph, save_path,
+                              x_num=101):
         [mean_diff_both, std_diff_both,
          mean_diff_paretic, std_diff_paretic,
          mean_diff_nonparetic,
@@ -400,8 +411,8 @@ class DataProcess:
 
         axs[0].set_xlim(0, xlim_upper)
         axs[1].set_xlim(0, xlim_upper)
-
-        fig.savefig("../../"+data_label+".png")
+        create_folder(save_path)
+        fig.savefig(save_path+title_graph+".png")
 
     @staticmethod
     def data_process(
@@ -428,12 +439,10 @@ class DataProcess:
                 DataProcess.read_data_file_by_path(non_paretic_data)
         else:
             df_non_paretic = copy.deepcopy(non_paretic_data)
-
         df_paretic_gait = DataProcess.read_data_file_by_path(
             paretic_gait_path)
         df_non_paretic_gait = DataProcess.read_data_file_by_path(
             non_paretic_gait_path)
-
         df_paretic_gait.iloc[:, 0] -= start_time
         df_non_paretic_gait.iloc[:, 0] -= start_time
 
@@ -449,7 +458,6 @@ class DataProcess:
                 df_non_paretic_gait,
                 ignore_cycle
             )
-
         # save_each_cycle_timeseries_data(
         #     collection_paretic,
         #     data_label=data_label,
@@ -468,13 +476,13 @@ class DataProcess:
             get_ignored_cycle(df_paretic_gait, ignore_cycle)
         df_non_paretic_gait = \
             get_ignored_cycle(df_non_paretic_gait, ignore_cycle)
-
         DataProcess.graph_both_cycle_data(
             collection_paretic,
             collection_non_paretic,
             df_paretic_gait, df_non_paretic_gait,
-            x_num=101,
-            data_label=data_label)
+            data_label, title_label, save_path,
+            x_num=101
+        )
         ###
         # Statistics Processing
         max_paretic_mean = 0
@@ -482,7 +490,6 @@ class DataProcess:
         max_non_paretic_mean = 0
         max_non_paretic_stdev = 0
         max_symmetry = 0
-
         if max_flag == True:
             max_paretic = []
             max_non_paretic = []
@@ -501,7 +508,7 @@ class DataProcess:
             save_each_cycle_bar_plot(
                 np_p_max, np_np_max,
                 df_paretic_gait, df_non_paretic_gait,
-                data_label, title_label, save_path
+                data_label, title_label+"_max", save_path
             )
             max_paretic_mean = np.mean(np_p_max)
             max_paretic_stdev = np.std(np_p_max)
@@ -509,7 +516,6 @@ class DataProcess:
             max_non_paretic_stdev = np.std(np_np_max)
             max_symmetry = max_paretic_mean\
                 / (max_paretic_mean + max_non_paretic_mean) * 100
-
         impulse_paretic_mean = 0
         impulse_paretic_stdev = 0
         impulse_non_paretic_mean = 0
@@ -534,7 +540,7 @@ class DataProcess:
             save_each_cycle_bar_plot(
                 np_p_impulse, np_np_impulse,
                 df_paretic_gait, df_non_paretic_gait,
-                data_label, title_label, save_path
+                data_label, title_label+"_impulse", save_path
             )
             impulse_paretic_mean = np.mean(np_p_impulse)
             impulse_paretic_stdev = np.std(np_p_impulse)
@@ -542,7 +548,6 @@ class DataProcess:
             impulse_non_paretic_stdev = np.std(np_np_impulse)
             impulse_symmetry = impulse_paretic_mean\
                 / (impulse_paretic_mean + impulse_non_paretic_mean) * 100
-
         return [max_paretic_mean, max_paretic_stdev,
                 max_non_paretic_mean, max_non_paretic_stdev,
                 max_symmetry

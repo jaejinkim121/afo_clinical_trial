@@ -9,16 +9,7 @@ import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 
-from utils import DataProcess, get_ignored_cycle
-
-
-# Create Directory
-def create_folder(directory):
-    try:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-    except OSError:
-        print('Error: Creating directory. ' + directory)
+from utils import *
 
 
 # Function for folder path reading
