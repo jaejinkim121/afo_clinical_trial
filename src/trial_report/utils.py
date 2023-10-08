@@ -108,8 +108,14 @@ def match_both_side_cycle(collection_paretic, collection_non_paretic,
     idx_p, idx_np = (0, 0)
 
     while True:
+        if idx_np >= len(time_ic_non_paretic):
+            break
+        if idx_p >= len(time_ic_paretic):
+            break
+
         cur_p = time_ic_paretic[idx_p]
         cur_np = time_ic_non_paretic[idx_np]
+
         if idx_p == len(time_ic_paretic) - 1:
             next_p = cur_np + 1
         else:
@@ -125,8 +131,6 @@ def match_both_side_cycle(collection_paretic, collection_non_paretic,
         collection_paretic_matched.append(collection_paretic[idx_p])
         collection_non_paretic_matched.append(collection_non_paretic[idx_np])
         idx_p += 1
-        if idx_p >= len(time_ic_paretic) - 1:
-            break
 
     return collection_paretic_matched, collection_non_paretic_matched
 
