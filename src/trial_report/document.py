@@ -23,8 +23,11 @@ def num_array_to_string_array(num_array):
 def make_report(path, data_report: ClinicalAnalysis):
     # Document Formatting
     story = []
+    save_path = path + "/report/" + \
+                data_report.metadata.test_date + '_' + \
+                data_report.metadata.session_type + '.pdf'
     doc = SimpleDocTemplate(
-        path,
+        save_path,
         pagesize=A4,
         rightMargin=72,
         leftMargin=72,
@@ -100,8 +103,9 @@ def make_report(path, data_report: ClinicalAnalysis):
     weight = data_report.metadata.body_weight
     test_date = data_report.metadata.test_date
     test_label = data_report.metadata.test_label
-    session = data_report.metadata.session_type.value.split('_')
-    session_type = session[0] + " " + session[1]
+    session = data_report.metadata.session_type.value
+    session_list = session.split('_')
+    session_type = session_list[0] + " " + session_list[1]
     paretic_side = data_report.metadata.paretic_side.value
     sole_size = data_report.metadata.sole_size
     sensor_calibration_date = data_report.metadata.date_calibration
@@ -165,6 +169,7 @@ def make_report(path, data_report: ClinicalAnalysis):
 
     spacer_10_point = Spacer(1, 10)
     spacer_30_point = Spacer(1, 30)
+    spacer_200_point = Spacer(1, 200)
 
     story.append(paragraph_title)
     story.append(spacer_10_point)
@@ -175,5 +180,9 @@ def make_report(path, data_report: ClinicalAnalysis):
     story.append(paragraph_sub2_title)
     story.append(spacer_10_point)
     story.append(table_sub2)
-
+    story.append(spacer_200_point)
+    story.append(paragraph_title)
+    #image_path_ = path + "/data/graph/" + test_date + "/" + session + "/grf [N].png"
+    #im_ = Image(image_path_)
+    #story.append(im_)
     doc.build(story)

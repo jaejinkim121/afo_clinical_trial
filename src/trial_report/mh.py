@@ -913,7 +913,7 @@ class ClinicalIndexMH:
             save_path=cycle_timeseries_data_save_path,
             data_label="grf [N]",
             title_label="GRF",
-            ignore_cycle=(None, None),
+            ignore_cycle=ignore_cycle,
             start_time=start_time,
             max_flag=True,
             impulse_flag=True

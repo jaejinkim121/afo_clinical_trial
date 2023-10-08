@@ -487,14 +487,14 @@ class ReportMaker:
         return new_data
 
     def make_clinical_report(self):
-        bag_ = self.update_bag_info_json()
+        metadata_ = self.update_bag_info_json()
 
         # Read bag file
         path = self._path_bag_file
         create_folder(self._path_output_file)
         save_path = self._path_output_file + \
-                    bag_.test_date + '_' + \
-                    bag_.session_type + '.pdf'
+                    metadata_.test_date + '_' + \
+                    metadata_.session_type + '.pdf'
         bag_raw = bagreader(path)
         start_time = bag_raw.start_time
 
@@ -528,10 +528,11 @@ class ReportMaker:
         grf_model_path = self._path_grf_model_file
 
         body_weight = self._string_var_sub3_body_weight.get()  # 장비무게포함
-        if self._var_paretic_side == 1:
+        if self._var_paretic_side.get() == 1:
             paretic_side = 'L'
         else:
             paretic_side = 'R'
+        print(paretic_side)
         sole_size = self._int_var_sub3_shoe_size.get()
 
         # Read Topics and calculate clinical index
@@ -568,14 +569,14 @@ class ReportMaker:
         grf_raw_data_save_path = \
             self._path_default + \
             "/data/report/" + \
-            bag_.test_date + \
+            metadata_.test_date + \
             "/" + \
-            bag_.session_type + \
+            metadata_.session_type + \
             "/"
 
         graph_save_path = \
             self._path_default + "/data/graph/" + \
-            bag_.test_date + "/" + bag_.session_type + "/"
+            metadata_.test_date + "/" + metadata_.session_type + "/"
 
         grf_max_data, grf_impulse_data = \
             ClinicalIndexMH.get_symmetry_index_grf(
@@ -593,7 +594,7 @@ class ReportMaker:
                 size=str(sole_size),
                 paretic_side=paretic_side,
                 body_weight=float(body_weight),
-                ignore_cycle=(None, None)
+                ignore_cycle=(None, 2)
                 )
 
         stance_time_data = ClinicalIndexMH.get_symmetry_index_stanceTime(
@@ -611,10 +612,10 @@ class ReportMaker:
             stance_time=stance_time_data,
             gait_speed_imu=gait_speed_imu_data,
             gait_speed_distance=gait_speed_distance_data,
-            metadata=bag_
+            metadata=metadata_
         )
 
-        document.make_report(save_path, data_analysis)
+        document.make_report(self._path_default, data_analysis)
         print("Complete report making")
 
     def exit_program(self):
