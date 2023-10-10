@@ -68,15 +68,7 @@ def save_each_cycle_timeseries_data(
 
 
 def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
-                             df_gait_paretic, df_gait_non_paretic,
-                             data_label, title_label, save_path,
-                             is_matching=True):
-    # Matching
-    if is_matching:
-        data_paretic, data_non_paretic = match_both_side_cycle(
-            data_paretic, data_non_paretic,
-            df_gait_paretic, df_gait_non_paretic
-        )
+                             data_label, title_label, save_path):
     # 2 array input
     # path assign
     graph_save_path = save_path + "/graph/"
@@ -116,6 +108,8 @@ def match_both_side_cycle(collection_paretic, collection_non_paretic,
         DataProcess.get_initial_contact_time(df_gait_non_paretic)
     collection_paretic_matched = []
     collection_non_paretic_matched = []
+    gait_paretic_matched = []
+    gait_non_paretic_matched = []
 
     idx_p, idx_np = (0, 0)
 
@@ -142,9 +136,12 @@ def match_both_side_cycle(collection_paretic, collection_non_paretic,
 
         collection_paretic_matched.append(collection_paretic[idx_p])
         collection_non_paretic_matched.append(collection_non_paretic[idx_np])
+        gait_paretic_matched.append(df_gait_paretic[idx_p])
+        gait_non_paretic_matched.append(df_gait_non_paretic[idx_np])
         idx_p += 1
 
-    return collection_paretic_matched, collection_non_paretic_matched
+    return (collection_paretic_matched, collection_non_paretic_matched,
+            gait_paretic_matched, gait_non_paretic_matched)
 
 
 class DataProcess:
@@ -528,7 +525,6 @@ class DataProcess:
             np_np_max = np.array(max_non_paretic)
             save_each_cycle_bar_plot(
                 np_p_max, np_np_max,
-                df_paretic_gait, df_non_paretic_gait,
                 data_label + '[N]', title_label + "_max",
                 save_path
             )
@@ -561,7 +557,6 @@ class DataProcess:
             np_np_impulse = np.array(impulse_non_paretic)
             save_each_cycle_bar_plot(
                 np_p_impulse, np_np_impulse,
-                df_paretic_gait, df_non_paretic_gait,
                 data_label + '[N sec]', title_label + "_impulse",
                 save_path
             )
