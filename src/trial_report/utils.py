@@ -7,7 +7,7 @@ import os
 from bagpy import bagreader
 
 
-SAVE_EACH_CYCLE_DATA = True
+SAVE_EACH_CYCLE_DATA = False
 
 
 # Create Directory
@@ -25,6 +25,34 @@ def get_ignored_cycle(array_df, cycle_num):
     else:
         array_df = array_df[cycle_num[0]:-cycle_num[1]]
     return array_df
+
+
+def get_index_outlier(df_gait_paretic, df_gait_non_paretic):
+    paretic_ic, paretic_fo = \
+        DataProcess.get_gait_event_time(df_gait_paretic)
+    nonparetic_ic, nonparetic_fo = \
+        DataProcess.get_gait_event_time(df_gait_non_paretic)
+
+    if paretic_ic[0] > paretic_fo[0]:
+        paretic_fo = paretic_fo[1:]
+    if paretic_ic[-1] > paretic_fo[-1]:
+        paretic_ic = paretic_ic[:-1]
+    if nonparetic_ic[0] > nonparetic_fo[0]:
+        nonparetic_fo = nonparetic_fo[1:]
+    if nonparetic_ic[-1] > nonparetic_fo[-1]:
+        nonparetic_ic = nonparetic_ic[:-1]
+
+    time_diff_paretic = []
+    time_diff_non_paretic = []
+    for tic, tfo in zip(paretic_ic, paretic_fo):
+        time_diff_paretic.append(tfo - tic)
+    for tic, tfo in zip(nonparetic_ic, nonparetic_fo):
+        time_diff_non_paretic.append(tfo - tic)
+
+    picker_paretic = Picker(time_diff_paretic)
+    picker_non_paretic = Picker(time_diff_non_paretic)
+
+    return picker_paretic.selected_idx, picker_non_paretic.selected_idx
 
 
 def get_torque_info(path, start_time):
@@ -106,10 +134,8 @@ def match_both_side_cycle(collection_paretic, collection_non_paretic,
         DataProcess.get_initial_contact_time(df_gait_paretic)
     time_ic_non_paretic = \
         DataProcess.get_initial_contact_time(df_gait_non_paretic)
-    collection_paretic_matched = []
-    collection_non_paretic_matched = []
-    gait_paretic_matched = []
-    gait_non_paretic_matched = []
+    idx_paretic_matched = []
+    idx_non_paretic_matched = []
 
     idx_p, idx_np = (0, 0)
 
@@ -134,14 +160,12 @@ def match_both_side_cycle(collection_paretic, collection_non_paretic,
             idx_p += 1
             continue
 
-        collection_paretic_matched.append(collection_paretic[idx_p])
-        collection_non_paretic_matched.append(collection_non_paretic[idx_np])
-        gait_paretic_matched.append(df_gait_paretic[idx_p])
-        gait_non_paretic_matched.append(df_gait_non_paretic[idx_np])
+        idx_paretic_matched.append(idx_p)
+        idx_non_paretic_matched.append(idx_np)
+
         idx_p += 1
 
-    return (collection_paretic_matched, collection_non_paretic_matched,
-            gait_paretic_matched, gait_non_paretic_matched)
+    return idx_paretic_matched, idx_non_paretic_matched
 
 
 class DataProcess:
@@ -174,9 +198,11 @@ class DataProcess:
 
         for i in range(len(x_start)):
             target = x_start[i]
-            ind_start = DataProcess.search_index(x[ind_end:], target) + ind_end
+            ind_start = \
+                DataProcess.search_index(x[ind_end:], target) + ind_end
             target = x_end[i]
-            ind_end = DataProcess.search_index(x[ind_start:], target) + ind_start
+            ind_end = \
+                DataProcess.search_index(x[ind_start:], target) + ind_start
 
             y_cropped = DataProcess.normalize_time_series(
                 x[ind_start:ind_end+1],
@@ -284,8 +310,10 @@ class DataProcess:
         time_diff = np.array(time_diff)
         mean_stance_time_nonparetic = np.mean(time_diff)
         std_stance_time_nonparetic = np.std(time_diff)
-        mean_stance_percent_nonparetic = mean_stance_time_nonparetic / mean_cycle
-        std_stance_percent_nonparetic = std_stance_time_nonparetic / mean_cycle
+        mean_stance_percent_nonparetic = \
+            mean_stance_time_nonparetic / mean_cycle
+        std_stance_percent_nonparetic = \
+            std_stance_time_nonparetic / mean_cycle
 
         return [mean_ic_diff, std_ic_diff,
                 mean_stance_percent_paretic, std_stance_percent_paretic,
@@ -493,6 +521,17 @@ class DataProcess:
         df_non_paretic_gait = \
             get_ignored_cycle(df_non_paretic_gait, ignore_cycle)
 
+        idx_paretic_matched, idx_non_paretic_matched = \
+            match_both_side_cycle(
+                collection_paretic, collection_non_paretic,
+                df_paretic_gait, df_non_paretic_gait
+            )
+
+        idx_paretic_ignore, idx_non_paretic_ignore = \
+            get_index_outlier(
+                df_paretic_gait, df_non_paretic_gait
+            )
+
         DataProcess.graph_both_cycle_data(
             collection_paretic,
             collection_non_paretic,
@@ -502,6 +541,7 @@ class DataProcess:
             x_num=101
         )
         ###
+        index = [1, 2, 6, 8]
         # Statistics Processing
         max_paretic_mean = 0
         max_paretic_stdev = 0
@@ -573,7 +613,6 @@ class DataProcess:
         if stance_flag:
             ...
 
-
         return [max_paretic_mean, max_paretic_stdev,
                 max_non_paretic_mean, max_non_paretic_stdev,
                 max_symmetry
@@ -581,6 +620,36 @@ class DataProcess:
                     impulse_non_paretic_mean, impulse_non_paretic_stdev,
                     impulse_symmetry
                     ]
+
+
+class Picker:
+    def __init__(self, data):
+        self.del_index = []
+        self.data = data
+        self.fig, self.ax = plt.subplots()
+        self.fig.subplots_adjust(bottom=0.2)
+        self.ax.plot(data, picker=True, pickradius=5)
+        self.ax.set_title("c", picker=True)
+        self.ax.set_ylabel("y", picker=True)
+        self.fig.canvas.mpl_connect('pick_event', self.pick)
+        self.ax_update = self.fig.add_axes([0.81, 0.05, 0.1, 0.075])
+        self.b_update = Button(self.ax_update, 'Update')
+        self.b_update.on_clicked(self.draw)
+        self.selected_idx = []
+        plt.show()
+
+    def pick(self, event):
+        if isinstance(event.artist, Line2D):
+            ind = event.ind[0]
+            self.del_index.append(ind)
+            self.ax.plot(ind, self.data[ind], 'r*')
+            plt.draw()
+
+    def draw(self, event):
+        self.ax.clear()
+        self.ax.plot(self.data, picker=True, pickradius=5)
+        self.selected_idx = sorted(self.del_index)
+        plt.close()
 
 
 def main():
