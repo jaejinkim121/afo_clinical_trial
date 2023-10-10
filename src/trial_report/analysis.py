@@ -62,7 +62,7 @@ class ClinicalAnalysis:
             paretic_data = grf_class.right_grf
             non_paretic_data = grf_class.left_grf
 
-        max_array, impulse_array = DataProcess.data_process(
+        max_array, impulse_array, stance_array = DataProcess.data_process(
             paretic_data,
             non_paretic_data,
             paretic_path,
@@ -73,10 +73,11 @@ class ClinicalAnalysis:
             ignore_cycle=ignore_cycle,
             start_time=start_time,
             max_flag=True,
-            impulse_flag=True
+            impulse_flag=True,
+            stance_flag=True
         )
 
-        return max_array, impulse_array
+        return max_array, impulse_array, stance_array
 
     @staticmethod
     def data_analysis_stance_time(

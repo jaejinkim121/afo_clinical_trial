@@ -592,7 +592,6 @@ class DataProcess:
                 abs(stance_paretic_mean - stance_non_paretic_mean)\
                 / (stance_paretic_mean + stance_non_paretic_mean)
 
-
         return [max_paretic_mean, max_paretic_stdev,
                 max_non_paretic_mean, max_non_paretic_stdev,
                 max_symmetry
