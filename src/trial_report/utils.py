@@ -532,8 +532,9 @@ class DataProcess:
             max_paretic_stdev = np.std(np_p_max)
             max_non_paretic_mean = np.mean(np_np_max)
             max_non_paretic_stdev = np.std(np_np_max)
-            max_symmetry = max_paretic_mean\
-                / (max_paretic_mean + max_non_paretic_mean) * 100
+            max_symmetry = 1 -\
+                abs(max_paretic_mean - max_non_paretic_mean)\
+                / (max_paretic_mean + max_non_paretic_mean)
         impulse_paretic_mean = 0
         impulse_paretic_stdev = 0
         impulse_non_paretic_mean = 0
@@ -564,8 +565,9 @@ class DataProcess:
             impulse_paretic_stdev = np.std(np_p_impulse)
             impulse_non_paretic_mean = np.mean(np_np_impulse)
             impulse_non_paretic_stdev = np.std(np_np_impulse)
-            impulse_symmetry = impulse_paretic_mean\
-                / (impulse_paretic_mean + impulse_non_paretic_mean) * 100
+            impulse_symmetry = 1 -\
+                abs(impulse_paretic_mean - impulse_non_paretic_mean)\
+                / (impulse_paretic_mean + impulse_non_paretic_mean)
 
         np_stance_paretic = []
         np_stance_non_paretic = []
@@ -586,8 +588,9 @@ class DataProcess:
             stance_paretic_stdev = np.std(np_stance_paretic)
             stance_non_paretic_mean = np.mean(np_stance_non_paretic)
             stance_non_paretic_stdev = np.std(np_stance_non_paretic)
-            stance_symmetry = stance_paretic_mean\
-                / (stance_paretic_mean + stance_non_paretic_mean) * 100
+            stance_symmetry = 1 -\
+                abs(stance_paretic_mean - stance_non_paretic_mean)\
+                / (stance_paretic_mean + stance_non_paretic_mean)
 
 
         return [max_paretic_mean, max_paretic_stdev,
