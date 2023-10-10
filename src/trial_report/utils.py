@@ -494,6 +494,7 @@ class DataProcess:
             get_ignored_cycle(df_paretic_gait, ignore_cycle)
         df_non_paretic_gait = \
             get_ignored_cycle(df_non_paretic_gait, ignore_cycle)
+
         DataProcess.graph_both_cycle_data(
             collection_paretic,
             collection_non_paretic,
@@ -569,6 +570,7 @@ class DataProcess:
             impulse_non_paretic_stdev = np.std(np_np_impulse)
             impulse_symmetry = impulse_paretic_mean\
                 / (impulse_paretic_mean + impulse_non_paretic_mean) * 100
+
         return [max_paretic_mean, max_paretic_stdev,
                 max_non_paretic_mean, max_non_paretic_stdev,
                 max_symmetry
