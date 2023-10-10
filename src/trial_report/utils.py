@@ -1,6 +1,8 @@
 import numpy as np
 import copy
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from matplotlib.widgets import Button
 import pandas as pd
 import csv
 import os
@@ -121,7 +123,7 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
     create_folder(graph_save_path)
     fig.savefig(graph_save_path + title_label + '_along_cycle.png')
     # df saving
-    df_data = pd.DataFrame(columns=['paretic side', 'non-paretic side'])
+    df_data = pd.DataFrame()
     df_data['paretic side'] = np_paretic
     df_data['non-paretic side'] = np_non_paretic
     df_data.to_csv(data_save_path + title_label + '_along_cycle.csv',
@@ -379,8 +381,19 @@ class DataProcess:
     def graph_both_cycle_data(collection_data_paretic,
                               collection_data_nonparetic,
                               data_gait_paretic, data_gait_nonparetic,
+                              idx_paretic_ignore, idx_non_paretic_ignore,
                               data_label, title_graph, save_path,
                               x_num=101):
+        collection_data_paretic_sel = \
+            copy.deepcopy(collection_data_paretic)
+        collection_data_nonparetic_sel = \
+            copy.deepcopy(collection_data_nonparetic)
+
+        for idx in sorted(idx_paretic_ignore, reverse=True):
+            collection_data_paretic_sel.pop(idx)
+        for idx in sorted(idx_non_paretic_ignore, reverse=True):
+            collection_data_nonparetic_sel.pop(idx)
+
         [mean_diff_both, std_diff_both,
          mean_diff_paretic, std_diff_paretic,
          mean_diff_nonparetic,
@@ -533,9 +546,9 @@ class DataProcess:
             )
 
         DataProcess.graph_both_cycle_data(
-            collection_paretic,
-            collection_non_paretic,
+            collection_paretic, collection_non_paretic,
             df_paretic_gait, df_non_paretic_gait,
+            idx_paretic_ignore, idx_non_paretic_ignore,
             data_label + '[N]', title_label,
             save_path=save_path + '/graph/',
             x_num=101
@@ -552,11 +565,17 @@ class DataProcess:
             max_paretic = []
             max_non_paretic = []
 
-            for da in collection_paretic:
+            for idx in idx_paretic_matched:
+                if idx in idx_paretic_ignore:
+                    continue
+                da = collection_paretic[idx]
                 max_paretic.append(
                     np.max(da[:, 1])
                 )
-            for da in collection_non_paretic:
+            for idx in idx_non_paretic_matched:
+                if idx in idx_non_paretic_ignore:
+                    continue
+                da = collection_non_paretic[idx]
                 max_non_paretic.append(
                     np.max(da[:, 1])
                 )
@@ -585,11 +604,17 @@ class DataProcess:
             impulse_paretic = []
             impulse_non_paretic = []
 
-            for da in collection_paretic:
+            for idx in idx_paretic_matched:
+                if idx in idx_paretic_ignore:
+                    continue
+                da = collection_paretic[idx]
                 impulse_paretic.append(
                     np.trapz(da[:, 1], x=da[:, 0])
                 )
-            for da in collection_non_paretic:
+            for idx in idx_non_paretic_matched:
+                if idx in idx_non_paretic_ignore:
+                    continue
+                da = collection_non_paretic[idx]
                 impulse_non_paretic.append(
                     np.trapz(da[:, 1], x=da[:, 0])
                 )
