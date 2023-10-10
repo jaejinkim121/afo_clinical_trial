@@ -570,8 +570,24 @@ class DataProcess:
         np_stance_paretic = []
         np_stance_non_paretic = []
 
+        stance_paretic_mean = 0
+        stance_paretic_stdev = 0
+        stance_non_paretic_mean = 0
+        stance_non_paretic_stdev = 0
+        stance_symmetry = 0
+
         if stance_flag:
-            ...
+            save_each_cycle_bar_plot(
+                np_stance_paretic, np_stance_non_paretic,
+                'stance time [s]',  "Stance_Time",
+                save_path
+            )
+            stance_paretic_mean = np.mean(np_stance_paretic)
+            stance_paretic_stdev = np.std(np_stance_paretic)
+            stance_non_paretic_mean = np.mean(np_stance_non_paretic)
+            stance_non_paretic_stdev = np.std(np_stance_non_paretic)
+            stance_symmetry = stance_paretic_mean\
+                / (stance_paretic_mean + stance_non_paretic_mean) * 100
 
 
         return [max_paretic_mean, max_paretic_stdev,
@@ -580,7 +596,10 @@ class DataProcess:
                 ], [impulse_paretic_mean, impulse_paretic_stdev,
                     impulse_non_paretic_mean, impulse_non_paretic_stdev,
                     impulse_symmetry
-                    ]
+                    ], [stance_paretic_mean, stance_paretic_stdev,
+                        stance_non_paretic_mean, stance_non_paretic_stdev,
+                        stance_symmetry
+                        ]
 
 
 def main():
