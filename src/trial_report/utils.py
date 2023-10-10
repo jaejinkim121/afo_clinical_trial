@@ -121,9 +121,13 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
     create_folder(graph_save_path)
     fig.savefig(graph_save_path + title_label + '_along_cycle.png')
     # df saving
-    df_data = pd.DataFrame(columns=['paretic side', 'non-paretic side'])
-    df_data['paretic side'] = np_paretic
-    df_data['non-paretic side'] = np_non_paretic
+    df_data = pd.DataFrame()
+    df_data = pd.concat(
+        [df_data, pd.Series(np_paretic, name='paretic side')], axis=0
+        )
+    df_data = pd.concat(
+        [df_data, pd.Series(np_non_paretic, name='non-paretic side')], axis=0
+        )
     df_data.to_csv(data_save_path + title_label + '_along_cycle.csv',
                    sep=",", header=True)
 
