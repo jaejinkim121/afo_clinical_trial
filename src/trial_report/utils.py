@@ -285,7 +285,7 @@ class DataProcess:
         mean_stance_time_nonparetic = np.mean(time_diff)
         std_stance_time_nonparetic = np.std(time_diff)
         mean_stance_percent_nonparetic = mean_stance_time_nonparetic / mean_cycle
-        std_stance_percent_nonparetic = std_stance_time_nonparetic / mean_cycle
+        std_stance_percent_nonp aretic = std_stance_time_nonparetic / mean_cycle
 
         return [mean_ic_diff, std_ic_diff,
                 mean_stance_percent_paretic, std_stance_percent_paretic,
@@ -508,7 +508,7 @@ class DataProcess:
         max_non_paretic_mean = 0
         max_non_paretic_stdev = 0
         max_symmetry = 0
-        if max_flag == True:
+        if max_flag:
             max_paretic = []
             max_non_paretic = []
 
@@ -540,7 +540,7 @@ class DataProcess:
         impulse_non_paretic_stdev = 0
         impulse_symmetry = 0
 
-        if impulse_flag == True:
+        if impulse_flag:
             impulse_paretic = []
             impulse_non_paretic = []
 
