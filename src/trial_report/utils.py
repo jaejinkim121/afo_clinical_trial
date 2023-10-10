@@ -7,6 +7,9 @@ import os
 from bagpy import bagreader
 
 
+SAVE_EACH_CYCLE_DATA = True
+
+
 # Create Directory
 def create_folder(directory):
     try:
@@ -57,10 +60,10 @@ def save_each_cycle_timeseries_data(
         plt.plot(data[:, 0], data[:, 1], color=color)
         plt.xlabel("Time [s]", fontsize=30)
         plt.ylabel(data_label, fontsize=30)
-        plt.title(title_label + '_cycle_number_' + str(num), fontsize=45)
-        #plt.show()
+        plt.title(title_label + '_' + str(num), fontsize=45)
+        # plt.show()
         fig.savefig(
-            save_path + title_label + '_cycle_number_' + str(num) + '.png'
+            save_path + title_label + '_' + str(num) + '.png'
             )
 
 
@@ -75,6 +78,9 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
             df_gait_paretic, df_gait_non_paretic
         )
     # 2 array input
+    # path assign
+    graph_save_path = save_path + "/graph/"
+    data_save_path = save_path + "/process_data/"
     # Plotting & Saving
     np_paretic = np.array(data_paretic)
     np_non_paretic = np.array(data_non_paretic)
@@ -92,8 +98,14 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
     plt.ylabel(data_label, fontsize=30)
     plt.title(title_label, fontsize=45)
     plt.legend(loc='best', fontsize=25)
-    create_folder(save_path)
-    fig.savefig(save_path + title_label + '.png')
+    create_folder(graph_save_path)
+    fig.savefig(graph_save_path + title_label + '_along_cycle.png')
+    # df saving
+    df_data = pd.DataFrame(columns=['paretic side', 'non-paretic side'])
+    df_data['paretic side'] = np_paretic
+    df_data['non-paretic side'] = np_non_paretic
+    df_data.to_csv(data_save_path + title_label + '_along_cycle.csv',
+                   sep=",", header=True)
 
 
 def match_both_side_cycle(collection_paretic, collection_non_paretic,
@@ -416,7 +428,7 @@ class DataProcess:
         axs[0].set_xlim(0, xlim_upper)
         axs[1].set_xlim(0, xlim_upper)
         create_folder(save_path)
-        fig.savefig(save_path+title_graph+".png")
+        fig.savefig(save_path + '%s_mean_cycle.png' % title_graph)
 
     @staticmethod
     def data_process(
@@ -424,7 +436,7 @@ class DataProcess:
             non_paretic_data,
             paretic_gait_path,
             non_paretic_gait_path,
-            save_path,
+            save_path,  # {test_label}/{session_type}
             data_label="data",
             title_label="data",
             ignore_cycle=(None, None),
@@ -462,19 +474,21 @@ class DataProcess:
                 df_non_paretic_gait,
                 ignore_cycle
             )
-        # save_each_cycle_timeseries_data(
-        #     collection_paretic,
-        #     data_label=data_label,
-        #     title_label=title_label + '_paretic',
-        #     color='red',
-        #     save_path=save_path)
-        #
-        # save_each_cycle_timeseries_data(
-        #     collection_non_paretic,
-        #     data_label=data_label,
-        #     title_label=title_label + '_non_paretic',
-        #     color='blue',
-        #     save_path=save_path)
+
+        if SAVE_EACH_CYCLE_DATA:
+            save_each_cycle_timeseries_data(
+                collection_paretic,
+                data_label=data_label + "[N]",
+                title_label=title_label,
+                color='red',
+                save_path=save_path + '/graph/each_cycle/paretic/')
+
+            save_each_cycle_timeseries_data(
+                collection_non_paretic,
+                data_label=data_label + "[N]",
+                title_label=title_label,
+                color='blue',
+                save_path=save_path + '/graph/each_cycle/non_paretic/')
 
         df_paretic_gait = \
             get_ignored_cycle(df_paretic_gait, ignore_cycle)
@@ -484,7 +498,8 @@ class DataProcess:
             collection_paretic,
             collection_non_paretic,
             df_paretic_gait, df_non_paretic_gait,
-            data_label, title_label, save_path,
+            data_label + '[N]', title_label,
+            save_path=save_path + '/graph/',
             x_num=101
         )
         ###
@@ -497,7 +512,7 @@ class DataProcess:
         if max_flag == True:
             max_paretic = []
             max_non_paretic = []
-    
+
             for da in collection_paretic:
                 max_paretic.append(
                     np.max(da[:, 1])
@@ -512,7 +527,8 @@ class DataProcess:
             save_each_cycle_bar_plot(
                 np_p_max, np_np_max,
                 df_paretic_gait, df_non_paretic_gait,
-                data_label, title_label+"_max", save_path
+                data_label + '[N]', title_label + "_max",
+                save_path
             )
             max_paretic_mean = np.mean(np_p_max)
             max_paretic_stdev = np.std(np_p_max)
@@ -529,7 +545,7 @@ class DataProcess:
         if impulse_flag == True:
             impulse_paretic = []
             impulse_non_paretic = []
-    
+
             for da in collection_paretic:
                 impulse_paretic.append(
                     np.trapz(da[:, 1], x=da[:, 0])
@@ -544,7 +560,8 @@ class DataProcess:
             save_each_cycle_bar_plot(
                 np_p_impulse, np_np_impulse,
                 df_paretic_gait, df_non_paretic_gait,
-                data_label, title_label+"_impulse", save_path
+                data_label + '[N sec]', title_label + "_impulse",
+                save_path
             )
             impulse_paretic_mean = np.mean(np_p_impulse)
             impulse_paretic_stdev = np.std(np_p_impulse)

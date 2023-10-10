@@ -10,33 +10,52 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 
 from utils import *
+from define import *
 from mh import GRF_predictor
 
 
 class ClinicalAnalysis:
     @staticmethod
     def data_analysis_grf(
-        start_time, left_path, right_path,
-        paretic_path, non_paretic_path,
-        model_path_calib, model_path_grf,
-        raw_data_save_path, cycle_timeseries_data_save_path,
-        size='280', paretic_side='L',
-        body_weight=float(100), ignore_cycle=(None, None)
-    ):
+            meta_data,
+            default_path,
+            start_time,
+            left_path,
+            right_path,
+            paretic_path,
+            non_paretic_path
+            ):
+        # parameter assign
+        model_path_cell = default_path + "/model/" +\
+            meta_data.model_cell + "/"
+        model_path_grf = default_path + "/model/" +\
+            meta_data.model_grf
+        sole_size = str(meta_data.sole_size)
+        paretic_side = meta_data.paretic_side.value[0]  # L or R
+        body_weight = meta_data.body_weight
+        ignore_cycle = (meta_data.ignore_cycle[0], meta_data.ignore_cycle[1])
+        report_save_path = default_path + "/data/" +\
+            meta_data.test_label + "/" + meta_data.session_type
+        inference_data_save_path = report_save_path +\
+            "/process_data/inference_data/"
+
+        create_folder(inference_data_save_path)
+        #####################################################################
+        # GRF class assign
         grf_class = GRF_predictor(
-            start_time=float(start_time),
+            start_time=start_time,
             leftPath=left_path,
             rightPath=right_path,
             pareticPath=paretic_path,
             nonpareticPath=non_paretic_path,
-            modelPathCalib=model_path_calib,
+            modelPathCalib=model_path_cell,
             modelPathGRF=model_path_grf,
-            save_path=raw_data_save_path,
-            size=size,
+            save_path=inference_data_save_path,
+            size=sole_size,
             paretic_side=paretic_side,
             BW=body_weight
         )
-        if paretic_side == 'L':
+        if meta_data.paretic_side == Side.LEFT:
             paretic_data = grf_class.left_grf
             non_paretic_data = grf_class.right_grf
         else:
@@ -48,8 +67,8 @@ class ClinicalAnalysis:
             non_paretic_data,
             paretic_path,
             non_paretic_path,
-            save_path=cycle_timeseries_data_save_path,
-            data_label="grf [N]",
+            save_path=report_save_path,
+            data_label="grf",
             title_label="GRF",
             ignore_cycle=ignore_cycle,
             start_time=start_time,

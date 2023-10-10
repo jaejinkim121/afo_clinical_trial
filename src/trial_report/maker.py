@@ -19,6 +19,7 @@ from jj import ClinicalIndexJJ
 from mh import ClinicalIndexMH
 import document
 from define import *
+from analysis import ClinicalAnalysis
 
 
 def load_bag(bag: str, data_json):
@@ -491,10 +492,11 @@ class ReportMaker:
 
         # Read bag file
         path = self._path_bag_file
-        create_folder(self._path_output_file)
-        save_path = self._path_output_file + \
-                    metadata_.test_date + '_' + \
-                    metadata_.session_type + '.pdf'
+        save_path = self._path_output_file + "/data/" + \
+            metadata_.test_label + "/" + metadata_.session_type + "/"
+        # save path only for report
+        create_folder(save_path)
+        report_save_path = save_path + 'report_file.pdf'
         bag_raw = bagreader(path)
         start_time = bag_raw.start_time
 
@@ -559,7 +561,7 @@ class ReportMaker:
         # toe_clearance_data = \
         #     ClinicalIndexJJ.get_clinical_index_max_toe_clearance(
         #         left_toe_path, right_toe_path)
-        toe_clearance_data = [1,1,1]
+        toe_clearance_data = [1, 1, 1]
 
         # stride_data = ClinicalIndexJJ.get_clinical_index_gait_speed_imu(
         #     stride_path)
@@ -575,26 +577,18 @@ class ReportMaker:
             "/"
 
         graph_save_path = \
-            self._path_default + "/data/graph/" + \
-            metadata_.test_date + "/" + metadata_.session_type + "/"
+            self._path_default + "/report/data/" + \
+            metadata_.test_label + "/" + metadata_.session_type + "/"
 
         grf_max_data, grf_impulse_data = \
-            ClinicalIndexMH.get_symmetry_index_grf(
+            ClinicalAnalysis.data_analysis_grf(
+                meta_data=metadata_,
+                default_path=self._path_default,
                 start_time=start_time,
                 left_path=left_sole_path,
                 right_path=right_sole_path,
                 paretic_path=paretic_gait_path,
-                non_paretic_path=nonparetic_gait_path,
-                model_path_calib=calib_model_path,
-                model_path_grf=grf_model_path,
-                # GRF raw data 저장 경로
-                raw_data_save_path=grf_raw_data_save_path,
-                # cycle별 timeseries data 저장 경로
-                cycle_timeseries_data_save_path=graph_save_path,
-                size=str(sole_size),
-                paretic_side=paretic_side,
-                body_weight=float(body_weight),
-                ignore_cycle=(None, 2)
+                non_paretic_path=nonparetic_gait_path
                 )
 
         stance_time_data = ClinicalIndexMH.get_symmetry_index_stanceTime(

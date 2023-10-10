@@ -1,6 +1,7 @@
 __pycache__/
 image/
 bag/
+report/
 .idea/
 test.pdf
-
+.spyproject/

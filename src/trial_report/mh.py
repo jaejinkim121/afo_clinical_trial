@@ -209,7 +209,7 @@ class GRF_predictor:
 
     def get_time_data(self):
         return np.array(self.leftTime), np.array(self.rightTime)
-    
+
     def get_voltage_raw_data_modify(self):
         self.left_voltage = self.leftData
         self.right_voltage = self.rightData
@@ -378,19 +378,25 @@ class GRF_predictor:
             sep=",", header=True, index=False
             )
         self.left_force.to_csv(
-            self.save_path + 'RAW_FORCE_LEFT.csv',
+            self.save_path + 'RAW_FORCE_%s_LEFT.csv' %
+            self.modelPathCalib[-19:-1],  # CHAR_230815_280_LP
             sep=",", header=True, index=False
             )
         self.right_force.to_csv(
-            self.save_path + 'RAW_FORCE_RIGHT.csv',
+            self.save_path + 'RAW_FORCE_%s_RIGHT.csv' %
+            self.modelPathCalib[-19:-1],  # CHAR_230815_280_LP
             sep=",", header=True, index=False
             )
         self.left_grf.to_csv(
-            self.save_path + 'RAW_GRF_LEFT.csv',
+            self.save_path + 'RAW_GRF_%s_LEFT.csv' %
+            self.modelPathGRF[-18:-12] + "_" +
+            self.modelPathGRF[-11:-7],  # 230815_LSTM
             sep=",", header=True, index=False
             )
         self.right_grf.to_csv(
-            self.save_path + 'RAW_GRF_RIGHT.csv',
+            self.save_path + 'RAW_GRF_%s_RIGHT.csv' %
+            self.modelPathGRF[-18:-12] + "_" +
+            self.modelPathGRF[-11:-7],  # 230815_LSTM
             sep=",", header=True, index=False
             )
 
@@ -920,7 +926,7 @@ class ClinicalIndexMH:
             )
 
         return max_array, impulse_array
-     
+
     @staticmethod
     def get_symmetry_index_stanceTime(start_time,
                                       paretic_path, non_paretic_path,
@@ -1079,4 +1085,4 @@ if __name__ == "__main__":
     print("Running time: ", end_run_time - start_run_time)
 
     # raw data plotting
-    
+
