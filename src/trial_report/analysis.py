@@ -110,9 +110,9 @@ class ClinicalAnalysis:
         return [paretic_mean, paretic_stdev,
                 non_paretic_mean, non_paretic_stdev, symmetry]
 
-    def data_analysis_toe_clearance:
+    def data_analysis_toe_clearance():
         ...
 
-    def data_analysis_analog_data:
+    def data_analysis_analog_data():
         ...
 
