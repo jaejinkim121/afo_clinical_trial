@@ -442,7 +442,8 @@ class DataProcess:
             ignore_cycle=(None, None),
             start_time=0.0,
             max_flag=True,
-            impulse_flag=False
+            impulse_flag=False,
+            stance_flag=False
     ):
         if type(paretic_data) != pd.DataFrame:
             df_paretic = \
@@ -570,6 +571,13 @@ class DataProcess:
             impulse_non_paretic_stdev = np.std(np_np_impulse)
             impulse_symmetry = impulse_paretic_mean\
                 / (impulse_paretic_mean + impulse_non_paretic_mean) * 100
+
+        np_stance_paretic = []
+        np_stance_non_paretic = []
+
+        if stance_flag:
+            ...
+
 
         return [max_paretic_mean, max_paretic_stdev,
                 max_non_paretic_mean, max_non_paretic_stdev,
