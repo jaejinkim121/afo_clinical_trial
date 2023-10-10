@@ -34,7 +34,7 @@ class ClinicalAnalysis:
         paretic_side = meta_data.paretic_side.value[0]  # L or R
         body_weight = meta_data.body_weight
         ignore_cycle = (meta_data.ignore_cycle[0], meta_data.ignore_cycle[1])
-        report_save_path = default_path + "/data/" +\
+        report_save_path = default_path + "/report/data/" +\
             meta_data.test_label + "/" + meta_data.session_type
         inference_data_save_path = report_save_path +\
             "/process_data/inference_data/"
