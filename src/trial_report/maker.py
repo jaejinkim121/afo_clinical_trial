@@ -14,12 +14,8 @@ from utils import create_folder
 import numpy as np
 import pandas as pd
 import json
-
-
-from jj import ClinicalIndexJJ
-from mh import ClinicalIndexMH
 import document
-import define
+from define import *
 from analysis import ClinicalAnalysis
 
 
@@ -583,7 +579,7 @@ class ReportMaker:
             save_path + 'statistics.csv', sep=",", header=True, index=True
             )
 
-        data_analysis = define.ClinicalAnalysis(
+        data_analysis = ClinicalAnalysis(
             limb_length={"Femur": 1, "Tibia": 2, "Foot": 3, "Pelvis": 4},
             grf_max=grf_max_data,
             grf_impulse=grf_impulse_data,
