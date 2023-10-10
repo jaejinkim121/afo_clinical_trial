@@ -441,7 +441,7 @@ class ReportMaker:
 
     def update_bag_info_json(self):
         bag_name = self._path_bag_file.split('/')[-1]
-        with open('bag_info.json', 'r') as f:
+        with open(self._path_default + 'bag_info.json', 'r') as f:
             data = json.load(f)
         new_data = load_bag(bag_name, data)
 
@@ -479,7 +479,8 @@ class ReportMaker:
 
             data.append(dataclasses.asdict(new_data))
 
-            with open('bag_info.json', 'w', encoding='utf-8') as f:
+            with open(self._path_default + 'bag_info.json',
+                      'w', encoding='utf-8') as f:
                 json.dump(data, f, indent='\t')
 
         return new_data
