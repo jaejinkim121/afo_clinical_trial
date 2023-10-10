@@ -23,9 +23,9 @@ def num_array_to_string_array(num_array):
 def make_report(path, data_report: ClinicalAnalysis):
     # Document Formatting
     story = []
-    save_path = path + "/report/" + \
-                data_report.metadata.test_date + '_' + \
-                data_report.metadata.session_type + '.pdf'
+    save_path = path + "/report/data/" +\
+        data_report.metadata.test_label + '/' +\
+        data_report.metadata.session_type + '/report.pdf'
     doc = SimpleDocTemplate(
         save_path,
         pagesize=A4,

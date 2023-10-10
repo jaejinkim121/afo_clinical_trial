@@ -12,13 +12,14 @@ from bagpy import bagreader
 import dataclasses
 from utils import create_folder
 import numpy as np
+import pandas as pd
 import json
 
 
 from jj import ClinicalIndexJJ
 from mh import ClinicalIndexMH
 import document
-from define import *
+import define
 from analysis import ClinicalAnalysis
 
 
@@ -492,11 +493,11 @@ class ReportMaker:
 
         # Read bag file
         path = self._path_bag_file
-        save_path = self._path_output_file + "/data/" + \
+
+        save_path = self._path_default + "/report/data/" + \
             metadata_.test_label + "/" + metadata_.session_type + "/"
-        # save path only for report
         create_folder(save_path)
-        report_save_path = save_path + 'report_file.pdf'
+
         bag_raw = bagreader(path)
         start_time = bag_raw.start_time
 
@@ -525,17 +526,6 @@ class ReportMaker:
         right_sole_path = ""
         paretic_gait_path = ""
         nonparetic_gait_path = ""
-
-        calib_model_path = self._path_calibration_model_directory + '/'
-        grf_model_path = self._path_grf_model_file
-
-        body_weight = self._string_var_sub3_body_weight.get()  # 장비무게포함
-        if self._var_paretic_side.get() == 1:
-            paretic_side = 'L'
-        else:
-            paretic_side = 'R'
-        print(paretic_side)
-        sole_size = self._int_var_sub3_shoe_size.get()
 
         # Read Topics and calculate clinical index
         for topic in bag_raw.topics:
@@ -568,19 +558,7 @@ class ReportMaker:
         gait_speed_imu_data = [1, 1, 1]
         gait_speed_distance_data = [1, 1, 1]
 
-        grf_raw_data_save_path = \
-            self._path_default + \
-            "/data/report/" + \
-            metadata_.test_date + \
-            "/" + \
-            metadata_.session_type + \
-            "/"
-
-        graph_save_path = \
-            self._path_default + "/report/data/" + \
-            metadata_.test_label + "/" + metadata_.session_type + "/"
-
-        grf_max_data, grf_impulse_data = \
+        grf_max_data, grf_impulse_data, stance_time_data = \
             ClinicalAnalysis.data_analysis_grf(
                 meta_data=metadata_,
                 default_path=self._path_default,
@@ -591,15 +569,22 @@ class ReportMaker:
                 non_paretic_path=nonparetic_gait_path
                 )
 
-        stance_time_data = ClinicalIndexMH.get_symmetry_index_stanceTime(
-            start_time=start_time,
-            paretic_path=paretic_gait_path,
-            non_paretic_path=nonparetic_gait_path,
-            ignore_cycle=(None, None)
+        # Save statistics.csv
+        pd_statistics = pd.DataFrame(
+            columns=["paretic_mean", "paretic_stdev",
+                     "non_paretic_mean", "non_paretic_stdev",
+                     "symmetry"],
+            index=["grf_max", "grf_impulse", "stance_time"]
+            )
+        pd_statistics.loc["grf_max"] = grf_max_data
+        pd_statistics.loc["grf_impulse"] = grf_impulse_data
+        pd_statistics.loc["stance_time"] = stance_time_data
+        pd_statistics.to_csv(
+            save_path + 'statistics.csv', sep=",", header=True, index=True
             )
 
-        data_analysis = document.ClinicalAnalysis(
-            limb_length={"Femur":1, "Tibia":2, "Foot":3, "Pelvis":4},
+        data_analysis = define.ClinicalAnalysis(
+            limb_length={"Femur": 1, "Tibia": 2, "Foot": 3, "Pelvis": 4},
             grf_max=grf_max_data,
             grf_impulse=grf_impulse_data,
             toe_clearance=toe_clearance_data,
