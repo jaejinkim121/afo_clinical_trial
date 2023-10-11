@@ -4,3 +4,8 @@ bag/
 .idea/
 test.pdf
 .spyproject/
+**/process_data/*.csv
+statistics.csv
+graph/
+*.pdf
+dummy/
