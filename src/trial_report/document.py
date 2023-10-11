@@ -1,15 +1,9 @@
-from reportlab.pdfgen import canvas
-from reportlab.pdfbase import *
-from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import *
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import inch
-from reportlab.pdfbase import pdfmetrics
 import numpy as np
-from dataclasses import dataclass
-from define import ClinicalAnalysis
+from define import ClinicalDataset
 
 
 def num_array_to_string_array(num_array):
@@ -20,7 +14,7 @@ def num_array_to_string_array(num_array):
     return array_return
 
 
-def make_report(path, data_report: ClinicalAnalysis):
+def make_report(path, data_report: ClinicalDataset):
     # Document Formatting
     story = []
     save_path = path + "/report/data/" +\

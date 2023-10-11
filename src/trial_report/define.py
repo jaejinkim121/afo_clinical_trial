@@ -1,8 +1,5 @@
-import dataclasses
 from dataclasses import dataclass, fields
 from enum import Enum
-import json
-
 
 def from_dict(dict_:dict):
     for key in fields(Bag):
@@ -70,7 +67,7 @@ class Bag:
 
 
 @dataclass
-class ClinicalAnalysis:
+class ClinicalDataset:
     limb_length: dict
     grf_max: list
     grf_impulse: list

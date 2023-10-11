@@ -1,12 +1,5 @@
 import tkinter as tk
 from tkinter import font, filedialog
-from reportlab.pdfgen import canvas
-from reportlab.pdfbase import *
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import *
-from reportlab.lib.styles import *
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import inch
 from bagpy import bagreader
 
 import dataclasses
@@ -451,8 +444,8 @@ class ReportMaker:
             test_label = 'RH-' + test_date[2:4] + '-01'
             model_cell = \
                 self._string_var_sub5_calibraion_model_path.get().split('/')[-1]
-            model_grf = \
-                self._string_var_sub5_grf_model_path.get().split('/')[-1]
+            grf_path_ = self._string_var_sub5_grf_model_path.get().split('/')
+            model_grf = grf_path_[-2] + '/' + grf_path_[-1]
             calib_date = model_cell.split('_')[1]
             if self._var_paretic_side.get() == 1:
                 side = Side.LEFT
@@ -580,7 +573,7 @@ class ReportMaker:
             save_path + 'statistics.csv', sep=",", header=True, index=True
             )
 
-        data_analysis = ClinicalAnalysis(
+        data_analysis = ClinicalDataset(
             limb_length={"Femur": 1, "Tibia": 2, "Foot": 3, "Pelvis": 4},
             grf_max=grf_max_data,
             grf_impulse=grf_impulse_data,
