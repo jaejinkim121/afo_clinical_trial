@@ -21,11 +21,12 @@ def create_folder(directory):
         print('Error: Creating directory. ' + directory)
 
 
-def get_ignored_cycle(array_df, cycle_num):
+def get_ignored_cycle(array_df, cycle_num, is_gait_phase=False):
+    multiplier = 1 + is_gait_phase
     if cycle_num[1] is None:
-        array_df = array_df[cycle_num[0]:]
+        array_df = array_df[cycle_num[0]*multiplier:]
     else:
-        array_df = array_df[cycle_num[0]:-cycle_num[1]]
+        array_df = array_df[cycle_num[0]*multiplier:-cycle_num[1]]
     return array_df
 
 
@@ -35,13 +36,18 @@ def get_index_outlier(df_gait_paretic, df_gait_non_paretic):
     nonparetic_ic, nonparetic_fo = \
         DataProcess.get_gait_event_time(df_gait_non_paretic)
 
+    ic_last_idx_paretic = None
+    ic_last_idx_non_paretic = None
     if paretic_ic[0] > paretic_fo[0]:
         paretic_fo = paretic_fo[1:]
+
     if paretic_ic[-1] > paretic_fo[-1]:
+        ic_last_idx_paretic = len(paretic_ic) - 1
         paretic_ic = paretic_ic[:-1]
     if nonparetic_ic[0] > nonparetic_fo[0]:
         nonparetic_fo = nonparetic_fo[1:]
     if nonparetic_ic[-1] > nonparetic_fo[-1]:
+        ic_last_idx_non_paretic = len(nonparetic_ic) - 1
         nonparetic_ic = nonparetic_ic[:-1]
 
     time_diff_paretic = []
@@ -54,7 +60,13 @@ def get_index_outlier(df_gait_paretic, df_gait_non_paretic):
     picker_paretic = Picker(time_diff_paretic)
     picker_non_paretic = Picker(time_diff_non_paretic)
 
-    return picker_paretic.selected_idx, picker_non_paretic.selected_idx
+    if ic_last_idx_paretic:
+        picker_paretic.selected_idx.append(ic_last_idx_paretic)
+    if ic_last_idx_non_paretic:
+        picker_non_paretic.selected_idx.append(ic_last_idx_non_paretic)
+
+    return picker_paretic.selected_idx, picker_non_paretic.selected_idx, \
+           time_diff_paretic, time_diff_non_paretic
 
 
 def get_torque_info(path, start_time):
@@ -91,10 +103,10 @@ def save_each_cycle_timeseries_data(
         plt.xlabel("Time [s]", fontsize=30)
         plt.ylabel(data_label, fontsize=30)
         plt.title(title_label + '_' + str(num), fontsize=45)
-        # plt.show()
         fig.savefig(
             save_path + title_label + '_' + str(num) + '.png'
             )
+        plt.close(fig)
 
 
 def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
@@ -393,6 +405,8 @@ class DataProcess:
         collection_data_nonparetic_sel = \
             copy.deepcopy(collection_data_nonparetic)
 
+        print(len(collection_data_paretic_sel))
+        print(sorted(idx_paretic_ignore, reverse=True))
         for idx in sorted(idx_paretic_ignore, reverse=True):
             collection_data_paretic_sel.pop(idx)
         for idx in sorted(idx_non_paretic_ignore, reverse=True):
@@ -519,32 +533,39 @@ class DataProcess:
             )
 
         if SAVE_EACH_CYCLE_DATA:
+            each_cycle_paretic_path = \
+                save_path + '/graph/each_cycle/paretic/'
+            eacy_cycle_non_paretic_path = \
+                save_path + '/graph/each_cycle/non_paretic/'
+
+            create_folder(each_cycle_paretic_path)
+            create_folder(eacy_cycle_non_paretic_path)
+
             save_each_cycle_timeseries_data(
                 collection_paretic,
                 data_label=data_label + "[N]",
                 title_label=title_label,
                 color='red',
-                save_path=save_path + '/graph/each_cycle/paretic/')
+                save_path=each_cycle_paretic_path)
 
             save_each_cycle_timeseries_data(
                 collection_non_paretic,
                 data_label=data_label + "[N]",
                 title_label=title_label,
                 color='blue',
-                save_path=save_path + '/graph/each_cycle/non_paretic/')
-
+                save_path=eacy_cycle_non_paretic_path)
         df_paretic_gait = \
-            get_ignored_cycle(df_paretic_gait, ignore_cycle)
+            get_ignored_cycle(df_paretic_gait, ignore_cycle, True)
         df_non_paretic_gait = \
-            get_ignored_cycle(df_non_paretic_gait, ignore_cycle)
-
+            get_ignored_cycle(df_non_paretic_gait, ignore_cycle, True)
         idx_paretic_matched, idx_non_paretic_matched = \
             match_both_side_cycle(
                 collection_paretic, collection_non_paretic,
                 df_paretic_gait, df_non_paretic_gait
             )
 
-        idx_paretic_ignore, idx_non_paretic_ignore = \
+        idx_paretic_ignore, idx_non_paretic_ignore, \
+        stance_time_paretic, stance_time_non_paretic = \
             get_index_outlier(
                 df_paretic_gait, df_non_paretic_gait
             )
@@ -569,17 +590,17 @@ class DataProcess:
             max_paretic = []
             max_non_paretic = []
 
-            for idx in idx_paretic_matched:
-                if idx in idx_paretic_ignore:
+            for idx_paretic, idx_non_paretic in \
+                    zip(idx_paretic_matched, idx_non_paretic_matched):
+                if idx_paretic in idx_paretic_ignore:
                     continue
-                da = collection_paretic[idx]
+                if idx_non_paretic in idx_non_paretic_ignore:
+                    continue
+                da = collection_paretic[idx_paretic]
                 max_paretic.append(
                     np.max(da[:, 1])
                 )
-            for idx in idx_non_paretic_matched:
-                if idx in idx_non_paretic_ignore:
-                    continue
-                da = collection_non_paretic[idx]
+                da = collection_non_paretic[idx_non_paretic]
                 max_non_paretic.append(
                     np.max(da[:, 1])
                 )
@@ -608,17 +629,17 @@ class DataProcess:
             impulse_paretic = []
             impulse_non_paretic = []
 
-            for idx in idx_paretic_matched:
-                if idx in idx_paretic_ignore:
+            for idx_paretic, idx_non_paretic in \
+                    zip(idx_paretic_matched, idx_non_paretic_matched):
+                if idx_paretic in idx_paretic_ignore:
                     continue
-                da = collection_paretic[idx]
+                if idx_non_paretic in idx_non_paretic_ignore:
+                    continue
+                da = collection_paretic[idx_paretic]
                 impulse_paretic.append(
                     np.trapz(da[:, 1], x=da[:, 0])
                 )
-            for idx in idx_non_paretic_matched:
-                if idx in idx_non_paretic_ignore:
-                    continue
-                da = collection_non_paretic[idx]
+                da = collection_non_paretic[idx_non_paretic]
                 impulse_non_paretic.append(
                     np.trapz(da[:, 1], x=da[:, 0])
                 )
@@ -638,9 +659,6 @@ class DataProcess:
                 abs(impulse_paretic_mean - impulse_non_paretic_mean)\
                 / (impulse_paretic_mean + impulse_non_paretic_mean)
 
-        np_stance_paretic = []
-        np_stance_non_paretic = []
-
         stance_paretic_mean = 0
         stance_paretic_stdev = 0
         stance_non_paretic_mean = 0
@@ -648,15 +666,35 @@ class DataProcess:
         stance_symmetry = 0
 
         if stance_flag:
+            stance_time_paretic_ignored = []
+            stance_time_non_paretic_ignored = []
+            for idx_paretic, idx_non_paretic in \
+                    zip(idx_paretic_matched, idx_non_paretic_matched):
+                if idx_paretic in idx_paretic_ignore:
+                    continue
+                if idx_non_paretic in idx_non_paretic_ignore:
+                    continue
+                stance_time_paretic_ignored.append(
+                    stance_time_paretic[idx_paretic]
+                )
+                stance_time_non_paretic_ignored.append(
+                    stance_time_non_paretic[idx_non_paretic])
+
             save_each_cycle_bar_plot(
-                np_stance_paretic, np_stance_non_paretic,
-                'stance time [s]',  "Stance_Time",
+                stance_time_paretic, stance_time_non_paretic,
+                'stance time [s]', "Stance_Time",
                 save_path
             )
-            stance_paretic_mean = np.mean(np_stance_paretic)
-            stance_paretic_stdev = np.std(np_stance_paretic)
-            stance_non_paretic_mean = np.mean(np_stance_non_paretic)
-            stance_non_paretic_stdev = np.std(np_stance_non_paretic)
+            save_each_cycle_bar_plot(
+                stance_time_paretic_ignored, stance_time_non_paretic_ignored,
+                'stance time [s]', "Stance_Time_ignored"
+                                   "",
+                save_path
+            )
+            stance_paretic_mean = np.mean(stance_time_paretic_ignored)
+            stance_paretic_stdev = np.std(stance_time_paretic_ignored)
+            stance_non_paretic_mean = np.mean(stance_time_non_paretic_ignored)
+            stance_non_paretic_stdev = np.std(stance_time_non_paretic_ignored)
             stance_symmetry = 1 -\
                 abs(stance_paretic_mean - stance_non_paretic_mean)\
                 / (stance_paretic_mean + stance_non_paretic_mean)
@@ -679,7 +717,7 @@ class Picker:
         self.data = data
         self.fig, self.ax = plt.subplots()
         self.fig.subplots_adjust(bottom=0.2)
-        self.ax.plot(data, picker=True, pickradius=5)
+        self.ax.plot(data, 'bo', picker=True, pickradius=5)
         self.ax.set_title("c", picker=True)
         self.ax.set_ylabel("y", picker=True)
         self.fig.canvas.mpl_connect('pick_event', self.pick)
@@ -692,9 +730,10 @@ class Picker:
     def pick(self, event):
         if isinstance(event.artist, Line2D):
             ind = event.ind[0]
-            self.del_index.append(ind)
-            self.ax.plot(ind, self.data[ind], 'r*')
-            plt.draw()
+            if ind not in self.del_index:
+                self.del_index.append(ind)
+                self.ax.plot(ind, self.data[ind], 'r*')
+                plt.draw()
 
     def draw(self, event):
         self.ax.clear()
