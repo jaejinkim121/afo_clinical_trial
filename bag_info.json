@@ -25,9 +25,9 @@
 	{
 		"bag": "log_2023-08-16-15-51-39.bag",
 		"test_date": "230816",
-		"test_label": "RH-08-01",
+		"test_label": "RH-23-01",
 		"model_cell": "CHAR_230815_280_LP",
-		"model_grf": "LSTM_GRF.pt",
+		"model_grf": "GRF_230815/LSTM_GRF.pt",
 		"name": "KJJ",
 		"body_weight": 85.1,
 		"sole_size": 280,
@@ -43,6 +43,150 @@
 		"ignore_cycle": [
 			null,
 			3
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2023-08-16-15-40-08.bag",
+		"test_date": "230816",
+		"test_label": "RH-23-01",
+		"model_cell": "CHAR_230815_280_LP",
+		"model_grf": "GRF_230815/LSTM_GRF.pt",
+		"name": "KJJ",
+		"body_weight": 85.1,
+		"sole_size": 280,
+		"paretic_side": "LEFT",
+		"session_type": "10MWT_OFF_CUE_OFF",
+		"date_calibration": "230815",
+		"distance": 1.0,
+		"time": 1.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2023-08-16-15-41-19.bag",
+		"test_date": "230816",
+		"test_label": "RH-23-01",
+		"model_cell": "CHAR_230815_280_LP",
+		"model_grf": "GRF_230815/LSTM_GRF.pt",
+		"name": "KJJ",
+		"body_weight": 85.1,
+		"sole_size": 280,
+		"paretic_side": "LEFT",
+		"session_type": "10MWT_ON_CUE_OFF",
+		"date_calibration": "230815",
+		"distance": 1.0,
+		"time": 1.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2023-08-16-15-44-06.bag",
+		"test_date": "230816",
+		"test_label": "RH-23-01",
+		"model_cell": "CHAR_230815_280_LP",
+		"model_grf": "GRF_230815/LSTM_GRF.pt",
+		"name": "KJJ",
+		"body_weight": 85.1,
+		"sole_size": 280,
+		"paretic_side": "LEFT",
+		"session_type": "10MWT_ON_CUE_ON",
+		"date_calibration": "230815",
+		"distance": 1.0,
+		"time": 1.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2023-08-16-16-02-17.bag",
+		"test_date": "230816",
+		"test_label": "RH-23-01",
+		"model_cell": "CHAR_230815_280_LP",
+		"model_grf": "GRF_230815/LSTM_GRF.pt",
+		"name": "KJJ",
+		"body_weight": 85.1,
+		"sole_size": 280,
+		"paretic_side": "LEFT",
+		"session_type": "2MWT_ON_CUE_ON",
+		"date_calibration": "230815",
+		"distance": 64.2,
+		"time": 64.2,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2023-08-16-16-23-57.bag",
+		"test_date": "230816",
+		"test_label": "RH-23-01",
+		"model_cell": "CHAR_230815_280_LP",
+		"model_grf": "GRF_230815/LSTM_GRF.pt",
+		"name": "KJJ",
+		"body_weight": 85.1,
+		"sole_size": 280,
+		"paretic_side": "LEFT",
+		"session_type": "2MWT_BARE_CUE_OFF",
+		"date_calibration": "230815",
+		"distance": 90.0,
+		"time": 90.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2023-08-16-16-29-04.bag",
+		"test_date": "230816",
+		"test_label": "RH-23-01",
+		"model_cell": "CHAR_230815_280_LP",
+		"model_grf": "GRF_230815/LSTM_GRF.pt",
+		"name": "KJJ",
+		"body_weight": 85.1,
+		"sole_size": 280,
+		"paretic_side": "LEFT",
+		"session_type": "10MWT_BARE_CUE_OFF",
+		"date_calibration": "230815",
+		"distance": 90.0,
+		"time": 90.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
 		],
 		"age": 30
 	}
