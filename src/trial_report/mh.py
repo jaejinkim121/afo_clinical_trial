@@ -383,14 +383,14 @@ class GRF_predictor:
             )
         self.left_grf.to_csv(
             self.save_path + 'RAW_GRF_%s_LEFT.csv' %
-            self.modelPathGRF[-18:-12] + "_" +
-            self.modelPathGRF[-11:-7],  # 230815_LSTM
+            (self.modelPathGRF[-18:-12] + "_" +
+             self.modelPathGRF[-11:-7]),  # 230815_LSTM
             sep=",", header=True, index=False
             )
         self.right_grf.to_csv(
             self.save_path + 'RAW_GRF_%s_RIGHT.csv' %
-            self.modelPathGRF[-18:-12] + "_" +
-            self.modelPathGRF[-11:-7],  # 230815_LSTM
+            (self.modelPathGRF[-18:-12] + "_" +
+             self.modelPathGRF[-11:-7]),  # 230815_LSTM
             sep=",", header=True, index=False
             )
 
