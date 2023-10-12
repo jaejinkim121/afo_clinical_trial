@@ -12,7 +12,8 @@ class ClinicalAnalysis:
             left_path,
             right_path,
             paretic_path,
-            non_paretic_path
+            non_paretic_path,
+            save_each_cycle_flag=False
             ):
         # parameter assign
         model_path_cell = default_path + "/model/" +\
@@ -47,9 +48,31 @@ class ClinicalAnalysis:
         if meta_data.paretic_side == Side.LEFT:
             paretic_data = grf_class.left_grf
             non_paretic_data = grf_class.right_grf
+
+            paretic_extra_data = grf_class.left_force
+            non_paretic_extra_data = grf_class.right_force
         else:
             paretic_data = grf_class.right_grf
             non_paretic_data = grf_class.left_grf
+
+            paretic_extra_data = grf_class.right_force
+            non_paretic_extra_data = grf_class.left_force
+
+        if (save_each_cycle_flag):
+            DataProcess.graph_each_cycle_data(
+                paretic_data,
+                non_paretic_data,
+                paretic_extra_data,
+                non_paretic_extra_data,
+                paretic_path,
+                non_paretic_path,
+                save_path=report_save_path,
+                data_label=("grf", "force"),
+                unit_label=("[N]", "[N]"),
+                title_label=("GRF", "Force"),
+                ignore_cycle=ignore_cycle,
+                start_time=start_time
+            )
 
         max_array, impulse_array, stance_array = DataProcess.data_process(
             paretic_data,

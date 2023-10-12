@@ -65,8 +65,8 @@ def get_index_outlier(df_gait_paretic, df_gait_non_paretic):
     if ic_last_idx_non_paretic:
         picker_non_paretic.selected_idx.append(ic_last_idx_non_paretic)
 
-    return picker_paretic.selected_idx, picker_non_paretic.selected_idx, \
-           time_diff_paretic, time_diff_non_paretic
+    return picker_paretic.selected_idx, picker_non_paretic.selected_idx,\
+        time_diff_paretic, time_diff_non_paretic
 
 
 def get_torque_info(path, start_time):
@@ -96,15 +96,60 @@ def get_torque_info(path, start_time):
 
 
 def save_each_cycle_timeseries_data(
-        collection_data, data_label, title_label, color, save_path):
-    for num, data in enumerate(collection_data):
-        fig = plt.figure(figsize=(16, 8))
-        plt.plot(data[:, 0], data[:, 1], color=color)
-        plt.xlabel("Time [s]", fontsize=30)
-        plt.ylabel(data_label, fontsize=30)
-        plt.title(title_label + '_' + str(num), fontsize=45)
+        collection_data, df_gait,
+        data_label, unit_label, title_label, color, save_path
+        ):
+    create_folder(save_path)
+
+    main_collection_data = collection_data[0]
+    extra_collection_data = collection_data[1:]
+    print(len(main_collection_data))
+
+    for cycle_num, main_data in enumerate(main_collection_data):
+        start_time = main_data[0, 0]
+        end_time = main_data[len(main_data) - 1, 0]
+        # indexing gait dataframe
+        df_gait_cycle = df_gait[
+            (df_gait.iloc[:, 0] >= start_time) &
+            (df_gait.iloc[:, 0] <= end_time)
+            ]
+        # print(cycle_num)
+        # print(main_data)
+        # print(df_gait[(df_gait.iloc[:, 0] >= start_time)])
+        # print(df_gait_cycle)
+        foot_off_timing = DataProcess.get_foot_off_time(df_gait_cycle)[0]
+
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 12))
+        ax1.plot(main_data[:, 0], main_data[:, 1],
+                 color=color, label=data_label[0]
+                 )
+        ax1.vlines(foot_off_timing,
+                   0, np.max(main_data[:, 1]), color='black',
+                   linewidth=2
+                   )
+        ax1.set_xlabel("Time [s]", fontsize=30)
+        ax1.set_ylabel(data_label[0] + unit_label[0], fontsize=30)
+        ax1.set_title(title_label[0] + '_' + str(cycle_num), fontsize=45)
+        ax1.legend(loc="best")
+
+        extra_data_max = 0
+        for extra_num, extra_dataset in enumerate(extra_collection_data):
+            ax2.plot(
+                extra_dataset[cycle_num][:, 0],
+                extra_dataset[cycle_num][:, 1],
+                label=data_label[1] + str(extra_num)
+                )
+            if extra_data_max <= np.max(extra_dataset[cycle_num][:, 1]):
+                extra_data_max = np.max(extra_dataset[cycle_num][:, 1])
+        ax1.vlines(foot_off_timing, 0, extra_data_max,
+                   color='black', linewidth=2)
+        ax2.set_xlabel("Time [s]", fontsize=30)
+        ax2.set_ylabel(data_label[1] + unit_label[1], fontsize=30)
+        ax2.set_title(title_label[1] + '_' + str(cycle_num), fontsize=45)
+        ax2.legend(loc="best")
         fig.savefig(
-            save_path + title_label + '_' + str(num) + '.png'
+            save_path + title_label[0] + '_' + title_label[1] + '_' +
+            str(cycle_num) + '.png'
             )
         plt.close(fig)
 
@@ -115,6 +160,8 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
     # path assign
     graph_save_path = save_path + "/graph/"
     data_save_path = save_path + "/process_data/"
+    create_folder(graph_save_path)
+    create_folder(data_save_path)
     # Plotting & Saving
     np_paretic = np.array(data_paretic)
     np_non_paretic = np.array(data_non_paretic)
@@ -379,6 +426,117 @@ class DataProcess:
         return divided_array
 
     @staticmethod
+    def get_gait_phase_collection_data(
+            paretic_data,  # Dataframe(time, data)
+            non_paretic_data,  # Dataframe(time, data)
+            paretic_gait_path,
+            non_paretic_gait_path,
+            ignore_cycle=(None, None),
+            start_time=0.0
+    ):
+        if type(paretic_data) != pd.DataFrame:
+            df_paretic = \
+                DataProcess.read_data_file_by_path(paretic_data)
+        else:
+            df_paretic = copy.deepcopy(paretic_data)
+
+        if type(non_paretic_data) != pd.DataFrame:
+            df_non_paretic = \
+                DataProcess.read_data_file_by_path(non_paretic_data)
+        else:
+            df_non_paretic = copy.deepcopy(non_paretic_data)
+        df_paretic_gait = DataProcess.read_data_file_by_path(
+            paretic_gait_path)
+        df_non_paretic_gait = DataProcess.read_data_file_by_path(
+            non_paretic_gait_path)
+        df_paretic_gait.iloc[:, 0] -= start_time
+        df_non_paretic_gait.iloc[:, 0] -= start_time
+
+        collection_paretic = \
+            DataProcess.divider_data_by_gait_phase_df(
+                df_paretic, df_paretic_gait,
+                ignore_cycle
+            )
+
+        collection_non_paretic = \
+            DataProcess.divider_data_by_gait_phase_df(
+                df_non_paretic,
+                df_non_paretic_gait,
+                ignore_cycle
+            )
+        return collection_paretic, collection_non_paretic,\
+            df_paretic_gait, df_non_paretic_gait
+
+    @staticmethod
+    def graph_each_cycle_data(
+            paretic_data,  # columns: time, data
+            non_paretic_data,  # columns: time, data
+            paretic_extra_data,  # columns: time, data 1 ~ data 6
+            non_paretic_extra_data,  # columns: time, data 1 ~ data 6
+            paretic_gait_path,
+            non_paretic_gait_path,
+            save_path,  # {test_label}/{session_type}
+            data_label=("data", None),
+            unit_label=("[N]", None),
+            title_label=("data", None),
+            ignore_cycle=(None, None),
+            start_time=0.0
+    ):
+        total_collection_paretic = []
+        total_collection_non_paretic = []
+
+        # main collection data
+        main_collection_paretic, main_collection_non_paretic,\
+            df_paretic_gait, df_non_paretic_gait =\
+            DataProcess.get_gait_phase_collection_data(
+                paretic_data, non_paretic_data,
+                paretic_gait_path, non_paretic_gait_path,
+                ignore_cycle=ignore_cycle,
+                start_time=start_time
+                )
+        total_collection_paretic.append(main_collection_paretic)
+        total_collection_non_paretic.append(main_collection_non_paretic)
+        # extra collection data
+        for data_ind in np.arange(1, len(paretic_extra_data.columns)):
+            paretic_extra_df = pd.DataFrame()
+            paretic_extra_df["time"] = paretic_extra_data.iloc[:, 0]
+            paretic_extra_df["data"] =\
+                paretic_extra_data.iloc[:, data_ind]
+
+            non_paretic_extra_df = pd.DataFrame()
+            non_paretic_extra_df["time"] = non_paretic_extra_data.iloc[:, 0]
+            non_paretic_extra_df["data"] =\
+                non_paretic_extra_data.iloc[:, data_ind]
+
+            extra_collection_paretic, extra_collection_non_paretic, _, _ =\
+                DataProcess.get_gait_phase_collection_data(
+                    paretic_extra_df, non_paretic_extra_df,
+                    paretic_gait_path, non_paretic_gait_path,
+                    ignore_cycle=ignore_cycle,
+                    start_time=start_time
+                    )
+            total_collection_paretic.append(extra_collection_paretic)
+            total_collection_non_paretic.append(extra_collection_non_paretic)
+
+        save_each_cycle_timeseries_data(
+            total_collection_paretic,
+            df_paretic_gait,
+            data_label=data_label,
+            unit_label=unit_label,
+            title_label=title_label,
+            color='red',
+            save_path=save_path + '/graph/each_cycle/paretic/')
+
+        save_each_cycle_timeseries_data(
+            total_collection_non_paretic,
+            df_non_paretic_gait,
+            data_label=data_label,
+            unit_label=unit_label,
+            title_label=title_label,
+            color='blue',
+            save_path=save_path + '/graph/each_cycle/non_paretic/')
+
+    @staticmethod
     def graph_averaged_data(collection_data, title_graph, data_label,
                             x_num=101):
         mean, std = DataProcess.average_cropped_time_series(
@@ -501,59 +659,16 @@ class DataProcess:
             impulse_flag=False,
             stance_flag=False
     ):
-        if type(paretic_data) != pd.DataFrame:
-            df_paretic = \
-                DataProcess.read_data_file_by_path(paretic_data)
-        else:
-            df_paretic = copy.deepcopy(paretic_data)
 
-        if type(non_paretic_data) != pd.DataFrame:
-            df_non_paretic = \
-                DataProcess.read_data_file_by_path(non_paretic_data)
-        else:
-            df_non_paretic = copy.deepcopy(non_paretic_data)
-        df_paretic_gait = DataProcess.read_data_file_by_path(
-            paretic_gait_path)
-        df_non_paretic_gait = DataProcess.read_data_file_by_path(
-            non_paretic_gait_path)
-        df_paretic_gait.iloc[:, 0] -= start_time
-        df_non_paretic_gait.iloc[:, 0] -= start_time
+        collection_paretic, collection_non_paretic,\
+            df_paretic_gait, df_non_paretic_gait =\
+            DataProcess.get_gait_phase_collection_data(
+                paretic_data, non_paretic_data,
+                paretic_gait_path, non_paretic_gait_path,
+                ignore_cycle=ignore_cycle,
+                start_time=start_time
+                )
 
-        collection_paretic = \
-            DataProcess.divider_data_by_gait_phase_df(
-                df_paretic, df_paretic_gait,
-                ignore_cycle
-            )
-
-        collection_non_paretic = \
-            DataProcess.divider_data_by_gait_phase_df(
-                df_non_paretic,
-                df_non_paretic_gait,
-                ignore_cycle
-            )
-
-        if SAVE_EACH_CYCLE_DATA:
-            each_cycle_paretic_path = \
-                save_path + '/graph/each_cycle/paretic/'
-            eacy_cycle_non_paretic_path = \
-                save_path + '/graph/each_cycle/non_paretic/'
-
-            create_folder(each_cycle_paretic_path)
-            create_folder(eacy_cycle_non_paretic_path)
-
-            save_each_cycle_timeseries_data(
-                collection_paretic,
-                data_label=data_label + "[N]",
-                title_label=title_label,
-                color='red',
-                save_path=each_cycle_paretic_path)
-
-            save_each_cycle_timeseries_data(
-                collection_non_paretic,
-                data_label=data_label + "[N]",
-                title_label=title_label,
-                color='blue',
-                save_path=eacy_cycle_non_paretic_path)
         df_paretic_gait = \
             get_ignored_cycle(df_paretic_gait, ignore_cycle, True)
         df_non_paretic_gait = \
@@ -564,8 +679,8 @@ class DataProcess:
                 df_paretic_gait, df_non_paretic_gait
             )
 
-        idx_paretic_ignore, idx_non_paretic_ignore, \
-        stance_time_paretic, stance_time_non_paretic = \
+        idx_paretic_ignore, idx_non_paretic_ignore,\
+            stance_time_paretic, stance_time_non_paretic =\
             get_index_outlier(
                 df_paretic_gait, df_non_paretic_gait
             )
