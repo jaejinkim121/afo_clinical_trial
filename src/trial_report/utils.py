@@ -23,10 +23,17 @@ def create_folder(directory):
 
 def get_ignored_cycle(array_df, cycle_num, is_gait_phase=False):
     multiplier = 1 + is_gait_phase
+    print(multiplier)
+    print(cycle_num)
+    print(len(array_df))
     if cycle_num[1] is None:
-        array_df = array_df[cycle_num[0]*multiplier:]
-    else:
+        if cycle_num[0] is not None:
+            array_df = array_df[cycle_num[0]*multiplier:]
+    elif cycle_num[0] is not None:
         array_df = array_df[cycle_num[0]*multiplier:-cycle_num[1]]
+    else:
+        array_df = array_df[:-cycle_num[1]]
+    print(len(array_df))
     return array_df
 
 
@@ -103,7 +110,6 @@ def save_each_cycle_timeseries_data(
 
     main_collection_data = collection_data[0]
     extra_collection_data = collection_data[1:]
-    print(len(main_collection_data))
 
     for cycle_num, main_data in enumerate(main_collection_data):
         start_time = main_data[0, 0]
@@ -694,7 +700,6 @@ class DataProcess:
             x_num=101
         )
         ###
-        index = [1, 2, 6, 8]
         # Statistics Processing
         max_paretic_mean = 0
         max_paretic_stdev = 0
