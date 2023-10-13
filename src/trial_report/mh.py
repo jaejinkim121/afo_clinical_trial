@@ -191,7 +191,9 @@ class GRF_predictor:
         # D://OneDrive - SNU/범부처-DESKTOP-2JL44HH/C_임상_2023/
         # 2023-08-16/report_RAW/2MWT_BARE_CueOFF_90m/
         self.save_path = save_path
-        self.device = torch.device('cpu')
+        self.device = torch.device("cuda:0"
+                                   if torch.cuda.is_available() else "cpu")
+        print(self.device)
         self.size = str(size)
         self.sensor_num = int(6)
         self.calib_input_length = int(15)
@@ -353,15 +355,17 @@ class GRF_predictor:
         # Data process
         self.vout_data_read()
         self.force_model_load()
+        time3 = time.time()
         self.Calib_total_prediction()
+        time4 = time.time()
         self.GRF_model_load()
+        time5 = time.time()
         self.GRF_total_prediction()
-
+        time6 = time.time()
         # Data load for saving
         self.get_voltage_raw_data_modify()
         self.get_force_raw_data_modify()
         self.get_grf_raw_data_modify()
-
         # Save dataframe
         self.left_voltage.to_csv(
             self.save_path + 'RAW_VOLTAGE_LEFT.csv',
@@ -393,6 +397,9 @@ class GRF_predictor:
              self.modelPathGRF[-11:-7]),  # 230815_LSTM
             sep=",", header=True, index=False
             )
+        print("Sensel Force Prediction: {:.5f} \n "
+              "GRF Prediction: {:.5f}".format(
+            time4-time3, time6-time5))
 
     def vout_data_read(self):
         leftData = pd.read_csv(self.leftPath, header=0)
@@ -435,6 +442,8 @@ class GRF_predictor:
                                     hidden_size_3=35,
                                     num_layers=6,
                                     drop_p=0.1)
+            leftmodel = nn.DataParallel(leftmodel)
+            rightmodel = nn.DataParallel(rightmodel)
             leftmodel.load_state_dict(torch.load(
                 self.modelPathCalib + self.size + "Left_" +
                 str(num + 1) + ".pt",
@@ -511,15 +520,21 @@ class GRF_predictor:
             left_name_list = sorted(left_name_list, key=lambda x: int(x[-4]),
                                     reverse=False)
             leftOutput = np.array([])
-
             for name in left_name_list:
                 model = self.leftModel[int(name[-4]) - 1]
+                model.to(self.device)
                 model.eval()
                 with torch.no_grad():
+                    a = time.time()
                     x = self.LSTM_Calib_transform(int(name[-4]),
                                                   str(sensor_dir))
-                    leftOutput = np.append(leftOutput, model(x))
-
+                    b = time.time()
+                    input = x.to(self.device)
+                    leftOutput = np.append(
+                        leftOutput, model(input).detach().cpu().numpy()
+                    )
+                c = time.time()
+                print("{:.5f} {:.5f}".format(b-a, c-b))
             return np.expand_dims(leftOutput, axis=0)
         else:
             # rightData
@@ -543,11 +558,15 @@ class GRF_predictor:
 
             for name in right_name_list:
                 model = self.rightModel[int(name[-4]) - 1]
+                model.to(self.device)
                 model.eval()
                 with torch.no_grad():
                     x = self.LSTM_Calib_transform(int(name[-4]),
                                                   str(sensor_dir))
-                    rightOutput = np.append(rightOutput, model(x))
+                    input = x.to(self.device)
+                    rightOutput = np.append(
+                        rightOutput, model(input).detach().cpu().numpy()
+                    )
 
             return np.expand_dims(rightOutput, axis=0)
 
@@ -720,6 +739,7 @@ class GRF_predictor:
         GRFmodel = LSTM_GRF(input_size=6, hidden_size_1=self.GRF_input_length,
                             hidden_size_2=20, hidden_size_3=15,
                             num_layers=2, drop_p=0.1)
+        GRFmodel = nn.DataParallel(GRFmodel)
         GRFmodel.load_state_dict(torch.load(self.modelPathGRF,
                                             map_location=self.device))
         self.GRFmodel = GRFmodel
@@ -778,10 +798,12 @@ class GRF_predictor:
 
     def GRF_one_prediction(self, idx, sensor_dir):
         model = self.GRFmodel
+        model = model.to(self.device)
         model.eval()
         with torch.no_grad():
             x = self.LSTM_GRF_transform(idx, sensor_dir)
-            output = model(x).detach().cpu().numpy()
+            input = x.to(self.device)
+            output = model(input).detach().cpu().numpy()
             output = output.squeeze(0)
 
         return output
