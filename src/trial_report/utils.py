@@ -23,9 +23,6 @@ def create_folder(directory):
 
 def get_ignored_cycle(array_df, cycle_num, is_gait_phase=False):
     multiplier = 1 + is_gait_phase
-    print(multiplier)
-    print(cycle_num)
-    print(len(array_df))
     if cycle_num[1] is None:
         if cycle_num[0] is not None:
             array_df = array_df[cycle_num[0]*multiplier:]
@@ -33,7 +30,6 @@ def get_ignored_cycle(array_df, cycle_num, is_gait_phase=False):
         array_df = array_df[cycle_num[0]*multiplier:-cycle_num[1]*multiplier]
     else:
         array_df = array_df[:-cycle_num[1]*multiplier]
-    print(len(array_df))
     return array_df
 
 
@@ -119,10 +115,6 @@ def save_each_cycle_timeseries_data(
             (df_gait.iloc[:, 0] >= start_time) &
             (df_gait.iloc[:, 0] <= end_time)
             ]
-        # print(cycle_num)
-        # print(main_data)
-        # print(df_gait[(df_gait.iloc[:, 0] >= start_time)])
-        # print(df_gait_cycle)
         foot_off_timing = DataProcess.get_foot_off_time(df_gait_cycle)[0]
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 12))
@@ -569,8 +561,6 @@ class DataProcess:
         collection_data_nonparetic_sel = \
             copy.deepcopy(collection_data_nonparetic)
 
-        print(len(collection_data_paretic_sel))
-        print(sorted(idx_paretic_ignore, reverse=True))
         for idx in sorted(idx_paretic_ignore, reverse=True):
             collection_data_paretic_sel.pop(idx)
         for idx in sorted(idx_non_paretic_ignore, reverse=True):
@@ -834,6 +824,7 @@ class DataProcess:
 class Picker:
     def __init__(self, data):
         self.del_index = []
+        self.selected_idx = []
         self.data = data
         self.fig, self.ax = plt.subplots()
         self.fig.subplots_adjust(bottom=0.2)
@@ -842,9 +833,14 @@ class Picker:
         self.ax.set_ylabel("y", picker=True)
         self.fig.canvas.mpl_connect('pick_event', self.pick)
         self.ax_update = self.fig.add_axes([0.81, 0.05, 0.1, 0.075])
+        self.ax_redraw = self.fig.add_axes([0.7, 0.05, 0.1, 0.075])
+        self.ax_reset = self.fig.add_axes([0.59, 0.05, 0.1, 0.075])
         self.b_update = Button(self.ax_update, 'Update')
-        self.b_update.on_clicked(self.draw)
-        self.selected_idx = []
+        self.b_redraw = Button(self.ax_redraw, 'Redraw')
+        self.b_reset = Button(self.ax_reset, 'Reset')
+        self.b_update.on_clicked(self.update)
+        self.b_redraw.on_clicked(self.redraw)
+        self.b_reset.on_clicked(self.reset)
         plt.show()
 
     def pick(self, event):
@@ -855,11 +851,22 @@ class Picker:
                 self.ax.plot(ind, self.data[ind], 'r*')
                 plt.draw()
 
-    def draw(self, event):
-        self.ax.clear()
-        self.ax.plot(self.data, picker=True, pickradius=5)
+    def update(self, event):
         self.selected_idx = sorted(self.del_index)
         plt.close()
+
+    def redraw(self, event):
+        data_del_ = copy.deepcopy(self.data)
+        for idx in self.del_index:
+            data_del_[idx] = None
+        self.ax.clear()
+        self.ax.plot(data_del_, 'bo', picker=True, pickradius=5)
+        plt.draw()
+
+    def reset(self, event):
+        self.del_index = []
+        self.ax.clear()
+        self.ax.plot(self.data, 'bo', picker=True, pickradius=5)
 
 
 def main():
