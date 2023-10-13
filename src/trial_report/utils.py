@@ -30,9 +30,9 @@ def get_ignored_cycle(array_df, cycle_num, is_gait_phase=False):
         if cycle_num[0] is not None:
             array_df = array_df[cycle_num[0]*multiplier:]
     elif cycle_num[0] is not None:
-        array_df = array_df[cycle_num[0]*multiplier:-cycle_num[1]]
+        array_df = array_df[cycle_num[0]*multiplier:-cycle_num[1]*multiplier]
     else:
-        array_df = array_df[:-cycle_num[1]]
+        array_df = array_df[:-cycle_num[1]*multiplier]
     print(len(array_df))
     return array_df
 
