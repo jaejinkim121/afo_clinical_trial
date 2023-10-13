@@ -1,10 +1,8 @@
 import tkinter as tk
 from tkinter import font, filedialog
 from bagpy import bagreader
-
 import dataclasses
 from utils import create_folder
-import numpy as np
 import pandas as pd
 import json
 import document
