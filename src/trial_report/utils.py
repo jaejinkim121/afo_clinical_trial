@@ -164,7 +164,7 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
     np_paretic = np.array(data_paretic)
     np_non_paretic = np.array(data_non_paretic)
 
-    fig = plt.figure(figsize=(16, 8))
+    fig = plt.figure(figsize=(16, 12))
     plt.plot(
         np.arange(1, len(np_paretic) + 1), np_paretic,
         color='red', label='paretic side'
@@ -177,7 +177,10 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
     plt.ylabel(data_label, fontsize=30)
     plt.title(title_label, fontsize=45)
     plt.legend(loc='best', fontsize=25)
+    plt.xticks(fontsize=25)
+    plt.yticks(fontsize=25)
     create_folder(graph_save_path)
+    fig.tight_layout()
     fig.savefig(graph_save_path + title_label + '_along_cycle.png')
     # df saving
     df_data = pd.DataFrame()
@@ -189,6 +192,7 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
         )
     df_data.to_csv(data_save_path + title_label + '_along_cycle.csv',
                    sep=",", header=True)
+    plt.close(fig)
 
 
 def match_both_side_cycle(collection_paretic, collection_non_paretic,
@@ -585,7 +589,9 @@ class DataProcess:
         x_nonparetic = np.linspace(mean_diff_both, 100 + mean_diff_both,
                                    x_num)
 
-        fig, axs = plt.subplots(2, 1, gridspec_kw={'height_ratios': [5, 1]})
+        fig, axs = plt.subplots(2, 1,
+                                gridspec_kw={'height_ratios': [5, 1]},
+                                figsize=(16, 12))
         fig.subplots_adjust(hspace=0.3)
 
         axs[0].plot(x_paretic, mean_paretic, 'r-')
@@ -601,8 +607,10 @@ class DataProcess:
                             color=(0.1, 0.1, 0.9, 0.2),
                             linewidth=0)
 
-        axs[0].set_ylabel(data_label)
-        axs[0].set_title(title_graph)
+        axs[0].set_ylabel(data_label, fontsize=30)
+        axs[0].set_title(title_graph, fontsize=45)
+        axs[0].xaxis.set_tick_params(labelsize=25)
+        axs[0].yaxis.set_tick_params(labelsize=25)
 
         axs[1].axis('off')
         axs[1].barh(
@@ -638,7 +646,9 @@ class DataProcess:
         axs[0].set_xlim(0, xlim_upper)
         axs[1].set_xlim(0, xlim_upper)
         create_folder(save_path)
+        fig.tight_layout()
         fig.savefig(save_path + '%s_mean_cycle.png' % title_graph)
+        plt.close(fig)
 
     @staticmethod
     def data_process(

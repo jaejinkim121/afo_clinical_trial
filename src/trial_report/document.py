@@ -17,11 +17,17 @@ def num_array_to_string_array(num_array):
 def make_report(path, data_report: ClinicalDataset):
     # Document Formatting
     story = []
-    save_path = path + "/report/data/" +\
-        data_report.metadata.test_label + '/' +\
-        data_report.metadata.session_type + '/report.pdf'
+    path_base = \
+        "{}/report/data/{}/{}/".format(
+            path,
+            data_report.metadata.test_label,
+            data_report.metadata.session_type
+        )
+    pdf_path = path_base + 'report.pdf'
+    image_path_base = path_base + "graph/"
+
     doc = SimpleDocTemplate(
-        save_path,
+        pdf_path,
         pagesize=A4,
         rightMargin=72,
         leftMargin=72,
@@ -63,6 +69,7 @@ def make_report(path, data_report: ClinicalDataset):
     ])
 
     title = "Training Report"
+    graph_title = "Data analysis"
 
     sub1_title = "1. Basic info"
     label_sub1_left = ["Subject Name",
@@ -131,10 +138,16 @@ def make_report(path, data_report: ClinicalDataset):
     gait_speed_distance = \
         num_array_to_string_array(data_report.gait_speed_distance)
 
+    sole_sensor_text = "Data derived from sole sensor data"
+    kinematics_text = "Kinematic data derived from IMU data"
+
     paragraph_title = Paragraph(title, styles['Title'])
     paragraph_sub1_title = Paragraph(sub1_title, styles['Heading2'])
     paragraph_sub2_title = Paragraph(sub2_title, styles['Heading2'])
     paragraph_sub3_title = Paragraph(sub3_title, styles['Heading2'])
+    paragraph_graph_title = Paragraph(graph_title, styles['Title'])
+    paragraph_graph_sole_sensor = Paragraph(sole_sensor_text, styles['Heading2'])
+    paragraph_graph_kinematics = Paragraph(kinematics_text, styles['Heading2'])
 
     text_sub1 = np.array(
         [label_sub1_left, data_sub1_left,
@@ -161,6 +174,46 @@ def make_report(path, data_report: ClinicalDataset):
     text_sub3 = limb_length
     table_sub3 = Table(text_sub3)
 
+    image_path_grf_impulse = image_path_base + "GRF_impulse_along_cycle.png"
+    image_path_grf_max = image_path_base + "GRF_max_along_cycle.png"
+    image_path_grf_mean_cycle = image_path_base + "GRF_mean_cycle.png"
+    image_path_stance_time = \
+        image_path_base + "Stance_Time_ignored_along_cycle.png"
+    image_path_toe_mean_cycle = image_path_base + "Toe_mean_cycle.png"
+    image_path_toe_max = image_path_base + "Toe_max_along_cycle.png"
+    image_path_stride = image_path_base + "Stride_along_cycle.png"
+
+    chart_style = TableStyle(
+        [
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ("VALIGN", (0, 0), (-1, -1), 'CENTER'),
+            ("LEFTPADDING", (0, 0), (-1, -1), 1),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 1),
+
+        ]
+    )
+    image_height = 205
+    image_width = 260
+    image_grf_mean_cycle = Image(image_path_grf_mean_cycle,
+                                 height=image_height, width=image_width)
+    image_grf_impulse = Image(image_path_grf_impulse,
+                              height=image_height, width=image_width)
+    image_grf_max = Image(image_path_grf_max,
+                          height=image_height, width=image_width)
+    image_stance_time = Image(image_path_stance_time,
+                              height=image_height, width=image_width)
+    image_toe_mean_cycle = Image(image_path_toe_mean_cycle,
+                                 height=image_height, width=image_width)
+    image_toe_max = Image(image_path_toe_max,
+                          height=image_height, width=image_width)
+    image_stride = Image(image_path_stride,
+                         height=image_height, width=image_width)
+
+    chart_sole_sensor = Table([[image_grf_mean_cycle, image_stance_time],
+                               [image_grf_max, image_grf_impulse]])
+    chart_kinematics = Table([[image_toe_mean_cycle, image_toe_max],
+                              [image_stride, None]])
+
     spacer_10_point = Spacer(1, 10)
     spacer_30_point = Spacer(1, 30)
     spacer_200_point = Spacer(1, 200)
@@ -175,8 +228,14 @@ def make_report(path, data_report: ClinicalDataset):
     story.append(spacer_10_point)
     story.append(table_sub2)
     story.append(spacer_200_point)
-    story.append(paragraph_title)
-    #image_path_ = path + "/data/graph/" + test_date + "/" + session + "/grf [N].png"
-    #im_ = Image(image_path_)
-    #story.append(im_)
+    story.append(paragraph_graph_title)
+    story.append(spacer_10_point)
+    story.append(paragraph_graph_sole_sensor)
+    story.append(spacer_10_point)
+    story.append(chart_sole_sensor)
+    story.append(spacer_10_point)
+    story.append(paragraph_graph_kinematics)
+    story.append(spacer_10_point)
+    story.append(chart_kinematics)
+
     doc.build(story)
