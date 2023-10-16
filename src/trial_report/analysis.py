@@ -122,9 +122,11 @@ class ClinicalAnalysis:
         return [paretic_mean, paretic_stdev,
                 non_paretic_mean, non_paretic_stdev, symmetry]
 
+    @staticmethod
     def data_analysis_toe_clearance():
         ...
 
+    @staticmethod
     def data_analysis_analog_data():
         ...
 
