@@ -48,7 +48,8 @@ def folder_path_name(path, option=None, char=None, T_F=None):
 
 # LSTM model structure for calibration
 class LSTM_Calib(nn.Module):
-    def __init__(self, input_size=1, hidden_size_1=15, hidden_size_2=60,
+    def __init__(self, device,
+                 input_size=1, hidden_size_1=15, hidden_size_2=60,
                  hidden_size_3=20, num_layers=2, drop_p=0.3):
         super(LSTM_Calib, self).__init__()
 
@@ -58,6 +59,7 @@ class LSTM_Calib(nn.Module):
         self.hidden_size_3 = hidden_size_3
         self.num_layers = num_layers
         self.dropout = drop_p
+        self.device = device
 
         self.lstm = nn.LSTM(
             input_size=input_size,
@@ -77,8 +79,10 @@ class LSTM_Calib(nn.Module):
         batch_size = x.shape[0]
         h0 = torch.zeros(self.num_layers, batch_size,
                          self.hidden_size_1).requires_grad_()
+        h0 = h0.to(self.device)
         c0 = torch.zeros(self.num_layers, batch_size,
                          self.hidden_size_1).requires_grad_()
+        c0 = c0.to(self.device)
 
         outn, (hn, cn) = self.lstm(x, (h0, c0))
         out1 = self.linear1(outn[:, :, -1])
@@ -90,7 +94,8 @@ class LSTM_Calib(nn.Module):
 
 # LSTM model structure for GRF estimation
 class LSTM_GRF(nn.Module):
-    def __init__(self, input_size=6, hidden_size_1=15, hidden_size_2=60,
+    def __init__(self, device,
+                 input_size=6, hidden_size_1=15, hidden_size_2=60,
                  hidden_size_3=20, num_layers=2, drop_p=0.3):
         super(LSTM_GRF, self).__init__()
 
@@ -100,6 +105,7 @@ class LSTM_GRF(nn.Module):
         self.hidden_size_3 = hidden_size_3
         self.num_layers = num_layers
         self.dropout = drop_p
+        self.device = device
 
         self.lstm = nn.LSTM(
             input_size=input_size,
@@ -119,8 +125,10 @@ class LSTM_GRF(nn.Module):
         batch_size = x.shape[0]
         h0 = torch.zeros(self.num_layers, batch_size,
                          self.hidden_size_1, device=x.device).requires_grad_()
+        h0 = h0.to(self.device)
         c0 = torch.zeros(self.num_layers, batch_size,
                          self.hidden_size_1, device=x.device).requires_grad_()
+        c0 = c0.to(self.device)
 
         outn, (hn, cn) = self.lstm(x, (h0, c0))
         out1 = self.linear1(outn[:, :, -1])
@@ -191,8 +199,9 @@ class GRF_predictor:
         # D://OneDrive - SNU/범부처-DESKTOP-2JL44HH/C_임상_2023/
         # 2023-08-16/report_RAW/2MWT_BARE_CueOFF_90m/
         self.save_path = save_path
-        self.device = torch.device("cuda:0"
-                                   if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cuda:0"
+        #                            if torch.cuda.is_available() else "cpu")
+        self.device = "cpu"
         print(self.device)
         self.size = str(size)
         self.sensor_num = int(6)
@@ -352,14 +361,20 @@ class GRF_predictor:
                     self.right_grf = pd.read_csv(path_list[num], header=0)
 
     def grf_initialization(self):
+        torch.set_num_threads(16)
+        print(torch.get_num_threads())
         # Data process
         self.vout_data_read()
         self.force_model_load()
         time3 = time.time()
+        print(torch.get_num_threads())
+        print("Sensel start")
         self.Calib_total_prediction()
         time4 = time.time()
         self.GRF_model_load()
         time5 = time.time()
+        print(torch.get_num_threads())
+        print("GRF start")
         self.GRF_total_prediction()
         time6 = time.time()
         # Data load for saving
@@ -432,18 +447,18 @@ class GRF_predictor:
         self.leftModel = np.array([])
         self.rightModel = np.array([])
         for num in np.arange(self.sensor_num):
-            leftmodel = LSTM_Calib(hidden_size_1=self.calib_input_length,
+            leftmodel = LSTM_Calib(device=self.device,
+                                   hidden_size_1=self.calib_input_length,
                                    hidden_size_2=45,
                                    hidden_size_3=35,
                                    num_layers=6,
                                    drop_p=0.1)
-            rightmodel = LSTM_Calib(hidden_size_1=self.calib_input_length,
+            rightmodel = LSTM_Calib(device=self.device,
+                                    hidden_size_1=self.calib_input_length,
                                     hidden_size_2=45,
                                     hidden_size_3=35,
                                     num_layers=6,
                                     drop_p=0.1)
-            leftmodel = nn.DataParallel(leftmodel)
-            rightmodel = nn.DataParallel(rightmodel)
             leftmodel.load_state_dict(torch.load(
                 self.modelPathCalib + self.size + "Left_" +
                 str(num + 1) + ".pt",
@@ -736,10 +751,10 @@ class GRF_predictor:
     #     self.SyncedRightForce = np.array(SyncedRightForce.iloc[:, 1:])
 
     def GRF_model_load(self):
-        GRFmodel = LSTM_GRF(input_size=6, hidden_size_1=self.GRF_input_length,
+        GRFmodel = LSTM_GRF(device=self.device,
+                            input_size=6, hidden_size_1=self.GRF_input_length,
                             hidden_size_2=20, hidden_size_3=15,
                             num_layers=2, drop_p=0.1)
-        GRFmodel = nn.DataParallel(GRFmodel)
         GRFmodel.load_state_dict(torch.load(self.modelPathGRF,
                                             map_location=self.device))
         self.GRFmodel = GRFmodel
@@ -801,10 +816,14 @@ class GRF_predictor:
         model = model.to(self.device)
         model.eval()
         with torch.no_grad():
+            a = time.time()
             x = self.LSTM_GRF_transform(idx, sensor_dir)
+            b = time.time()
             input = x.to(self.device)
             output = model(input).detach().cpu().numpy()
             output = output.squeeze(0)
+            c = time.time()
+            print("{:.5f} {:.5f}".format(b-a, c-b))
 
         return output
 

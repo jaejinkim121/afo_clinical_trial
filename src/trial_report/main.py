@@ -7,7 +7,7 @@ def get_path():
     path = path.replace('\\', '/')
     path = path[:-17]
 
-    return path
+    return path                                                                                                                            
 
 def main():
     path = get_path()

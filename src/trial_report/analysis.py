@@ -2,6 +2,8 @@ from utils import *
 from define import *
 from mh import GRF_predictor
 
+import time
+
 
 class ClinicalAnalysis:
     @staticmethod
@@ -32,6 +34,7 @@ class ClinicalAnalysis:
         create_folder(inference_data_save_path)
         #####################################################################
         # GRF class assign
+        inference_start_time = time.time()
         grf_class = GRF_predictor(
             start_time=start_time,
             leftPath=left_path,
@@ -45,6 +48,10 @@ class ClinicalAnalysis:
             paretic_side=paretic_side,
             BW=body_weight
         )
+        inference_end_time = time.time()
+        print("Total inference time: {:.5f}".format(
+            inference_end_time - inference_start_time
+            ))
         if meta_data.paretic_side == Side.LEFT:
             paretic_data = grf_class.left_grf
             non_paretic_data = grf_class.right_grf
