@@ -202,17 +202,17 @@ def make_report(path, data_report: ClinicalDataset):
                           height=image_height, width=image_width)
     image_stance_time = Image(image_path_stance_time,
                               height=image_height, width=image_width)
-    image_toe_mean_cycle = Image(image_path_toe_mean_cycle,
-                                 height=image_height, width=image_width)
-    image_toe_max = Image(image_path_toe_max,
-                          height=image_height, width=image_width)
-    image_stride = Image(image_path_stride,
-                         height=image_height, width=image_width)
+    # image_toe_mean_cycle = Image(image_path_toe_mean_cycle,
+    #                              height=image_height, width=image_width)
+    # image_toe_max = Image(image_path_toe_max,
+    #                       height=image_height, width=image_width)
+    # image_stride = Image(image_path_stride,
+    #                      height=image_height, width=image_width)
 
     chart_sole_sensor = Table([[image_grf_mean_cycle, image_stance_time],
                                [image_grf_max, image_grf_impulse]])
-    chart_kinematics = Table([[image_toe_mean_cycle, image_toe_max],
-                              [image_stride, None]])
+    # chart_kinematics = Table([[image_toe_mean_cycle, image_toe_max],
+    #                           [image_stride, None]])
 
     spacer_10_point = Spacer(1, 10)
     spacer_30_point = Spacer(1, 30)
@@ -236,6 +236,6 @@ def make_report(path, data_report: ClinicalDataset):
     story.append(spacer_10_point)
     story.append(paragraph_graph_kinematics)
     story.append(spacer_10_point)
-    story.append(chart_kinematics)
+    # story.append(chart_kinematics)
 
     doc.build(story)
