@@ -1,0 +1,15 @@
+1차로 업로드 -> 후에 튜닝하는대로 재업로드 예정
+
+<현재 parameters>
+1) INPUT_LENGTH: 16
+2) LR: 0.0005
+3) num_layers: 4
+
+batch_size: 42
+epochs: 300
+train_size: 0.85
+n_warmup_steps: 10
+decay_rate: 0.985
+hidden_size_2: 30
+hidden_size_3: 15
+drop_p: 0.1
