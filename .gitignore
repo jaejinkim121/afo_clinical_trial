@@ -9,3 +9,13 @@ statistics.csv
 graph/
 *.pdf
 dummy/
+
+
+graph_BAR/
+graph_RAW/
+data/RH-*/
+*.zip
+*/data_231013/
+
+
+
