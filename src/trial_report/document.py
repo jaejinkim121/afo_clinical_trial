@@ -3,8 +3,7 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.pagesizes import A4
 import numpy as np
-from define import ClinicalDataset
-
+from define import ClinicalDataset, Session
 
 def num_array_to_string_array(num_array):
     array_return = [""] * len(num_array)
@@ -96,7 +95,8 @@ def make_report(path, data_report: ClinicalDataset):
         "Toe Clearance",
         "Stance Time",
         "Gait Speed (IMU)",
-        "Gait Speed (Distance)"
+        "Gait Speed (Distance)",
+        "Gait Speed (Time)"
     ]
 
     subject_name = data_report.metadata.name
@@ -117,7 +117,7 @@ def make_report(path, data_report: ClinicalDataset):
                       paretic_side,
                       sole_size]
     data_sub1_right = [test_date, test_label,
-                       session_type, session[-1],
+                       session_type, session_list[-1],
                        sensor_calibration_date]
 
     limb_length_femur = data_report.limb_length["Femur"]
@@ -135,9 +135,14 @@ def make_report(path, data_report: ClinicalDataset):
     toe_clearance = num_array_to_string_array(data_report.toe_clearance)
     stance_time = num_array_to_string_array(data_report.stance_time)
     gait_speed_imu = num_array_to_string_array(data_report.gait_speed_imu)
-    gait_speed_distance = \
-        num_array_to_string_array(data_report.gait_speed_distance)
-
+    if Session.is_2MWT(data_report.metadata.session_type):
+        gait_speed_distance = \
+            num_array_to_string_array(data_report.gait_speed_distance)
+        gait_speed_time = ["N/A"]
+    else:
+        gait_speed_distance = ["N/A"]
+        gait_speed_time = num_array_to_string_array(
+            data_report.gait_speed_distance)
     sole_sensor_text = "Data derived from sole sensor data"
     kinematics_text = "Kinematic data derived from IMU data"
 
@@ -165,7 +170,9 @@ def make_report(path, data_report: ClinicalDataset):
                  ["Toe Clearance"] + toe_clearance,
                  ["Stance Time"] + stance_time,
                  ["Gait Speed (IMU)"] + gait_speed_imu,
-                 ["Gait Speed (Distance)"] + gait_speed_distance]
+                 ["Gait Speed (Distance)"] + gait_speed_distance,
+                 ["Gait Speed (Time)"] + gait_speed_time
+                 ]
     table_sub2 = Table(text_sub2,
                        style=style_sub2_table,
                        colWidths=(130, 65, 65, 65, 65, 65),
@@ -216,7 +223,7 @@ def make_report(path, data_report: ClinicalDataset):
 
     spacer_10_point = Spacer(1, 10)
     spacer_30_point = Spacer(1, 30)
-    spacer_200_point = Spacer(1, 200)
+    spacer_200_point = Spacer(1, 170)
 
     story.append(paragraph_title)
     story.append(spacer_10_point)

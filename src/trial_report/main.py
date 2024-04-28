@@ -9,6 +9,7 @@ def get_path():
 
     return path
 
+
 def main():
     path = get_path()
     report = ReportMaker(path)

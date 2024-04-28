@@ -45,6 +45,10 @@ class Session(str, Enum):
     TEN_METER_BARE_CUE_OFF = "10MWT_BARE_CUE_OFF"
     TEN_METER_BARE_CUE_ON = "10MWT_BARE_CUE_ON"
 
+    def is_2MWT(self):
+        trial_type = self.value.split('_')[0]
+        return trial_type == '2MWT'
+
 
 @dataclass
 class Bag:

@@ -237,5 +237,29 @@
 			null
 		],
 		"age": 30
+	},
+	{
+		"bag": "log_2024-04-27-15-07-59.bag",
+		"test_date": "240427",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_230815_280_LP",
+		"model_grf": "GRF_230815/LSTM_GRF.pt",
+		"name": "KJJ",
+		"body_weight": 80.0,
+		"sole_size": 280,
+		"paretic_side": "LEFT",
+		"session_type": "10MWT_OFF_CUE_ON",
+		"date_calibration": "230815",
+		"distance": 233.0,
+		"time": 233.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
 	}
 ]

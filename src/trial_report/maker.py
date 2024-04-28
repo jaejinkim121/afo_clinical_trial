@@ -38,6 +38,20 @@ class ReportMaker:
         self._shoe_size_list = [
             255, 260, 265, 270, 275, 280, 285
         ]
+        self._session_type_list = [
+            "2MWT_BARE_CUE_OFF",
+            "2MWT_BARE_CUE_ON",
+            "2MWT_OFF_CUE_OFF",
+            "2MWT_OFF_CUE_ON",
+            "2MWT_ON_CUE_OFF",
+            "2MWT_ON_CUE_ON",
+            "10MWT_BARE_CUE_OFF",
+            "10MWT_BARE_CUE_ON",
+            "10MWT_OFF_CUE_OFF",
+            "10MWT_OFF_CUE_ON",
+            "10MWT_ON_CUE_OFF",
+            "10MWT_ON_CUE_ON",
+            ]
         outline_label = "flat"
         outline_button = "raised"
         outline_entry = "sunken"
@@ -182,9 +196,26 @@ class ReportMaker:
             relief=outline_entry
         )
 
+        self._label_sub4_2 = tk.Label(
+            self._root,
+            text="5. Session Type",
+            font=self._font_sub_title,
+            relief=outline_label
+        )
+
+        self._int_var_sub4_2_session_type = tk.StringVar()
+        self._int_var_sub4_2_session_type.set(self._session_type_list[0])
+        self._opt_sub4_2_session_type = tk.OptionMenu(
+            self._root,
+            self._int_var_sub4_2_session_type,
+            *self._session_type_list
+        )
+        self._opt_sub4_2_session_type.config(width=30,
+            relief=outline_option)
+
         self._label_sub5 = tk.Label(
             self._root,
-            text="5. Model Path",
+            text="6. Model Path",
             font=self._font_sub_title,
             relief=outline_label
         )
@@ -238,7 +269,7 @@ class ReportMaker:
 
         self._label_sub6 = tk.Label(
             self._root,
-            text="6. Output Path",
+            text="7. Output Path",
             font=self._font_sub_title,
             relief=outline_label
         )
@@ -280,7 +311,7 @@ class ReportMaker:
 
     def run_gui(self):
         self._root.title("AFO Clinical Reporter")
-        self._root.geometry("600x800+100+100")
+        self._root.geometry("600x1000+100+100")
         self._root.resizable(False, False)
 
         self._label_title_main.grid(row=0, column=0, columnspan=6)
@@ -300,7 +331,6 @@ class ReportMaker:
         self._radiobutton_sub2_right.grid(row=5, column=2, columnspan=2,
                                           pady='5')
 
-
         self._label_sub3.grid(row=6, column=0, columnspan=6,
                               sticky='w', padx='30', pady='5')
         self._label_sub3_name.grid(row=7, column=0, columnspan=2,
@@ -315,7 +345,6 @@ class ReportMaker:
                                         sticky='w', padx='44', pady='5')
         self._opt_sub3_shoe_size.grid(row=9, column=2, columnspan=4,
                                       sticky='w')
-
         self._label_sub4.grid(row=10, column=0, columnspan=6,
                               sticky='w', padx='30', pady='5')
         self._entry_sub4_walking_distance.grid(
@@ -349,9 +378,13 @@ class ReportMaker:
         self._button_sub6_output_path.grid(
             row=16, column=4, columnspan=2,
             sticky='w', padx='5', pady='5')
-        self._button_make_output.grid(row=17, column=0, columnspan=3,
+        self._label_sub4_2.grid(row=17, column=0, columnspan=6,
+                                sticky='w', padx='30', pady='5')
+        self._opt_sub4_2_session_type.grid(row=18, column=0, columnspan=6,
+                                           sticky='w', padx='30', pady='5')
+        self._button_make_output.grid(row=19, column=0, columnspan=3,
                                       pady='15')
-        self._button_exit.grid(row=17, column=2, columnspan=3, pady='15')
+        self._button_exit.grid(row=19, column=2, columnspan=3, pady='15')
         #    label_sub3.grid(row=6, column=0, columnspan=6, sticky='w')
         # label_sub4.grid(row=6, column=0)
         # label_sub5.grid(row=7, column=0)
@@ -388,6 +421,7 @@ class ReportMaker:
             self._path_default + '/model/' + bag_.model_cell)
         self._string_var_sub5_grf_model_path.set(
             self._path_default + '/model/' + bag_.model_grf)
+        self._int_var_sub4_2_session_type.set(bag_.session_type.value)
 
 
     def search_calibration_model_path(self):
@@ -450,7 +484,7 @@ class ReportMaker:
             else:
                 side = Side.RIGHT
 
-            session = Session.TWO_MIN_OFF_CUE_OFF
+            session = Session(self._int_var_sub4_2_session_type.get())
 
             new_data = \
                 Bag(bag_name,
@@ -497,17 +531,17 @@ class ReportMaker:
             "/afo_detector/gait_nonparetic"
         )
 
-        TOPIC_JJ = ("/afo_gui/left_toe_clearance",
-                    "/afo_gui/right_toe_clearance",
-                    "/afo_gui/stride")
+        TOPIC_JJ = ("/afo_gui/kinematics_y",
+                    "/afo_gui/kinematics_z"
+                    )
 
         # Definition of Clinical Indices
         # Sample
         cadence_trial_mean = 0.0
         variables = [("vGRF", 1.0, "[N]"), ("Gait Speed", 21.0, "[m/s]")]
 
-        left_toe_path = ""
-        right_toe_path = ""
+        kinematics_y_path = ""
+        kinematics_z_path = ""
         stride_path = ""
 
         left_sole_path = ""
@@ -533,18 +567,19 @@ class ReportMaker:
                 left_toe_path = msg_topic
             elif topic == TOPIC_JJ[1]:
                 right_toe_path = msg_topic
-            elif topic == TOPIC_JJ[2]:
-                stride_path = msg_topic
 
-        # toe_clearance_data = \
-        #     ClinicalIndexJJ.get_clinical_index_max_toe_clearance(
-        #         left_toe_path, right_toe_path)
+        toe_clearance_data = \
+            ClinicalIndexJJ.get_clinical_index_max_toe_clearance(
+                left_toe_path, right_toe_path)
         toe_clearance_data = [1, 1, 1]
 
         # stride_data = ClinicalIndexJJ.get_clinical_index_gait_speed_imu(
         #     stride_path)
         gait_speed_imu_data = [1, 1, 1]
-        gait_speed_distance_data = [1, 1, 1]
+        if Session.is_2MWT(metadata_.session_type):
+            gait_speed_distance_data = metadata_.distance / 120.0   # for 2MWT
+        else:
+            gait_speed_distance_data = 10 / metadata_.distance
 
         grf_max_data, grf_impulse_data, stance_time_data = \
             ClinicalAnalysis.data_analysis_grf(
@@ -579,7 +614,7 @@ class ReportMaker:
             toe_clearance=toe_clearance_data,
             stance_time=stance_time_data,
             gait_speed_imu=gait_speed_imu_data,
-            gait_speed_distance=gait_speed_distance_data,
+            gait_speed_distance=[gait_speed_distance_data],
             metadata=metadata_
         )
 

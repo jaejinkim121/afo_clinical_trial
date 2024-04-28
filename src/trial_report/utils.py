@@ -578,11 +578,11 @@ class DataProcess:
             data_gait_paretic, data_gait_nonparetic)
 
         mean_paretic, std_paretic = DataProcess.average_cropped_time_series(
-            collection_data_paretic, x_num
+            collection_data_paretic_sel, x_num
         )
         mean_nonparetic, std_nonparetic = \
             DataProcess.average_cropped_time_series(
-                collection_data_nonparetic, x_num
+                collection_data_nonparetic_sel, x_num
             )
 
         x_paretic = np.linspace(0, 100, x_num)
