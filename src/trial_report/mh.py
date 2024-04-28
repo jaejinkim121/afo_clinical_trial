@@ -2,6 +2,9 @@ import glob
 import time
 import torch
 import torch.nn as nn
+import numpy as np
+import pandas as pd
+import joblib
 
 from utils import *
 
@@ -194,7 +197,7 @@ class GRF_predictor:
         self.device = torch.device('cpu')
         self.size = str(size)
         self.sensor_num = int(6)
-        self.calib_input_length = int(15)
+        self.calib_input_length = int(16)
         self.GRF_input_length = int(25)
         self.save_path_read()
         # Read gait detection data
@@ -332,9 +335,9 @@ class GRF_predictor:
 
     def saved_data_load(self, path_list, name_list):
         for num, name in enumerate(name_list):
-            data_type = name[4:7]
+            data_type = name[4:7]  # voltage, force, grf
             data_direction = name[-7:-4]
-            if data_direction == 'EFT':
+            if data_direction == 'EFT':  # left
                 if data_type == 'VOL':
                     self.left_voltage = pd.read_csv(path_list[num], header=0)
                 if data_type == 'FOR':
@@ -383,14 +386,14 @@ class GRF_predictor:
             )
         self.left_grf.to_csv(
             self.save_path + 'RAW_GRF_%s_LEFT.csv' %
-            (self.modelPathGRF[-18:-12] + "_" +
-             self.modelPathGRF[-11:-7]),  # 230815_LSTM
+            (self.modelPathGRF[-18:-12] + "_" +  # 230815_
+             self.modelPathGRF[-11:-7]),  # LSTM or SVR_
             sep=",", header=True, index=False
             )
         self.right_grf.to_csv(
             self.save_path + 'RAW_GRF_%s_RIGHT.csv' %
-            (self.modelPathGRF[-18:-12] + "_" +
-             self.modelPathGRF[-11:-7]),  # 230815_LSTM
+            (self.modelPathGRF[-18:-12] + "_" +  # 230815_
+             self.modelPathGRF[-11:-7]),  # LSTM or SVR_
             sep=",", header=True, index=False
             )
 
@@ -426,14 +429,14 @@ class GRF_predictor:
         self.rightModel = np.array([])
         for num in np.arange(self.sensor_num):
             leftmodel = LSTM_Calib(hidden_size_1=self.calib_input_length,
-                                   hidden_size_2=45,
-                                   hidden_size_3=35,
-                                   num_layers=6,
+                                   hidden_size_2=30,  # previous: 45
+                                   hidden_size_3=15,  # previous: 35
+                                   num_layers=4,  # previous: 6
                                    drop_p=0.1)
             rightmodel = LSTM_Calib(hidden_size_1=self.calib_input_length,
-                                    hidden_size_2=45,
-                                    hidden_size_3=35,
-                                    num_layers=6,
+                                    hidden_size_2=30,  # previous: 45
+                                    hidden_size_3=15,  # previous: 35
+                                    num_layers=4,  # previous: 6
                                     drop_p=0.1)
             leftmodel.load_state_dict(torch.load(
                 self.modelPathCalib + self.size + "Left_" +
@@ -717,12 +720,48 @@ class GRF_predictor:
     #     self.SyncedRightForce = np.array(SyncedRightForce.iloc[:, 1:])
 
     def GRF_model_load(self):
-        GRFmodel = LSTM_GRF(input_size=6, hidden_size_1=self.GRF_input_length,
-                            hidden_size_2=20, hidden_size_3=15,
-                            num_layers=2, drop_p=0.1)
-        GRFmodel.load_state_dict(torch.load(self.modelPathGRF,
-                                            map_location=self.device))
-        self.GRFmodel = GRFmodel
+        if self.modelPathGRF[-11:-7] == 'LSTM':
+            GRFmodel = LSTM_GRF(input_size=6,
+                                hidden_size_1=self.GRF_input_length,
+                                hidden_size_2=20, hidden_size_3=15,
+                                num_layers=2, drop_p=0.1)
+            GRFmodel.load_state_dict(torch.load(self.modelPathGRF,
+                                                map_location=self.device))
+            self.GRFmodel = GRFmodel
+        else:  # SVR_
+            self.GRFmodel = joblib.load(self.modelPathGRF)
+
+    def SVR_GRF_transform(self):
+        if self.size == '280':
+            xCOP_list = np.expand_dims(
+                np.array([-0.15, 0.35, 0.15, 0.55, 0.45, 0.0]), axis=1)
+            yCOP_list = np.expand_dims(
+                np.array([1.43, 2.2, 1.54, 2.09, 1.54, 0.0]), axis=1)
+        else:  # 260
+            xCOP_list = np.expand_dims(
+                np.array([-0.15, 0.25, 0.15, 0.45, 0.45, 0.0]), axis=1)
+            yCOP_list = np.expand_dims(
+                np.array([1.215, 1.985, 1.435, 1.875, 1.435, 0.0]), axis=1)
+
+        left_sum = np.expand_dims(
+            np.sum(np.array(self.leftForce), axis=1), axis=1)  # N*1
+        left_xCOP = np.dot(np.array(self.leftForce), xCOP_list)  # N*1
+        left_yCOP = np.dot(np.array(self.leftForce), yCOP_list)  # N*1
+        left_xCOP /= left_sum  # N*1
+        left_yCOP /= left_sum  # N*1
+        left_prop = np.array(self.leftForce) / left_sum  # N*6
+        self.GRF_leftinput = pd.DataFrame(np.concatenate(
+            (left_prop, left_sum, left_xCOP, left_yCOP), axis=1))
+
+        right_sum = np.expand_dims(
+            np.sum(np.array(self.rightForce), axis=1), axis=1)  # N*1
+        right_xCOP = np.dot(np.array(self.rightForce), xCOP_list)  # N*1
+        right_yCOP = np.dot(np.array(self.rightForce), yCOP_list)  # N*1
+        right_xCOP /= right_sum  # N*1
+        right_yCOP /= right_sum  # N*1
+        right_prop = np.array(self.rightForce) / right_sum  # N*6
+        self.GRF_rightinput = pd.DataFrame(np.concatenate(
+            (right_prop, right_sum, right_xCOP, right_yCOP), axis=1))
 
     def LSTM_GRF_transform(self, idx, sensor_dir):
         if sensor_dir == 'L':
@@ -787,27 +826,42 @@ class GRF_predictor:
         return output
 
     def GRF_total_prediction(self):
-        self.GRFleftData = np.array([])
-        self.GRFrightData = np.array([])
-        # LEFT
-        for g_ind in np.arange(len(np.array(self.leftForce))):
-            # prediction
-            leftOutput = self.GRF_one_prediction(idx=g_ind, sensor_dir='L')
-            # post-processing
-            leftOutput /= np.sum(np.array(self.leftForce)[g_ind])
-            leftOutput *= (self.BW * 9.807)
-            self.GRFleftData = np.append(self.GRFleftData,
-                                         leftOutput,
-                                         axis=0)
-        # RIGHT
-        for g_ind in np.arange(len(np.array(self.rightForce))):
-            # prediction
-            rightOutput = self.GRF_one_prediction(idx=g_ind, sensor_dir='R')
-            # post-processing
-            rightOutput /= np.sum(np.array(self.rightForce)[g_ind])
-            rightOutput *= (self.BW * 9.807)
-            self.GRFrightData = np.append(
-                self.GRFrightData, rightOutput, axis=0)
+        if self.modelPathGRF[-11:-7] == 'LSTM':
+            self.GRFleftData = np.array([])
+            self.GRFrightData = np.array([])
+            # LEFT
+            for g_ind in np.arange(len(np.array(self.leftForce))):
+                # prediction
+                leftOutput = self.GRF_one_prediction(
+                    idx=g_ind, sensor_dir='L'
+                    )
+                # post-processing
+                leftOutput /= np.sum(np.array(self.leftForce)[g_ind])
+                leftOutput *= (self.BW * 9.807)
+                self.GRFleftData = np.append(self.GRFleftData,
+                                             leftOutput,
+                                             axis=0)
+            # RIGHT
+            for g_ind in np.arange(len(np.array(self.rightForce))):
+                # prediction
+                rightOutput = self.GRF_one_prediction(
+                    idx=g_ind, sensor_dir='R'
+                    )
+                # post-processing
+                rightOutput /= np.sum(np.array(self.rightForce)[g_ind])
+                rightOutput *= (self.BW * 9.807)
+                self.GRFrightData = np.append(
+                    self.GRFrightData, rightOutput, axis=0)
+        else:  # SVR_
+            # preprocessing
+            self.SVR_GRF_transform()
+
+            self.GRFleftData = np.array(
+                self.GRFmodel.predict(self.GRF_leftinput)) *\
+                (self.BW * 9.807)
+            self.GRFrightData = np.array(
+                self.GRFmodel.predict(self.GRF_rightinput)) *\
+                (self.BW * 9.807)
 
     # def GRF_trimmed_by_gait(self):
     #     # trimmed with respect to stance timing
