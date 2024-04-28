@@ -19,7 +19,7 @@
 		],
 		"ignore_cycle": [
 			null,
-			null
+			3
 		]
 	},
 	{
@@ -66,7 +66,7 @@
 		],
 		"ignore_cycle": [
 			null,
-			null
+			7
 		],
 		"age": 30
 	},
@@ -209,7 +209,7 @@
 			null
 		],
 		"ignore_cycle": [
-			null,
+			6,
 			null
 		],
 		"age": 30
@@ -233,7 +233,7 @@
 			null
 		],
 		"ignore_cycle": [
-			null,
+			4,
 			null
 		],
 		"age": 30

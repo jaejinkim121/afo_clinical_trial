@@ -1,0 +1,32 @@
+- Dataset
+: patients (RH-13~16) + able-bodied (SRBL1~4)
+
+- SVR model
+
+- Preprocessing: columns
+1) Fifth metatarsal head (main)
+2) Second toe (main)
+3) Third metatarsal head (main)
+4) First toe (main)
+5) First metatarsal head (main)
+6) Heel (main)
+--------------------------
+7) main summation
+--------------------------
+8) main xCOP
+9) main yCOP
+--------------------------
+
+- output: normalized_vGRF
+
+- Parameters:
+1) RANDOM_STATE = 42
+2) svr_kernel = 'rbf'
+3) svr_gamma = 'scale'
+4) svr_model = make_pipeline(
+        StandardScaler(), SVR(kernel=svr_kernel, gamma=svr_gamma)
+        )
+
+<<CODE>>
+svr_model = joblib.load(sav_path)
+pred_y = svr_model.predict(X)

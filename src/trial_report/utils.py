@@ -9,7 +9,7 @@ import os
 from bagpy import bagreader
 
 
-SAVE_EACH_CYCLE_DATA = False
+SAVE_EACH_CYCLE_DATA = True
 
 
 # Create Directory
@@ -125,9 +125,9 @@ def save_each_cycle_timeseries_data(
                    0, np.max(main_data[:, 1]), color='black',
                    linewidth=2
                    )
-        ax1.set_xlabel("Time [s]", fontsize=30)
-        ax1.set_ylabel(data_label[0] + unit_label[0], fontsize=30)
-        ax1.set_title(title_label[0] + '_' + str(cycle_num), fontsize=45)
+        ax1.set_ylabel(data_label[0] + '' + unit_label[0], fontsize=20)
+        ax1.set_title(title_label[0] + '_' + str(cycle_num), fontsize=20)
+        ax1.tick_params(axis='both', labelsize=15)
         ax1.legend(loc="best")
 
         extra_data_max = 0
@@ -141,9 +141,10 @@ def save_each_cycle_timeseries_data(
                 extra_data_max = np.max(extra_dataset[cycle_num][:, 1])
         ax1.vlines(foot_off_timing, 0, extra_data_max,
                    color='black', linewidth=2)
-        ax2.set_xlabel("Time [s]", fontsize=30)
-        ax2.set_ylabel(data_label[1] + unit_label[1], fontsize=30)
-        ax2.set_title(title_label[1] + '_' + str(cycle_num), fontsize=45)
+        ax2.set_xlabel("Time [s]", fontsize=20)
+        ax2.set_ylabel(data_label[1] + '' + unit_label[1], fontsize=20)
+        ax2.set_title(title_label[1] + '_' + str(cycle_num), fontsize=20)
+        ax2.tick_params(axis='both', labelsize=15)
         ax2.legend(loc="best")
         fig.savefig(
             save_path + title_label[0] + '_' + title_label[1] + '_' +
