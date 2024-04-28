@@ -9,7 +9,7 @@ import os
 from bagpy import bagreader
 
 
-SAVE_EACH_CYCLE_DATA = True
+SAVE_EACH_CYCLE_DATA = False
 
 
 # Create Directory

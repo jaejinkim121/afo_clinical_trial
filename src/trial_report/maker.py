@@ -590,7 +590,7 @@ class ReportMaker:
                 right_path=right_sole_path,
                 paretic_path=paretic_gait_path,
                 non_paretic_path=nonparetic_gait_path,
-                save_each_cycle_flag=True
+                save_each_cycle_flag=False
                 )
 
         # Save statistics.csv
