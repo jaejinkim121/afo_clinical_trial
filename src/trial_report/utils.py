@@ -353,8 +353,11 @@ class DataProcess:
             time_diff.append(nonparetic_ic[idx_np] - tic)
 
         time_diff = np.array(time_diff)
-        mean_ic_diff = np.mean(time_diff) / mean_cycle
-        std_ic_diff = np.std(time_diff) / mean_cycle
+        time_diff_crop = time_diff[
+            np.where(np.logical_and(0.1 < time_diff, time_diff < 1.5))
+        ]
+        mean_ic_diff = np.mean(time_diff_crop) / mean_cycle
+        std_ic_diff = np.std(time_diff_crop) / mean_cycle
 
         if paretic_ic[0] > paretic_fo[0]:
             paretic_fo = paretic_fo[1:]
@@ -365,8 +368,11 @@ class DataProcess:
         for tic, tfo in zip(paretic_ic, paretic_fo):
             time_diff.append(tfo - tic)
         time_diff = np.array(time_diff)
-        mean_stance_time_paretic = np.mean(time_diff)
-        std_stance_time_paretic = np.std(time_diff)
+        time_diff_crop = time_diff[
+            np.where(np.logical_and(0.2 < time_diff, time_diff < 1.5))
+        ]
+        mean_stance_time_paretic = np.mean(time_diff_crop)
+        std_stance_time_paretic = np.std(time_diff_crop)
         mean_stance_percent_paretic = mean_stance_time_paretic / mean_cycle
         std_stance_percent_paretic = std_stance_time_paretic / mean_cycle
 
@@ -379,8 +385,11 @@ class DataProcess:
         for tic, tfo in zip(nonparetic_ic, nonparetic_fo):
             time_diff.append(tfo - tic)
         time_diff = np.array(time_diff)
-        mean_stance_time_nonparetic = np.mean(time_diff)
-        std_stance_time_nonparetic = np.std(time_diff)
+        time_diff_crop = time_diff[
+            np.where(np.logical_and(0.2 < time_diff, time_diff < 1.5))
+        ]
+        mean_stance_time_nonparetic = np.mean(time_diff_crop)
+        std_stance_time_nonparetic = np.std(time_diff_crop)
         mean_stance_percent_nonparetic = \
             mean_stance_time_nonparetic / mean_cycle
         std_stance_percent_nonparetic = \
@@ -581,12 +590,12 @@ class DataProcess:
          _, _, _, _] = DataProcess.gait_phase_pre_processing(
             data_gait_paretic, data_gait_nonparetic)
         mean_paretic, std_paretic = DataProcess.average_cropped_time_series(
-            collection_data_paretic, x_num
+            collection_data_paretic_sel, x_num
         )
 
         mean_nonparetic, std_nonparetic = \
             DataProcess.average_cropped_time_series(
-                collection_data_nonparetic, x_num
+                collection_data_nonparetic_sel, x_num
             )
 
         x_paretic = np.linspace(0, 100, x_num)

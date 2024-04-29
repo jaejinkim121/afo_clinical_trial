@@ -219,7 +219,7 @@ def make_report(path, data_report: ClinicalDataset):
 
     spacer_10_point = Spacer(1, 10)
     spacer_30_point = Spacer(1, 30)
-    spacer_200_point = Spacer(1, 180)
+    spacer_200_point = Spacer(1, 200)
 
     story.append(paragraph_title)
     story.append(spacer_10_point)
@@ -233,11 +233,7 @@ def make_report(path, data_report: ClinicalDataset):
     story.append(spacer_200_point)
     story.append(paragraph_graph_title)
     story.append(spacer_10_point)
-    story.append(paragraph_graph_sole_sensor)
-    story.append(spacer_10_point)
     story.append(chart_sole_sensor)
-    story.append(spacer_10_point)
-    story.append(paragraph_graph_kinematics)
     story.append(spacer_10_point)
     story.append(chart_kinematics)
 
