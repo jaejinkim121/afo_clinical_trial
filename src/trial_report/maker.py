@@ -8,6 +8,7 @@ import json
 import document
 from define import *
 from analysis import ClinicalAnalysis
+from jj import ClinicalIndexJJ
 
 
 def load_bag(bag: str, data_json):
@@ -564,18 +565,22 @@ class ReportMaker:
                 nonparetic_gait_path = msg_topic
 
             if topic == TOPIC_JJ[0]:
-                left_toe_path = msg_topic
+                kinematics_y_path = msg_topic
             elif topic == TOPIC_JJ[1]:
-                right_toe_path = msg_topic
+                kinematics_z_path = msg_topic
 
         toe_clearance_data = \
-            ClinicalIndexJJ.get_clinical_index_max_toe_clearance(
-                left_toe_path, right_toe_path)
-        toe_clearance_data = [1, 1, 1]
+            ClinicalIndexJJ.data_process_kinematics(
+                kinematics_y_path,
+                kinematics_z_path,
+                paretic_gait_path, nonparetic_gait_path,
+                metadata_,
+                self._path_default,
+                start_time
+            )
 
-        # stride_data = ClinicalIndexJJ.get_clinical_index_gait_speed_imu(
-        #     stride_path)
         gait_speed_imu_data = [1, 1, 1]
+
         if Session.is_2MWT(metadata_.session_type):
             gait_speed_distance_data = metadata_.distance / 120.0   # for 2MWT
         else:

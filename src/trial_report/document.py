@@ -94,7 +94,6 @@ def make_report(path, data_report: ClinicalDataset):
         "GRF Impulse",
         "Toe Clearance",
         "Stance Time",
-        "Gait Speed (IMU)",
         "Gait Speed (Distance)",
         "Gait Speed (Time)"
     ]
@@ -134,7 +133,6 @@ def make_report(path, data_report: ClinicalDataset):
     grf_impulse = num_array_to_string_array(data_report.grf_impulse)
     toe_clearance = num_array_to_string_array(data_report.toe_clearance)
     stance_time = num_array_to_string_array(data_report.stance_time)
-    gait_speed_imu = num_array_to_string_array(data_report.gait_speed_imu)
     if Session.is_2MWT(data_report.metadata.session_type):
         gait_speed_distance = \
             num_array_to_string_array(data_report.gait_speed_distance)
@@ -169,7 +167,6 @@ def make_report(path, data_report: ClinicalDataset):
                  ["GRF Impulse"] + grf_impulse,
                  ["Toe Clearance"] + toe_clearance,
                  ["Stance Time"] + stance_time,
-                 ["Gait Speed (IMU)"] + gait_speed_imu,
                  ["Gait Speed (Distance)"] + gait_speed_distance,
                  ["Gait Speed (Time)"] + gait_speed_time
                  ]
@@ -186,8 +183,8 @@ def make_report(path, data_report: ClinicalDataset):
     image_path_grf_mean_cycle = image_path_base + "GRF_mean_cycle.png"
     image_path_stance_time = \
         image_path_base + "Stance_Time_ignored_along_cycle.png"
-    image_path_toe_mean_cycle = image_path_base + "Toe_mean_cycle.png"
-    image_path_toe_max = image_path_base + "Toe_max_along_cycle.png"
+    image_path_toe_mean_cycle = image_path_base + "Toe Clearance_mean_cycle.png"
+    image_path_toe_max = image_path_base + "Toe Clearance_max_along_cycle.png"
     image_path_stride = image_path_base + "Stride_along_cycle.png"
 
     chart_style = TableStyle(
@@ -209,21 +206,20 @@ def make_report(path, data_report: ClinicalDataset):
                           height=image_height, width=image_width)
     image_stance_time = Image(image_path_stance_time,
                               height=image_height, width=image_width)
-    # image_toe_mean_cycle = Image(image_path_toe_mean_cycle,
-    #                              height=image_height, width=image_width)
-    # image_toe_max = Image(image_path_toe_max,
-    #                       height=image_height, width=image_width)
+    image_toe_mean_cycle = Image(image_path_toe_mean_cycle,
+                                 height=image_height, width=image_width)
+    image_toe_max = Image(image_path_toe_max,
+                          height=image_height, width=image_width)
     # image_stride = Image(image_path_stride,
     #                      height=image_height, width=image_width)
 
     chart_sole_sensor = Table([[image_grf_mean_cycle, image_stance_time],
                                [image_grf_max, image_grf_impulse]])
-    # chart_kinematics = Table([[image_toe_mean_cycle, image_toe_max],
-    #                           [image_stride, None]])
+    chart_kinematics = Table([[image_toe_mean_cycle, image_toe_max]])
 
     spacer_10_point = Spacer(1, 10)
     spacer_30_point = Spacer(1, 30)
-    spacer_200_point = Spacer(1, 170)
+    spacer_200_point = Spacer(1, 180)
 
     story.append(paragraph_title)
     story.append(spacer_10_point)
@@ -243,6 +239,6 @@ def make_report(path, data_report: ClinicalDataset):
     story.append(spacer_10_point)
     story.append(paragraph_graph_kinematics)
     story.append(spacer_10_point)
-    # story.append(chart_kinematics)
+    story.append(chart_kinematics)
 
     doc.build(story)

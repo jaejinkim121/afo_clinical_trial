@@ -288,9 +288,12 @@ class DataProcess:
     def average_cropped_time_series(collection_data, x_num=101):
         crop_time_series = []
         for data in collection_data:
-            y_cropped = DataProcess.normalize_time_series(data[:, 0],
-                                                          data[:, 1],
-                                                          x_num=x_num)
+            try:
+                y_cropped = DataProcess.normalize_time_series(data[:, 0],
+                                                              data[:, 1],
+                                                              x_num=x_num)
+            except IndexError:
+                continue
             crop_time_series.append(y_cropped)
         crop_time_series = np.array(crop_time_series)
         mean_time_series = np.mean(crop_time_series, axis=0)
@@ -577,13 +580,13 @@ class DataProcess:
          std_diff_nonparetic,
          _, _, _, _] = DataProcess.gait_phase_pre_processing(
             data_gait_paretic, data_gait_nonparetic)
-
         mean_paretic, std_paretic = DataProcess.average_cropped_time_series(
-            collection_data_paretic_sel, x_num
+            collection_data_paretic, x_num
         )
+
         mean_nonparetic, std_nonparetic = \
             DataProcess.average_cropped_time_series(
-                collection_data_nonparetic_sel, x_num
+                collection_data_nonparetic, x_num
             )
 
         x_paretic = np.linspace(0, 100, x_num)
@@ -823,13 +826,15 @@ class DataProcess:
         return [max_paretic_mean, max_paretic_stdev,
                 max_non_paretic_mean, max_non_paretic_stdev,
                 max_symmetry
-                ], [impulse_paretic_mean, impulse_paretic_stdev,
-                    impulse_non_paretic_mean, impulse_non_paretic_stdev,
-                    impulse_symmetry
-                    ], [stance_paretic_mean, stance_paretic_stdev,
-                        stance_non_paretic_mean, stance_non_paretic_stdev,
-                        stance_symmetry
-                        ]
+                ], \
+               [impulse_paretic_mean, impulse_paretic_stdev,
+                impulse_non_paretic_mean, impulse_non_paretic_stdev,
+                impulse_symmetry
+                ], \
+               [stance_paretic_mean, stance_paretic_stdev,
+                stance_non_paretic_mean, stance_non_paretic_stdev,
+                stance_symmetry
+                ]
 
 
 class Picker:
