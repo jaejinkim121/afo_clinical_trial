@@ -428,16 +428,38 @@ class GRF_predictor:
         self.leftModel = np.array([])
         self.rightModel = np.array([])
         for num in np.arange(self.sensor_num):
-            leftmodel = LSTM_Calib(hidden_size_1=self.calib_input_length,
-                                   hidden_size_2=30,  # previous: 45
-                                   hidden_size_3=15,  # previous: 35
-                                   num_layers=4,  # previous: 6
-                                   drop_p=0.1)
-            rightmodel = LSTM_Calib(hidden_size_1=self.calib_input_length,
-                                    hidden_size_2=30,  # previous: 45
-                                    hidden_size_3=15,  # previous: 35
-                                    num_layers=4,  # previous: 6
-                                    drop_p=0.1)
+            if (num == 0) or (num == 2) or (num == 5):  # left layer = 4
+                leftmodel = LSTM_Calib(hidden_size_1=self.calib_input_length,
+                                       hidden_size_2=30,  # previous: 45
+                                       hidden_size_3=15,  # previous: 35
+                                       num_layers=4,  # previous: 6
+                                       drop_p=0.1)
+                rightmodel = LSTM_Calib(hidden_size_1=self.calib_input_length,
+                                        hidden_size_2=30,  # previous: 45
+                                        hidden_size_3=15,  # previous: 35
+                                        num_layers=6,  # previous: 6
+                                        drop_p=0.1)
+            else:  # left layer = 6
+                leftmodel = LSTM_Calib(hidden_size_1=self.calib_input_length,
+                                       hidden_size_2=30,  # previous: 45
+                                       hidden_size_3=15,  # previous: 35
+                                       num_layers=6,  # previous: 6
+                                       drop_p=0.1)
+                if num == 3:  # right layer = 6
+                    rightmodel = LSTM_Calib(hidden_size_1=\
+                                            self.calib_input_length,
+                                            hidden_size_2=30,  # previous: 45
+                                            hidden_size_3=15,  # previous: 35
+                                            num_layers=6,  # previous: 6
+                                            drop_p=0.1)
+                else:  # right layer = 4
+                    rightmodel = LSTM_Calib(hidden_size_1=\
+                                            self.calib_input_length,
+                                            hidden_size_2=30,  # previous: 45
+                                            hidden_size_3=15,  # previous: 35
+                                            num_layers=4,  # previous: 6
+                                            drop_p=0.1)
+
             leftmodel.load_state_dict(torch.load(
                 self.modelPathCalib + self.size + "Left_" +
                 str(num + 1) + ".pt",
