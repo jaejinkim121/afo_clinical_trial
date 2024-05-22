@@ -713,6 +713,8 @@ class DataProcess:
                 df_tmp.pop(i-1)
         df_non_paretic_gait = df_tmp.T
 
+        df_paretic_gait.to_csv(save_path+"/gait_paretic.csv")
+        df_non_paretic_gait.to_csv(save_path+"/gait_non_paretic.csv")
         ### LMH
         # df_paretic_gait
         # df_non_paretic_gait
