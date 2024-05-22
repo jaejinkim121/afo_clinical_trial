@@ -45,7 +45,7 @@ class ClinicalIndexJJ:
             paretic_gait_path,
             non_paretic_gait_path,
             save_path=report_save_path,
-            data_label="toe_clearance",
+            data_label="mm",
             title_label="Toe Clearance",
             ignore_cycle=ignore_cycle,
             start_time=start_time,

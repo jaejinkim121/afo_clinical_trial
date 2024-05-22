@@ -80,13 +80,14 @@ class ClinicalAnalysis:
             paretic_path,
             non_paretic_path,
             save_path=report_save_path,
-            data_label="grf",
+            data_label="N",
             title_label="GRF",
             ignore_cycle=ignore_cycle,
             start_time=start_time,
             max_flag=True,
             impulse_flag=True,
-            stance_flag=True
+            stance_flag=True,
+            grf_flag=True
         )
 
         return max_array, impulse_array, stance_array
