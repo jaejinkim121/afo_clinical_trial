@@ -523,7 +523,6 @@ class ReportMaker:
 
         bag_raw = bagreader(path)
         start_time = bag_raw.start_time
-
         # To filter specific topics with interests
         TOPIC_MH = (
             "/afo_sensor/soleSensor_left",

@@ -697,7 +697,6 @@ class DataProcess:
                 collection_paretic, collection_non_paretic,
                 df_paretic_gait, df_non_paretic_gait
             )
-
         idx_paretic_ignore, idx_non_paretic_ignore,\
             stance_time_paretic, stance_time_non_paretic =\
             get_index_outlier(
@@ -730,13 +729,22 @@ class DataProcess:
                 if idx_non_paretic in idx_non_paretic_ignore:
                     continue
                 da = collection_paretic[idx_paretic]
-                max_paretic.append(
-                    np.max(da[:, 1])
-                )
+
+                try:
+                    max_paretic.append(
+                        np.max(da[:, 1])
+                    )
+                except ValueError:
+                    print("max paretic - Empty collection - index "
+                          + str(idx_paretic))
                 da = collection_non_paretic[idx_non_paretic]
-                max_non_paretic.append(
-                    np.max(da[:, 1])
-                )
+                try:
+                    max_non_paretic.append(
+                        np.max(da[:, 1])
+                    )
+                except ValueError:
+                    print("max non paretic - Empty collection - index "
+                          + str(idx_non_paretic))
 
             np_p_max = np.array(max_paretic)
             np_np_max = np.array(max_non_paretic)

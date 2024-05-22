@@ -39,7 +39,6 @@ class ClinicalIndexJJ:
             non_paretic_data = left_y
 
         ignore_cycle = (metadata.ignore_cycle[0], metadata.ignore_cycle[1])
-
         max_, impulse_, stance_ = DataProcess.data_process(
             paretic_data,
             non_paretic_data,
