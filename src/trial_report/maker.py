@@ -602,10 +602,11 @@ class ReportMaker:
             columns=["paretic_mean", "paretic_stdev",
                      "non_paretic_mean", "non_paretic_stdev",
                      "symmetry"],
-            index=["grf_max", "grf_impulse", "stance_time"]
+            index=["grf_max", "grf_impulse", "toe_clearance", "stance_time"]
             )
         pd_statistics.loc["grf_max"] = grf_max_data
         pd_statistics.loc["grf_impulse"] = grf_impulse_data
+        pd_statistics.loc["toe_clearance"] = toe_clearance_data
         pd_statistics.loc["stance_time"] = stance_time_data
         pd_statistics.to_csv(
             save_path + 'statistics.csv', sep=",", header=True, index=True

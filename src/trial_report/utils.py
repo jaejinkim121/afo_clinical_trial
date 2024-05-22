@@ -790,21 +790,26 @@ class DataProcess:
             # Function 2: Make swing phase to zero
             ###########################################
             # paretic side
+            print(list(paretic_data.columns))
+            print(len(paretic_data))
+            paretic_data
             for idx in np.arange(len(df_paretic_event)):
                 swing_idx = paretic_data.index[
                     (paretic_data.iloc[:, 0] >=\
                      df_paretic_event.loc[idx, "start time"]) &\
-                        (paretic_data.iloc[:, 0] <=\
+                        (paretic_data.iloc[:, 0] <\
                          df_paretic_event.loc[idx, "end time"])].tolist()
-                paretic_data.iloc[swing_idx, 1] = 0.0
+                print(swing_idx)
+                paretic_data.loc[swing_idx, "grf"] = 0.0
             # non paretic side
             for idx in np.arange(len(df_non_paretic_event)):
                 swing_idx = non_paretic_data.index[
                     (non_paretic_data.iloc[:, 0] >=\
                      df_non_paretic_event.loc[idx, "start time"]) &\
-                        (non_paretic_data.iloc[:, 0] <=\
+                        (non_paretic_data.iloc[:, 0] <\
                          df_non_paretic_event.loc[idx, "end time"])].tolist()
-                non_paretic_data.iloc[swing_idx, 1] = 0.0
+                print(swing_idx)
+                non_paretic_data.loc[swing_idx, "grf"] = 0.0
 
         ##############
 
@@ -922,7 +927,6 @@ class DataProcess:
         stance_non_paretic_mean = 0
         stance_non_paretic_stdev = 0
         stance_symmetry = 0
-        print(df_non_paretic_gait)
         if stance_flag:
             stance_time_paretic = []
             stance_time_non_paretic = []
