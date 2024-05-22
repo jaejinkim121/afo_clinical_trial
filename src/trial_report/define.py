@@ -80,6 +80,10 @@ class ClinicalDataset:
     gait_speed_imu: list
     gait_speed_distance: list
     metadata: Bag
+
+
+class Config:
+    trial_start_time = 61.44919
 #
 # #
 # bag = Bag(

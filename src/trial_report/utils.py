@@ -7,10 +7,11 @@ import pandas as pd
 import csv
 import os
 from bagpy import bagreader
+from define import Config
 
 
 SAVE_EACH_CYCLE_DATA = False
-
+TST = Config.trial_start_time
 
 # Create Directory
 def create_folder(directory):
@@ -34,6 +35,10 @@ def get_ignored_cycle(array_df, cycle_num, is_gait_phase=False):
 
 
 def get_index_outlier(df_gait_paretic, df_gait_non_paretic):
+
+
+
+
     paretic_ic, paretic_fo = \
         DataProcess.get_gait_event_time(df_gait_paretic)
     nonparetic_ic, nonparetic_fo = \
@@ -434,7 +439,8 @@ class DataProcess:
                     (data_df["time"] >= time_initial_contact[i]) &
                     (data_df["time"] < time_initial_contact[i + 1])
                     ]
-            divided_array.append(divided_df_current.to_numpy())
+            if divided_df_current.to_numpy() is not []:
+                divided_array.append(divided_df_current.to_numpy())
 
         divided_array = get_ignored_cycle(divided_array, ignore_cycle)
 
@@ -444,11 +450,12 @@ class DataProcess:
     def get_gait_phase_collection_data(
             paretic_data,  # Dataframe(time, data)
             non_paretic_data,  # Dataframe(time, data)
-            paretic_gait_path,
-            non_paretic_gait_path,
+            df_paretic_gait,
+            df_non_paretic_gait,
             ignore_cycle=(None, None),
             start_time=0.0
     ):
+
         if type(paretic_data) != pd.DataFrame:
             df_paretic = \
                 DataProcess.read_data_file_by_path(paretic_data)
@@ -460,13 +467,7 @@ class DataProcess:
                 DataProcess.read_data_file_by_path(non_paretic_data)
         else:
             df_non_paretic = copy.deepcopy(non_paretic_data)
-        df_paretic_gait = DataProcess.read_data_file_by_path(
-            paretic_gait_path)
-        df_non_paretic_gait = DataProcess.read_data_file_by_path(
-            non_paretic_gait_path)
-        df_paretic_gait.iloc[:, 0] -= start_time
-        df_non_paretic_gait.iloc[:, 0] -= start_time
-
+        
         collection_paretic = \
             DataProcess.divider_data_by_gait_phase_df(
                 df_paretic, df_paretic_gait,
@@ -479,8 +480,7 @@ class DataProcess:
                 df_non_paretic_gait,
                 ignore_cycle
             )
-        return collection_paretic, collection_non_paretic,\
-            df_paretic_gait, df_non_paretic_gait
+        return collection_paretic, collection_non_paretic
 
     @staticmethod
     def graph_each_cycle_data(
@@ -570,19 +570,8 @@ class DataProcess:
     def graph_both_cycle_data(collection_data_paretic,
                               collection_data_nonparetic,
                               data_gait_paretic, data_gait_nonparetic,
-                              idx_paretic_ignore, idx_non_paretic_ignore,
                               data_label, title_graph, save_path,
                               x_num=101):
-        collection_data_paretic_sel = \
-            copy.deepcopy(collection_data_paretic)
-        collection_data_nonparetic_sel = \
-            copy.deepcopy(collection_data_nonparetic)
-
-        for idx in sorted(idx_paretic_ignore, reverse=True):
-            collection_data_paretic_sel.pop(idx)
-        for idx in sorted(idx_non_paretic_ignore, reverse=True):
-            collection_data_nonparetic_sel.pop(idx)
-
         [mean_diff_both, std_diff_both,
          mean_diff_paretic, std_diff_paretic,
          mean_diff_nonparetic,
@@ -590,12 +579,12 @@ class DataProcess:
          _, _, _, _] = DataProcess.gait_phase_pre_processing(
             data_gait_paretic, data_gait_nonparetic)
         mean_paretic, std_paretic = DataProcess.average_cropped_time_series(
-            collection_data_paretic_sel, x_num
+            collection_data_paretic, x_num
         )
 
         mean_nonparetic, std_nonparetic = \
             DataProcess.average_cropped_time_series(
-                collection_data_nonparetic_sel, x_num
+                collection_data_nonparetic, x_num
             )
 
         x_paretic = np.linspace(0, 100, x_num)
@@ -664,6 +653,13 @@ class DataProcess:
         plt.close(fig)
 
     @staticmethod
+    def manual_outlier_remover(df_p, df_np):
+
+
+
+        return df_p, df_np
+
+    @staticmethod
     def data_process(
             paretic_data,
             non_paretic_data,
@@ -678,35 +674,78 @@ class DataProcess:
             impulse_flag=False,
             stance_flag=False
     ):
+        df_paretic_gait = DataProcess.read_data_file_by_path(
+            paretic_gait_path)
+        df_non_paretic_gait = DataProcess.read_data_file_by_path(
+            non_paretic_gait_path)
+        df_paretic_gait.iloc[:, 0] -= start_time
+        df_non_paretic_gait.iloc[:, 0] -= start_time
 
-        collection_paretic, collection_non_paretic,\
-            df_paretic_gait, df_non_paretic_gait =\
+        paretic_data = paretic_data[
+            (paretic_data.time > TST) & (paretic_data.time < TST + 120.0)]
+        non_paretic_data = non_paretic_data[
+            (non_paretic_data.time > TST) & (non_paretic_data.time < TST + 120.0)]
+        df_paretic_gait = df_paretic_gait[(df_paretic_gait.time > TST) & (
+                    df_paretic_gait.time < TST + 120.0)]
+        df_non_paretic_gait = df_non_paretic_gait[
+            (df_non_paretic_gait.time > TST) & (
+                        df_non_paretic_gait.time < TST + 120.0)]
+
+        df_paretic_gait.iloc[:, 0] -= TST
+        df_non_paretic_gait.iloc[:, 0] -= TST
+
+        df_paretic_gait.reset_index(drop=True, inplace=True)
+        df_non_paretic_gait.reset_index(drop=True, inplace=True)
+        df_tmp = df_paretic_gait.T.copy()
+
+        for i in range(len(df_paretic_gait)):
+            i = len(df_paretic_gait) - i - 1
+            if df_paretic_gait.iloc[i, 1] == 2.0:
+                continue
+            if df_paretic_gait.iloc[i, 0] - df_paretic_gait.iloc[i - 1, 0] < 0.2:
+                df_tmp.pop(i)
+                df_tmp.pop(i-1)
+        df_paretic_gait = df_tmp.T
+
+        df_tmp = df_non_paretic_gait.T.copy()
+
+        for i in range(len(df_non_paretic_gait) - 1):
+            i = len(df_non_paretic_gait) - i - 1
+            if df_non_paretic_gait.iloc[i, 1] == 2.0:
+                continue
+            if df_non_paretic_gait.iloc[i, 0] - df_non_paretic_gait.iloc[i - 1, 0] < 0.2:
+                df_tmp.pop(i)
+                df_tmp.pop(i-1)
+        df_non_paretic_gait = df_tmp.T
+
+        ### LMH
+        # df_paretic_gait
+        # df_non_paretic_gait
+
+        ##############
+
+        collection_paretic, collection_non_paretic = \
             DataProcess.get_gait_phase_collection_data(
                 paretic_data, non_paretic_data,
-                paretic_gait_path, non_paretic_gait_path,
+                df_paretic_gait, df_non_paretic_gait,
                 ignore_cycle=ignore_cycle,
                 start_time=start_time
                 )
+        #
+        # df_paretic_gait = \
+        #     get_ignored_cycle(df_paretic_gait, ignore_cycle, True)
+        # df_non_paretic_gait = \
+        #     get_ignored_cycle(df_non_paretic_gait, ignore_cycle, True)
 
-        df_paretic_gait = \
-            get_ignored_cycle(df_paretic_gait, ignore_cycle, True)
-        df_non_paretic_gait = \
-            get_ignored_cycle(df_non_paretic_gait, ignore_cycle, True)
-        idx_paretic_matched, idx_non_paretic_matched = \
-            match_both_side_cycle(
-                collection_paretic, collection_non_paretic,
-                df_paretic_gait, df_non_paretic_gait
-            )
-        idx_paretic_ignore, idx_non_paretic_ignore,\
-            stance_time_paretic, stance_time_non_paretic =\
-            get_index_outlier(
-                df_paretic_gait, df_non_paretic_gait
-            )
+        # idx_paretic_matched, idx_non_paretic_matched = \
+        #     match_both_side_cycle(
+        #         collection_paretic, collection_non_paretic,
+        #         df_paretic_gait, df_non_paretic_gait
+        #     )
 
         DataProcess.graph_both_cycle_data(
             collection_paretic, collection_non_paretic,
             df_paretic_gait, df_non_paretic_gait,
-            idx_paretic_ignore, idx_non_paretic_ignore,
             data_label + '[N]', title_label,
             save_path=save_path + '/graph/',
             x_num=101
@@ -722,29 +761,21 @@ class DataProcess:
             max_paretic = []
             max_non_paretic = []
 
-            for idx_paretic, idx_non_paretic in \
-                    zip(idx_paretic_matched, idx_non_paretic_matched):
-                if idx_paretic in idx_paretic_ignore:
-                    continue
-                if idx_non_paretic in idx_non_paretic_ignore:
-                    continue
-                da = collection_paretic[idx_paretic]
-
+            for da in collection_paretic:
+                print(da)
                 try:
                     max_paretic.append(
                         np.max(da[:, 1])
                     )
                 except ValueError:
-                    print("max paretic - Empty collection - index "
-                          + str(idx_paretic))
-                da = collection_non_paretic[idx_non_paretic]
+                    print("max paretic - Empty collection - index ")
+            for da in collection_non_paretic:
                 try:
                     max_non_paretic.append(
                         np.max(da[:, 1])
                     )
                 except ValueError:
-                    print("max non paretic - Empty collection - index "
-                          + str(idx_non_paretic))
+                    print("max non paretic - Empty collection - index ")
 
             np_p_max = np.array(max_paretic)
             np_np_max = np.array(max_non_paretic)
@@ -770,17 +801,11 @@ class DataProcess:
             impulse_paretic = []
             impulse_non_paretic = []
 
-            for idx_paretic, idx_non_paretic in \
-                    zip(idx_paretic_matched, idx_non_paretic_matched):
-                if idx_paretic in idx_paretic_ignore:
-                    continue
-                if idx_non_paretic in idx_non_paretic_ignore:
-                    continue
-                da = collection_paretic[idx_paretic]
+            for da in collection_paretic:
                 impulse_paretic.append(
                     np.trapz(da[:, 1], x=da[:, 0])
                 )
-                da = collection_non_paretic[idx_non_paretic]
+            for da in collection_non_paretic:
                 impulse_non_paretic.append(
                     np.trapz(da[:, 1], x=da[:, 0])
                 )
@@ -809,18 +834,23 @@ class DataProcess:
         if stance_flag:
             stance_time_paretic_ignored = []
             stance_time_non_paretic_ignored = []
-            for idx_paretic, idx_non_paretic in \
-                    zip(idx_paretic_matched, idx_non_paretic_matched):
-                if idx_paretic in idx_paretic_ignore:
+            stance_time_paretic = []
+            stance_time_non_paretic = []
+            
+            for i in range(len(df_paretic_gait) - 1):
+                if df_paretic_gait.iloc[i, 1] == 2.0:
                     continue
-                if idx_non_paretic in idx_non_paretic_ignore:
-                    continue
-                stance_time_paretic_ignored.append(
-                    stance_time_paretic[idx_paretic]
-                )
-                stance_time_non_paretic_ignored.append(
-                    stance_time_non_paretic[idx_non_paretic])
+                stance_time_paretic.append(
+                    df_paretic_gait.iloc[i+1, 1] - df_paretic_gait.iloc[i, 1])
 
+            for i in range(len(df_non_paretic_gait) - 1):
+                if df_non_paretic_gait.iloc[i, 1] == 2.0:
+                    continue
+                stance_time_non_paretic.append(
+                    df_non_paretic_gait.iloc[i + 1, 1] - df_non_paretic_gait.iloc[
+                        i, 1])
+            stance_time_paretic_ignored = stance_time_paretic
+            stance_time_non_paretic_ignored = stance_time_non_paretic
             save_each_cycle_bar_plot(
                 stance_time_paretic, stance_time_non_paretic,
                 'stance time [s]', "Stance_Time",
@@ -900,6 +930,55 @@ class Picker:
         self.del_index = []
         self.ax.clear()
         self.ax.plot(self.data, 'bo', picker=True, pickradius=5)
+
+
+class Remover:
+    def __init__(self, data):
+        self.del_index = []
+        self.selected_idx = []
+        self.data = data
+        self.fig, self.ax = plt.subplots()
+        self.fig.subplots_adjust(bottom=0.2)
+        self.ax.plot(data, 'bo', picker=True, pickradius=5)
+        self.ax.set_title("c", picker=True)
+        self.ax.set_ylabel("y", picker=True)
+        self.fig.canvas.mpl_connect('pick_event', self.pick)
+        self.ax_update = self.fig.add_axes([0.81, 0.05, 0.1, 0.075])
+        self.ax_redraw = self.fig.add_axes([0.7, 0.05, 0.1, 0.075])
+        self.ax_reset = self.fig.add_axes([0.59, 0.05, 0.1, 0.075])
+        self.b_update = Button(self.ax_update, 'Update')
+        self.b_redraw = Button(self.ax_redraw, 'Redraw')
+        self.b_reset = Button(self.ax_reset, 'Reset')
+        self.b_update.on_clicked(self.update)
+        self.b_redraw.on_clicked(self.redraw)
+        self.b_reset.on_clicked(self.reset)
+        plt.show()
+
+    def pick(self, event):
+        if isinstance(event.artist, Line2D):
+            ind = event.ind[0]
+            if ind not in self.del_index:
+                self.del_index.append(ind)
+                self.ax.plot(ind, self.data[ind], 'r*')
+                plt.draw()
+
+    def update(self, event):
+        self.selected_idx = sorted(self.del_index)
+        plt.close()
+
+    def redraw(self, event):
+        data_del_ = copy.deepcopy(self.data)
+        for idx in self.del_index:
+            data_del_[idx] = None
+        self.ax.clear()
+        self.ax.plot(data_del_, 'bo', picker=True, pickradius=5)
+        plt.draw()
+
+    def reset(self, event):
+        self.del_index = []
+        self.ax.clear()
+        self.ax.plot(self.data, 'bo', picker=True, pickradius=5)
+
 
 
 def main():
