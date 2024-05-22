@@ -431,7 +431,6 @@ class DataProcess:
         divided_array = []
         time_initial_contact = \
             DataProcess.get_initial_contact_time(gait_phase_df)
-        time_initial_contact.append(data_df["time"].iloc[-1])
 
         for i in range(len(time_initial_contact) - 1):
             divided_df_current = \
@@ -455,7 +454,6 @@ class DataProcess:
             ignore_cycle=(None, None),
             start_time=0.0
     ):
-
         if type(paretic_data) != pd.DataFrame:
             df_paretic = \
                 DataProcess.read_data_file_by_path(paretic_data)
@@ -652,12 +650,6 @@ class DataProcess:
         fig.savefig(save_path + '%s_mean_cycle.png' % title_graph)
         plt.close(fig)
 
-    @staticmethod
-    def manual_outlier_remover(df_p, df_np):
-
-
-
-        return df_p, df_np
 
     @staticmethod
     def data_process(
@@ -672,8 +664,13 @@ class DataProcess:
             start_time=0.0,
             max_flag=True,
             impulse_flag=False,
-            stance_flag=False
+            stance_flag=False,
+            day=2
     ):
+        if day == 1:
+            tmp = paretic_gait_path
+            paretic_gait_path = non_paretic_gait_path
+            non_paretic_gait_path = tmp
         df_paretic_gait = DataProcess.read_data_file_by_path(
             paretic_gait_path)
         df_non_paretic_gait = DataProcess.read_data_file_by_path(
@@ -691,20 +688,18 @@ class DataProcess:
             (df_non_paretic_gait.time > TST) & (
                         df_non_paretic_gait.time < TST + 120.0)]
 
-        df_paretic_gait.iloc[:, 0] -= TST
-        df_non_paretic_gait.iloc[:, 0] -= TST
-
         df_paretic_gait.reset_index(drop=True, inplace=True)
         df_non_paretic_gait.reset_index(drop=True, inplace=True)
         df_tmp = df_paretic_gait.T.copy()
 
-        for i in range(len(df_paretic_gait)):
+        for i in range(len(df_paretic_gait) - 1):
             i = len(df_paretic_gait) - i - 1
             if df_paretic_gait.iloc[i, 1] == 2.0:
                 continue
             if df_paretic_gait.iloc[i, 0] - df_paretic_gait.iloc[i - 1, 0] < 0.2:
                 df_tmp.pop(i)
                 df_tmp.pop(i-1)
+
         df_paretic_gait = df_tmp.T
 
         df_tmp = df_non_paretic_gait.T.copy()
@@ -762,7 +757,6 @@ class DataProcess:
             max_non_paretic = []
 
             for da in collection_paretic:
-                print(da)
                 try:
                     max_paretic.append(
                         np.max(da[:, 1])
@@ -830,10 +824,8 @@ class DataProcess:
         stance_non_paretic_mean = 0
         stance_non_paretic_stdev = 0
         stance_symmetry = 0
-
+        print(df_non_paretic_gait)
         if stance_flag:
-            stance_time_paretic_ignored = []
-            stance_time_non_paretic_ignored = []
             stance_time_paretic = []
             stance_time_non_paretic = []
             
@@ -841,14 +833,14 @@ class DataProcess:
                 if df_paretic_gait.iloc[i, 1] == 2.0:
                     continue
                 stance_time_paretic.append(
-                    df_paretic_gait.iloc[i+1, 1] - df_paretic_gait.iloc[i, 1])
+                    df_paretic_gait.iloc[i+1, 0] - df_paretic_gait.iloc[i, 0])
 
             for i in range(len(df_non_paretic_gait) - 1):
                 if df_non_paretic_gait.iloc[i, 1] == 2.0:
                     continue
                 stance_time_non_paretic.append(
-                    df_non_paretic_gait.iloc[i + 1, 1] - df_non_paretic_gait.iloc[
-                        i, 1])
+                    df_non_paretic_gait.iloc[i + 1, 0] - df_non_paretic_gait.iloc[
+                        i, 0])
             stance_time_paretic_ignored = stance_time_paretic
             stance_time_non_paretic_ignored = stance_time_non_paretic
             save_each_cycle_bar_plot(
