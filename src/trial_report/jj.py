@@ -23,8 +23,8 @@ class ClinicalIndexJJ:
 
         y_time = y_data["Time"]
         y_time -= start_time
-        left_y = y_data["data_0"]
-        right_y = y_data["data_7"]
+        left_y = y_data["data_0"] * 1000.0
+        right_y = y_data["data_7"] * 1000.0
 
         left_y = pd.DataFrame({"time":y_time, "value":left_y})
         right_y = pd.DataFrame({"time":y_time, "value":right_y})

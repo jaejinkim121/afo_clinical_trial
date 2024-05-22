@@ -790,8 +790,6 @@ class DataProcess:
             # Function 2: Make swing phase to zero
             ###########################################
             # paretic side
-            print(list(paretic_data.columns))
-            print(len(paretic_data))
             paretic_data
             for idx in np.arange(len(df_paretic_event)):
                 swing_idx = paretic_data.index[
@@ -799,7 +797,6 @@ class DataProcess:
                      df_paretic_event.loc[idx, "start time"]) &\
                         (paretic_data.iloc[:, 0] <\
                          df_paretic_event.loc[idx, "end time"])].tolist()
-                print(swing_idx)
                 paretic_data.loc[swing_idx, "grf"] = 0.0
             # non paretic side
             for idx in np.arange(len(df_non_paretic_event)):
@@ -808,7 +805,6 @@ class DataProcess:
                      df_non_paretic_event.loc[idx, "start time"]) &\
                         (non_paretic_data.iloc[:, 0] <\
                          df_non_paretic_event.loc[idx, "end time"])].tolist()
-                print(swing_idx)
                 non_paretic_data.loc[swing_idx, "grf"] = 0.0
 
         ##############
