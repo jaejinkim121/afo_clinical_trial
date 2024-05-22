@@ -242,16 +242,592 @@
 		"bag": "log_2024-04-27-15-07-59.bag",
 		"test_date": "240427",
 		"test_label": "RH-04-01",
-		"model_cell": "CHAR_230815_280_LP",
-		"model_grf": "GRF_230815/LSTM_GRF.pt",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
 		"name": "KJJ",
 		"body_weight": 80.0,
 		"sole_size": 280,
 		"paretic_side": "LEFT",
-		"session_type": "10MWT_OFF_CUE_ON",
-		"date_calibration": "230815",
-		"distance": 233.0,
-		"time": 233.0,
+		"session_type": "2MWT_ON_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 150.2,
+		"time": 150.2,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-28-20-07-25.bag",
+		"test_date": "240428",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "10MWT_ON_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-28-20-04-08.bag",
+		"test_date": "240428",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "10MWT_ON_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-28-19-58-21.bag",
+		"test_date": "240428",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "10MWT_ON_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-30-15-07-57.bag",
+		"test_date": "240430",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "2MWT_ON_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-30-15-05-11.bag",
+		"test_date": "240430",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "2MWT_ON_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-30-15-01-07.bag",
+		"test_date": "240430",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "2MWT_ON_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-30-14-44-45.bag",
+		"test_date": "240430",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "2MWT_ON_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-30-14-41-56.bag",
+		"test_date": "240430",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "2MWT_ON_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-30-14-24-24.bag",
+		"test_date": "240430",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "2MWT_ON_CUE_OFF",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-30-14-21-36.bag",
+		"test_date": "240430",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "2MWT_ON_CUE_OFF",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-30-14-06-41.bag",
+		"test_date": "240430",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "2MWT_OFF_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-30-14-03-53.bag",
+		"test_date": "240430",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "2MWT_OFF_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-28-19-42-12.bag",
+		"test_date": "240428",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "2MWT_OFF_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-28-19-38-59.bag",
+		"test_date": "240428",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "2MWT_OFF_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-28-19-32-06.bag",
+		"test_date": "240428",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "2MWT_OFF_CUE_OFF",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-28-19-29-30.bag",
+		"test_date": "240428",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "2MWT_OFF_CUE_OFF",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-28-19-10-06.bag",
+		"test_date": "240428",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "LEFT",
+		"session_type": "2MWT_BARE_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-28-19-07-15.bag",
+		"test_date": "240428",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "2MWT_BARE_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-28-19-00-30.bag",
+		"test_date": "240428",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "2MWT_BARE_CUE_OFF",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-28-18-57-19.bag",
+		"test_date": "240428",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "2MWT_BARE_CUE_OFF",
+		"date_calibration": "240426",
+		"distance": 10.0,
+		"time": 10.0,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-28-18-54-23.bag",
+		"test_date": "240428",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "10MWT_BARE_CUE_OFF",
+		"date_calibration": "240426",
+		"distance": 18.48,
+		"time": 18.48,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-28-19-03-15.bag",
+		"test_date": "240428",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "10MWT_BARE_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 17.26,
+		"time": 17.26,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-28-19-05-08.bag",
+		"test_date": "240428",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "10MWT_BARE_CUE_ON",
+		"date_calibration": "240426",
+		"distance": 17.26,
+		"time": 17.26,
+		"bpm": [
+			null,
+			null
+		],
+		"ignore_cycle": [
+			null,
+			null
+		],
+		"age": 30
+	},
+	{
+		"bag": "log_2024-04-28-19-26-39.bag",
+		"test_date": "240428",
+		"test_label": "RH-04-01",
+		"model_cell": "CHAR_240426_280_RP",
+		"model_grf": "GRF_240312/SVR_GRF.sav",
+		"name": "RH1",
+		"body_weight": 70.0,
+		"sole_size": 280,
+		"paretic_side": "RIGHT",
+		"session_type": "10MWT_OFF_CUE_OFF",
+		"date_calibration": "240426",
+		"distance": 16.36,
+		"time": 16.36,
 		"bpm": [
 			null,
 			null
