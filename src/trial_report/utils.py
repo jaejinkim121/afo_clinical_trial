@@ -184,7 +184,6 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
     if ylim_lower is not None:
         plt.ylim([ylim_lower, ylim_upper])
     plt.title(title_label, fontsize=45)
-    plt.legend(loc='best', fontsize=25)
     plt.xticks(fontsize=25)
     plt.yticks(fontsize=25)
     create_folder(graph_save_path)
@@ -907,7 +906,7 @@ class DataProcess:
             save_each_cycle_bar_plot(
                 np_p_impulse, np_np_impulse,
                 title_label + " Impulse [" + data_label + "]",
-                save_path, 100.0, 800.0
+                save_path, 0.0, 600.0
             )
 
             impulse_paretic_mean = np.mean(np_p_impulse)
