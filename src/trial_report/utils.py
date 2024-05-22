@@ -159,7 +159,8 @@ def save_each_cycle_timeseries_data(
 
 
 def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
-                             data_label, title_label, save_path):
+                             title_label, save_path,
+                             ylim_lower=None, ylim_upper=None):
     # 2 array input
     # path assign
     graph_save_path = save_path + "/graph/"
@@ -180,7 +181,8 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
         color='blue', label='non-paretic side'
         )
     plt.xlabel("Gait cycle number", fontsize=30)
-    plt.ylabel(data_label, fontsize=30)
+    if ylim_lower is not None:
+        plt.ylim([ylim_lower, ylim_upper])
     plt.title(title_label, fontsize=45)
     plt.legend(loc='best', fontsize=25)
     plt.xticks(fontsize=25)
@@ -568,7 +570,8 @@ class DataProcess:
     def graph_both_cycle_data(collection_data_paretic,
                               collection_data_nonparetic,
                               data_gait_paretic, data_gait_nonparetic,
-                              data_label, title_graph, save_path,
+                              title_graph, save_path, 
+                              ylim_lower, ylim_upper, xlim_upper=160.0,
                               x_num=101):
         [mean_diff_both, std_diff_both,
          mean_diff_paretic, std_diff_paretic,
@@ -607,7 +610,6 @@ class DataProcess:
                             color=(0.1, 0.1, 0.9, 0.2),
                             linewidth=0)
 
-        axs[0].set_ylabel(data_label, fontsize=30)
         axs[0].set_title(title_graph, fontsize=45)
         axs[0].xaxis.set_tick_params(labelsize=25)
         axs[0].yaxis.set_tick_params(labelsize=25)
@@ -640,11 +642,14 @@ class DataProcess:
                      mean_diff_nonparetic + mean_diff_both],
                     [-0.4, 0.37], 'b-')
 
-        xlim_upper = max(mean_diff_nonparetic + std_diff_nonparetic + 1,
-                         101 + mean_diff_both)
+        xlim_option = max(mean_diff_nonparetic + std_diff_nonparetic + 1,
+                          101 + mean_diff_both)
+        if xlim_option > 160.0:
+            xlim_upper = xlim_option
 
         axs[0].set_xlim(0, xlim_upper)
         axs[1].set_xlim(0, xlim_upper)
+        axs[0].set_ylim(ylim_lower, ylim_upper)
         create_folder(save_path)
         fig.tight_layout()
         fig.savefig(save_path + '%s_mean_cycle.png' % title_graph)
@@ -658,13 +663,14 @@ class DataProcess:
             paretic_gait_path,
             non_paretic_gait_path,
             save_path,  # {test_label}/{session_type}
-            data_label="data",
+            data_label="N",
             title_label="data",
             ignore_cycle=(None, None),
             start_time=0.0,
             max_flag=True,
             impulse_flag=False,
             stance_flag=False,
+            grf_flag=False,
             day=2
     ):
         if day == 1:
@@ -718,6 +724,87 @@ class DataProcess:
         ### LMH
         # df_paretic_gait
         # df_non_paretic_gait
+        if grf_flag == True:
+            ###########################################
+            # swing phase go to zero (GRF)
+            # stance start: 1, swing start: 2
+            # 2 -> 1: swing phase
+            # Swing start timing, end timing, duration
+            ###########################################
+            # Function 1: find swing start, end time
+            # --> df_paretic_event, df_non_paretic_event
+            ###########################################
+            # paretic side
+            df_paretic_event = pd.DataFrame(
+                columns=["start time", "end time", "duration"])
+            par_flag = 0
+            for par_idx in np.arange(len(df_paretic_gait)):
+                # start time
+                if df_paretic_gait.iloc[par_idx, 1] == 2:
+                    paretic_start_time = df_paretic_gait.iloc[par_idx, 0]
+                    par_flag = 2
+                elif (df_paretic_gait.iloc[par_idx, 1] == 1) & (par_flag == 2):
+                    paretic_end_time = df_paretic_gait.iloc[par_idx, 0]
+                    par_flag = 1
+                else:
+                    pass
+                if par_flag == 1:
+                    paretic_duration = paretic_end_time - paretic_start_time
+                    df_paretic_add = pd.DataFrame({
+                        'start time': [paretic_start_time],
+                        'end time': [paretic_end_time],
+                        'duration': [paretic_duration]
+                        })
+                    df_paretic_event = pd.concat(
+                        [df_paretic_event, df_paretic_add],
+                        axis=0, ignore_index=True)
+            # nonparetic side
+            df_non_paretic_event = pd.DataFrame(
+                columns=["start time", "end time", "duration"])
+            non_par_flag = 0
+            for non_par_idx in np.arange(len(df_non_paretic_gait)):
+                # start time
+                if df_non_paretic_gait.iloc[non_par_idx, 1] == 2:
+                    non_paretic_start_time = df_non_paretic_gait.iloc[
+                        non_par_idx, 0]
+                    non_par_flag = 2
+                elif (df_non_paretic_gait.iloc[non_par_idx, 1] == 1) &\
+                    (non_par_flag == 2):
+                    non_paretic_end_time = df_non_paretic_gait.iloc[
+                        non_par_idx, 0]
+                    non_par_flag = 1
+                else:
+                    pass
+                if non_par_flag == 1:
+                    non_paretic_duration =\
+                        non_paretic_end_time - non_paretic_start_time
+                    df_non_paretic_add = pd.DataFrame({
+                        'start time': [non_paretic_start_time],
+                        'end time': [non_paretic_end_time],
+                        'duration': [non_paretic_duration]
+                        })
+                    df_non_paretic_event = pd.concat(
+                        [df_non_paretic_event, df_non_paretic_add],
+                        axis=0, ignore_index=True)
+            ###########################################
+            # Function 2: Make swing phase to zero
+            ###########################################
+            # paretic side
+            for idx in np.arange(len(df_paretic_event)):
+                swing_idx = paretic_data.index[
+                    (paretic_data.iloc[:, 0] >=\
+                     df_paretic_event.loc[idx, "start time"]) &\
+                        (paretic_data.iloc[:, 0] <=\
+                         df_paretic_event.loc[idx, "end time"])].tolist()
+                paretic_data.iloc[swing_idx, 1] = 0.0
+            # non paretic side
+            for idx in np.arange(len(df_non_paretic_event)):
+                swing_idx = non_paretic_data.index[
+                    (non_paretic_data.iloc[:, 0] >=\
+                     df_non_paretic_event.loc[idx, "start time"]) &\
+                        (non_paretic_data.iloc[:, 0] <=\
+                         df_non_paretic_event.loc[idx, "end time"])].tolist()
+                non_paretic_data.iloc[swing_idx, 1] = 0.0
 
         ##############
 
@@ -739,13 +826,19 @@ class DataProcess:
         #         collection_paretic, collection_non_paretic,
         #         df_paretic_gait, df_non_paretic_gait
         #     )
-
+        if grf_flag == 1:
+            ylim_lower=0.0
+            ylim_upper=800.0
+        else:  # toe clearance
+            ylim_lower=-50.0
+            ylim_upper=250.0
         DataProcess.graph_both_cycle_data(
             collection_paretic, collection_non_paretic,
             df_paretic_gait, df_non_paretic_gait,
-            data_label + '[N]', title_label,
+            title_label + "[" + data_label + "]",
             save_path=save_path + '/graph/',
-            x_num=101
+            ylim_lower=ylim_lower, ylim_upper=ylim_upper,
+            xlim_upper=160.0, x_num=101
         )
         ###
         # Statistics Processing
@@ -777,7 +870,7 @@ class DataProcess:
             np_np_max = np.array(max_non_paretic)
             save_each_cycle_bar_plot(
                 np_p_max, np_np_max,
-                data_label + '[N]', title_label + "_max",
+                title_label + " Max [" + data_label + "]",
                 save_path
             )
             max_paretic_mean = np.mean(np_p_max)
@@ -808,11 +901,14 @@ class DataProcess:
 
             np_p_impulse = np.array(impulse_paretic)
             np_np_impulse = np.array(impulse_non_paretic)
+            if grf_flag == 1:
+                data_label = data_label + " sec"
             save_each_cycle_bar_plot(
                 np_p_impulse, np_np_impulse,
-                data_label + '[N sec]', title_label + "_impulse",
-                save_path
+                title_label + " Impulse [" + data_label + "]",
+                save_path, 100.0, 800.0
             )
+
             impulse_paretic_mean = np.mean(np_p_impulse)
             impulse_paretic_stdev = np.std(np_p_impulse)
             impulse_non_paretic_mean = np.mean(np_np_impulse)
@@ -847,14 +943,13 @@ class DataProcess:
             stance_time_non_paretic_ignored = stance_time_non_paretic
             save_each_cycle_bar_plot(
                 stance_time_paretic, stance_time_non_paretic,
-                'stance time [s]', "Stance_Time",
-                save_path
+                "Stance Time Raw [s]",
+                save_path, 0.0, 1.2
             )
             save_each_cycle_bar_plot(
                 stance_time_paretic_ignored, stance_time_non_paretic_ignored,
-                'stance time [s]', "Stance_Time_ignored"
-                                   "",
-                save_path
+                "Stance Time [s]",
+                save_path, 0.0, 1.2
             )
             stance_paretic_mean = np.mean(stance_time_paretic_ignored)
             stance_paretic_stdev = np.std(stance_time_paretic_ignored)
