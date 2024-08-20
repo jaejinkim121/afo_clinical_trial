@@ -83,7 +83,7 @@ class ClinicalDataset:
 
 
 class Config:
-    trial_start_time = 61.44919
+    trial_start_time = 0.0
 #
 # #
 # bag = Bag(

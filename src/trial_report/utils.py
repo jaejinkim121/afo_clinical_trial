@@ -469,7 +469,7 @@ class DataProcess:
                 DataProcess.read_data_file_by_path(non_paretic_data)
         else:
             df_non_paretic = copy.deepcopy(non_paretic_data)
-        
+
         collection_paretic = \
             DataProcess.divider_data_by_gait_phase_df(
                 df_paretic, df_paretic_gait,
@@ -572,7 +572,7 @@ class DataProcess:
     def graph_both_cycle_data(collection_data_paretic,
                               collection_data_nonparetic,
                               data_gait_paretic, data_gait_nonparetic,
-                              title_graph, save_path, 
+                              title_graph, save_path,
                               ylim_lower, ylim_upper, xlim_upper=160.0,
                               x_num=101):
         [mean_diff_both, std_diff_both,
@@ -688,14 +688,14 @@ class DataProcess:
         df_non_paretic_gait.iloc[:, 0] -= start_time
 
         paretic_data = paretic_data[
-            (paretic_data.time > TST) & (paretic_data.time < TST + 120.0)]
+            (paretic_data.time > TST) & (paretic_data.time < TST + 120000.0)]
         non_paretic_data = non_paretic_data[
-            (non_paretic_data.time > TST) & (non_paretic_data.time < TST + 120.0)]
+            (non_paretic_data.time > TST) & (non_paretic_data.time < TST + 120000.0)]
         df_paretic_gait = df_paretic_gait[(df_paretic_gait.time > TST) & (
-                    df_paretic_gait.time < TST + 120.0)]
+                    df_paretic_gait.time < TST + 1200000.0)]
         df_non_paretic_gait = df_non_paretic_gait[
             (df_non_paretic_gait.time > TST) & (
-                        df_non_paretic_gait.time < TST + 120.0)]
+                        df_non_paretic_gait.time < TST + 1200000.0)]
 
         df_paretic_gait.iloc[:, 0] -= TST
         df_non_paretic_gait.iloc[:, 0] -= TST
@@ -709,8 +709,9 @@ class DataProcess:
             if df_paretic_gait.iloc[i, 1] == 2.0:
                 continue
             if df_paretic_gait.iloc[i, 0] - df_paretic_gait.iloc[i - 1, 0] < 0.2:
-                df_tmp.pop(i)
-                df_tmp.pop(i-1)
+                pass
+                # df_tmp.pop(i)
+                # df_tmp.pop(i-1)
         df_paretic_gait = df_tmp.T
 
         df_tmp = df_non_paretic_gait.T.copy()
@@ -720,8 +721,9 @@ class DataProcess:
             if df_non_paretic_gait.iloc[i, 1] == 2.0:
                 continue
             if df_non_paretic_gait.iloc[i, 0] - df_non_paretic_gait.iloc[i - 1, 0] < 0.2:
-                df_tmp.pop(i)
-                df_tmp.pop(i-1)
+                pass
+                # df_tmp.pop(i)
+                # df_tmp.pop(i-1)
         df_non_paretic_gait = df_tmp.T
 
         ### LMH
@@ -932,7 +934,7 @@ class DataProcess:
             stance_time_non_paretic_ignored = []
             stance_time_paretic = []
             stance_time_non_paretic = []
-            
+
             for i in range(len(df_paretic_gait) - 1):
                 if df_paretic_gait.iloc[i, 1] == 2.0:
                     continue
