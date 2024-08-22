@@ -86,8 +86,8 @@ class ClinicalAnalysis:
             start_time=start_time,
             max_flag=True,
             impulse_flag=True,
-            stance_flag=True,
-            grf_flag=True
+            stance_flag=True
+            # grf_flag=True
         )
 
         return max_array, impulse_array, stance_array
