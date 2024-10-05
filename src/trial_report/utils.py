@@ -447,7 +447,9 @@ class DataProcess:
             paretic_gait_path,
             non_paretic_gait_path,
             ignore_cycle=(None, None),
-            start_time=0.0
+            start_time=0.0,
+            report_start_time=None,
+            report_duration=None
     ):
         if type(paretic_data) != pd.DataFrame:
             df_paretic = \
@@ -466,6 +468,14 @@ class DataProcess:
             non_paretic_gait_path)
         df_paretic_gait.iloc[:, 0] -= start_time
         df_non_paretic_gait.iloc[:, 0] -= start_time
+        if report_start_time is not None:
+            df_paretic_gait = df_paretic_gait[
+                (df_paretic_gait.time >= report_start_time) &
+                (df_paretic_gait.time <= report_start_time + report_duration)]
+            df_non_paretic_gait = df_non_paretic_gait[
+                (df_non_paretic_gait.time >= report_start_time) &
+                (df_non_paretic_gait.time <=
+                 report_start_time + report_duration)]
 
         collection_paretic = \
             DataProcess.divider_data_by_gait_phase_df(
@@ -676,7 +686,9 @@ class DataProcess:
             start_time=0.0,
             max_flag=True,
             impulse_flag=False,
-            stance_flag=False
+            stance_flag=False,
+            report_start_time=None,
+            report_duration=None
     ):
 
         collection_paretic, collection_non_paretic,\
@@ -685,7 +697,9 @@ class DataProcess:
                 paretic_data, non_paretic_data,
                 paretic_gait_path, non_paretic_gait_path,
                 ignore_cycle=ignore_cycle,
-                start_time=start_time
+                start_time=start_time,
+                report_start_time=report_start_time,
+                report_duration=report_duration
                 )
 
         df_paretic_gait = \

@@ -180,7 +180,7 @@ class ReportMaker:
 
         self._label_sub4 = tk.Label(
             self._root,
-            text="4. Walking Distance",
+            text="5. Walking Distance",
             font=self._font_sub_title,
             relief=outline_label
         )
@@ -199,7 +199,7 @@ class ReportMaker:
 
         self._label_sub4_2 = tk.Label(
             self._root,
-            text="5. Session Type",
+            text="6. Session Type",
             font=self._font_sub_title,
             relief=outline_label
         )
@@ -212,11 +212,11 @@ class ReportMaker:
             *self._session_type_list
         )
         self._opt_sub4_2_session_type.config(width=30,
-            relief=outline_option)
+                                             relief=outline_option)
 
         self._label_sub5 = tk.Label(
             self._root,
-            text="6. Model Path",
+            text="7. Model Path",
             font=self._font_sub_title,
             relief=outline_label
         )
@@ -270,7 +270,7 @@ class ReportMaker:
 
         self._label_sub6 = tk.Label(
             self._root,
-            text="7. Output Path",
+            text="8. Output Path",
             font=self._font_sub_title,
             relief=outline_label
         )
@@ -346,6 +346,7 @@ class ReportMaker:
                                         sticky='w', padx='44', pady='5')
         self._opt_sub3_shoe_size.grid(row=9, column=2, columnspan=4,
                                       sticky='w')
+
         self._label_sub4.grid(row=10, column=0, columnspan=6,
                               sticky='w', padx='30', pady='5')
         self._entry_sub4_walking_distance.grid(
@@ -383,6 +384,7 @@ class ReportMaker:
                                 sticky='w', padx='30', pady='5')
         self._opt_sub4_2_session_type.grid(row=18, column=0, columnspan=6,
                                            sticky='w', padx='30', pady='5')
+
         self._button_make_output.grid(row=19, column=0, columnspan=3,
                                       pady='15')
         self._button_exit.grid(row=19, column=2, columnspan=3, pady='15')
@@ -523,6 +525,77 @@ class ReportMaker:
 
         bag_raw = bagreader(path)
         start_time = bag_raw.start_time
+
+        bag_name = self._path_bag_file.split('/')[-1]
+        # report start time, report duration
+        # RH03, Day1
+        if bag_name == "log_2024-09-11-12-16-22.bag":
+            report_start_time = 61.39
+            report_duration = 14.86
+            # report_start_time = 110.36
+            # report_duration = 14.51
+        elif bag_name == "log_2024-09-11-12-18-45.bag":
+            report_start_time = 25.77
+            report_duration = 14.51
+        elif bag_name == "log_2024-09-11-12-19-48.bag":
+            report_start_time = 17.85
+            report_duration = 14.22
+        elif bag_name == "log_2024-09-11-12-34-12.bag":
+            report_start_time = 40.3
+            report_duration = 120.0
+        elif bag_name == "log_2024-09-11-12-43-37.bag":
+            report_start_time = 110.58
+            report_duration = 120.0
+        elif bag_name == "log_2024-09-11-13-01-43.bag":
+            report_start_time = 42.43
+            report_duration = 15.12
+            # report_start_time = 79.44
+            # report_duration = 14.17
+        elif bag_name == "log_2024-09-11-13-03-34.bag":
+            report_start_time = 32.84
+            report_duration = 17.12
+            # report_start_time = 76.28
+            # report_duration = 14.61
+        elif bag_name == "log_2024-09-11-13-10-28.bag":
+            report_start_time = 30.1
+            report_duration = 120.0
+        elif bag_name == "log_2024-09-11-13-17-54.bag":
+            report_start_time = 32.63
+            report_duration = 120.0
+        # RH03, Day2
+        elif bag_name == "log_2024-09-12-11-45-05.bag":
+            report_start_time = 41.76
+            report_duration = 16.01
+        elif bag_name == "log_2024-09-12-11-46-18.bag":
+            report_start_time = 14.47
+            report_duration = 14.5
+        elif bag_name == "log_2024-09-12-11-51-35.bag":
+            report_start_time = 34.59
+            report_duration = 120.0
+        elif bag_name == "log_2024-09-12-11-59-43.bag":
+            report_start_time = 14.32
+            report_duration = 120.0
+        elif bag_name == "log_2024-09-12-12-07-15.bag":
+            report_start_time = 28.33
+            report_duration = 15.66
+        elif bag_name == "log_2024-09-12-12-08-16.bag":
+            report_start_time = 16.17
+            report_duration = 13.79
+        elif bag_name == "log_2024-09-12-12-09-02.bag":
+            report_start_time = 14.7
+            report_duration = 13.35
+        elif bag_name == "log_2024-09-12-12-09-46.bag":
+            report_start_time = 14.32
+            report_duration = 13.81
+        elif bag_name == "log_2024-09-12-12-15-28.bag":
+            report_start_time = 20.0
+            report_duration = 120.0
+        elif bag_name == "log_2024-09-12-12-23-23.bag":
+            report_start_time = 20.1
+            report_duration = 120.0
+        else:
+            report_start_time = None
+            report_duration = None
         # To filter specific topics with interests
         TOPIC_MH = (
             "/afo_sensor/soleSensor_left",
@@ -590,6 +663,8 @@ class ReportMaker:
                 meta_data=metadata_,
                 default_path=self._path_default,
                 start_time=start_time,
+                report_start_time=report_start_time,
+                report_duration=report_duration,
                 left_path=left_sole_path,
                 right_path=right_sole_path,
                 paretic_path=paretic_gait_path,

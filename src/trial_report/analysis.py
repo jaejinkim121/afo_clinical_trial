@@ -9,6 +9,8 @@ class ClinicalAnalysis:
             meta_data,
             default_path,
             start_time,
+            report_start_time,
+            report_duration,
             left_path,
             right_path,
             paretic_path,
@@ -34,16 +36,18 @@ class ClinicalAnalysis:
         # GRF class assign
         grf_class = GRF_predictor(
             start_time=start_time,
-            leftPath=left_path,
-            rightPath=right_path,
-            pareticPath=paretic_path,
-            nonpareticPath=non_paretic_path,
-            modelPathCalib=model_path_cell,
-            modelPathGRF=model_path_grf,
+            report_start=report_start_time,
+            report_duration=report_duration,
+            left_path=left_path,
+            right_path=right_path,
+            paretic_path=paretic_path,
+            nonparetic_path=non_paretic_path,
+            calib_model_path=model_path_cell,
+            grf_model_path=model_path_grf,
             save_path=inference_data_save_path,
             size=sole_size,
             paretic_side=paretic_side,
-            BW=body_weight
+            body_weight=body_weight
         )
         if meta_data.paretic_side == Side.LEFT:
             paretic_data = grf_class.left_grf
@@ -86,7 +90,9 @@ class ClinicalAnalysis:
             start_time=start_time,
             max_flag=True,
             impulse_flag=True,
-            stance_flag=True
+            stance_flag=True,
+            report_start_time=report_start_time,
+            report_duration=report_duration,
             # grf_flag=True
         )
 

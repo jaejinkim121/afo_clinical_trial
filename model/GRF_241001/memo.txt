@@ -1,0 +1,13 @@
+- Dataset
+: Treadmill (SRBL6, 8 L R both)
+
+- BiLSTM model
+
+Force model: BiLSTM
+Force filtering: O
+Force normalization: O
+
+- Columns:
+f1~6
+
+- output: normalized_vGRF
