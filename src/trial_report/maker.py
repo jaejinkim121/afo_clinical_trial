@@ -593,6 +593,65 @@ class ReportMaker:
         elif bag_name == "log_2024-09-12-12-23-23.bag":
             report_start_time = 20.1
             report_duration = 120.0
+        # RH02, Day1
+        elif bag_name == "log_2024-08-12-16-37-14.bag":
+            report_start_time = 60.5
+            report_duration = 120.0
+        elif bag_name == "log_2024-08-12-16-33-02.bag":
+            report_start_time = 80.7
+            report_duration = 120.0
+        elif bag_name == "log_2024-08-12-15-25-57.bag":
+            report_start_time = 33.5
+            report_duration = 49.5
+            # report_start_time = 107.5
+            # report_duration = 50.5
+            # report_start_time = 208.5
+            # report_duration = 49.5
+            # report_start_time = 296.0
+            # report_duration = 50.0
+        elif bag_name == "log_2024-08-12-15-46-35.bag":
+            report_start_time = 161.0
+            report_duration = 49.0
+            # report_start_time = 246.0
+            # report_duration = 50.0
+        elif bag_name == "log_2024-08-12-15-52-57.bag":
+            report_start_time = 17.0
+            report_duration = 43.0
+            # report_start_time = 111.5
+            # report_duration = 51.0
+        # RH02, Day2
+        elif bag_name == "log_2024-08-14-12-33-52.bag":
+            report_start_time = 60.0
+            report_duration = 120.0
+        elif bag_name == "log_2024-08-14-12-21-10.bag":
+            report_start_time = 65.5
+            report_duration = 120.0
+        elif bag_name == "log_2024-08-14-12-08-57.bag":
+            report_start_time = 44.5
+            report_duration = 120.0
+        elif bag_name == "log_2024-08-14-11-56-49.bag":
+            report_start_time = 40.0
+            report_duration = 120.0
+        elif bag_name == "log_2024-08-14-11-19-39.bag":
+            report_start_time = 33.0
+            report_duration = 50.0
+            # report_start_time = 102.5
+            # report_duration = 52.0
+        elif bag_name == "log_2024-08-14-11-26-48.bag":
+            report_start_time = 35.0
+            report_duration = 52.0
+            # report_start_time = 141.5
+            # report_duration = 49.5
+        elif bag_name == "log_2024-08-14-11-34-32.bag":
+            report_start_time = 58.5
+            report_duration = 49.5
+            # report_start_time = 133.0
+            # report_duration = 49.0
+        elif bag_name == "log_2024-08-14-11-42-33.bag":
+            report_start_time = 76.0
+            report_duration = 45.0
+            # report_start_time = 194.0
+            # report_duration = 50.0
         else:
             report_start_time = None
             report_duration = None
