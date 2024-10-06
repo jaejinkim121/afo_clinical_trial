@@ -703,36 +703,39 @@ class ReportMaker:
         ## Use hand made gait event filter index
         # Need to be set None-object
         # when you don't use hand-picked gait event index filter
-        path_gait_event_filter_left = \
-            self._path_default + "/report/data/" + \
-            metadata_.test_label + "/gait_event_filter_left.csv"
-        path_gait_event_filter_right = \
-            self._path_default + "/report/data/" + \
-            metadata_.test_label + "/gait_event_filter_right.csv"
+        if metadata_.test_label == "RH-08-01":
+            path_gait_event_filter_left = \
+                self._path_default + "/report/data/" + \
+                metadata_.test_label + "/gait_event_filter_left.csv"
+            path_gait_event_filter_right = \
+                self._path_default + "/report/data/" + \
+                metadata_.test_label + "/gait_event_filter_right.csv"
 
-        df_gait_event_filter_left = \
-            pd.read_csv(path_gait_event_filter_left, header=0)
-        df_gait_event_filter_right = \
-            pd.read_csv(path_gait_event_filter_right, header=0)
-        df_current_filter_left = \
-            df_gait_event_filter_left[metadata_.bag[:-4]]
-        df_current_filter_right = \
-            df_gait_event_filter_right[metadata_.bag[:-4]]
-        df_current_filter_left.dropna(inplace=True)
-        df_current_filter_right.dropna(inplace=True)
-        current_filter_left = df_current_filter_left.astype(int).to_list()
-        current_filter_right = df_current_filter_right.astype(int).to_list()
-        for i in range(len(current_filter_left)):
-            current_filter_left[i] = current_filter_left[i] - 1
-        for i in range(len(current_filter_right)):
-            current_filter_right[i] = current_filter_right[i] - 1
+            df_gait_event_filter_left = \
+                pd.read_csv(path_gait_event_filter_left, header=0)
+            df_gait_event_filter_right = \
+                pd.read_csv(path_gait_event_filter_right, header=0)
+            df_current_filter_left = \
+                df_gait_event_filter_left[metadata_.bag[:-4]]
+            df_current_filter_right = \
+                df_gait_event_filter_right[metadata_.bag[:-4]]
+            df_current_filter_left.dropna(inplace=True)
+            df_current_filter_right.dropna(inplace=True)
+            current_filter_left = df_current_filter_left.astype(int).to_list()
+            current_filter_right = df_current_filter_right.astype(int).to_list()
+            for i in range(len(current_filter_left)):
+                current_filter_left[i] = current_filter_left[i] - 1
+            for i in range(len(current_filter_right)):
+                current_filter_right[i] = current_filter_right[i] - 1
 
-        if metadata_.paretic_side == Side.LEFT:
-            current_gait_event_filter = \
-                [current_filter_left, current_filter_right]
+            if metadata_.paretic_side == Side.LEFT:
+                current_gait_event_filter = \
+                    [current_filter_left, current_filter_right]
+            else:
+                current_gait_event_filter = \
+                    [current_filter_right, current_filter_left]
         else:
-            current_gait_event_filter = \
-                [current_filter_right, current_filter_left]
+            current_gait_event_filter = None
 
         #########################################################
 
