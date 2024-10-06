@@ -689,6 +689,7 @@ class DataProcess:
             max_flag=True,
             impulse_flag=False,
             stance_flag=False,
+            clearance_flag=False,
             report_start_time=None,
             report_duration=None,
             idx_gait_event_filter=None
@@ -715,6 +716,44 @@ class DataProcess:
                 collection_paretic, collection_non_paretic,
                 df_paretic_gait, df_non_paretic_gait
             )
+
+        ####################################################
+        ## Clearance histogram drawing
+        ## Flag should be True only for clearance
+        if clearance_flag:
+            paretic_swing = []
+            non_paretic_swing = []
+            # 1. Get data only for swing
+            for i in range(len(df_paretic_gait) - 1):
+                if df_paretic_gait.iloc[i, 1] == 1:
+                    continue
+                else:
+                    tmp = paretic_data["value"][
+                        (paretic_data["time"] >= df_paretic_gait.iloc[i, 0]) &
+                        (paretic_data["time"] < df_paretic_gait.iloc[i + 1, 0])
+                        ]
+                    tmp = tmp.to_list()
+                    paretic_swing += tmp
+            for i in range(len(df_non_paretic_gait) - 1):
+                if df_non_paretic_gait.iloc[i, 1] == 1:
+                    continue
+                else:
+                    tmp = non_paretic_data["value"][
+                        (non_paretic_data["time"] >= df_non_paretic_gait.iloc[i, 0]) &
+                        (non_paretic_data["time"] < df_non_paretic_gait.iloc[i + 1, 0])
+                        ]
+                    tmp = tmp.to_list()
+                    non_paretic_swing += tmp
+
+            # 2. Draw Histogram
+            DataProcess.draw_histogram(
+                paretic_swing,
+                non_paretic_swing,
+                save_path,
+                title_label
+            )
+        ####################################################
+
 
         ####################################################
         ## Disabled Picker
@@ -876,6 +915,30 @@ class DataProcess:
                 stance_non_paretic_mean, stance_non_paretic_stdev,
                 stance_symmetry
                 ]
+
+    @staticmethod
+    def draw_histogram(paretic_swing,
+                       non_paretic_swing,
+                       report_save_path,
+                       plot_title):
+        array_paretic = np.array(paretic_swing)
+        array_non_paretic = np.array(non_paretic_swing)
+
+        weights_paretic = \
+            np.ones_like(array_paretic) / len(array_paretic)
+        weights_non_paretic = \
+            np.ones_like(array_non_paretic) / len(array_non_paretic)
+        fig, axs = plt.subplots(1, 2, sharey='all', tight_layout=True)
+        axs[0].hist(array_paretic, weights=weights_paretic, bins=30)
+        axs[1].hist(array_non_paretic, weights=weights_non_paretic, bins=30)
+        axs[0].set_xlim(left=-100, right=400)
+        axs[0].set_title(plot_title + " - paretic")
+        axs[0].set_xlabel("Clearance [mm]")
+        axs[0].set_ylabel("Frequency")
+        axs[1].set_xlim(left=-100, right=400)
+        axs[1].set_title(plot_title + " - non paretic")
+        axs[1].set_xlabel("Clearance [mm]")
+        fig.savefig(report_save_path + "/graph/" + plot_title + ".png")
 
 
 class Picker:

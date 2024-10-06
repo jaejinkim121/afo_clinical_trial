@@ -31,14 +31,19 @@ class ClinicalIndexJJ:
                                            "Right toe",
                                            "Right heel"],
                                     header=None)
+        torso_height = 800
         df_toe_left = pd.DataFrame(
-            {"time": df_clearance_["t"], "value": df_clearance_["Left toe"]})
+            {"time": df_clearance_["t"],
+             "value": df_clearance_["Left toe"] + torso_height})
         df_heel_left = pd.DataFrame(
-            {"time": df_clearance_["t"], "value": df_clearance_["Left heel"]})
+            {"time": df_clearance_["t"],
+             "value": df_clearance_["Left heel"] + torso_height})
         df_toe_right = pd.DataFrame(
-            {"time": df_clearance_["t"], "value": df_clearance_["Right toe"]})
+            {"time": df_clearance_["t"],
+             "value": df_clearance_["Right toe"] + torso_height})
         df_heel_right = pd.DataFrame(
-            {"time": df_clearance_["t"], "value": df_clearance_["Right heel"]})
+            {"time": df_clearance_["t"],
+             "value": df_clearance_["Right heel"] + torso_height})
 
         paretic_side = metadata.paretic_side
 
@@ -65,6 +70,7 @@ class ClinicalIndexJJ:
             ignore_cycle=ignore_cycle,
             start_time=start_time,
             max_flag=True,
+            clearance_flag=True,
             report_start_time=report_start_time,
             report_duration=report_duration,
             idx_gait_event_filter=current_gait_event_filter
@@ -81,6 +87,7 @@ class ClinicalIndexJJ:
             ignore_cycle=ignore_cycle,
             start_time=start_time,
             max_flag=True,
+            clearance_flag=True,
             report_start_time=report_start_time,
             report_duration=report_duration,
             idx_gait_event_filter=current_gait_event_filter
