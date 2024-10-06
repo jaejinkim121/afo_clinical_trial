@@ -12,46 +12,78 @@ class ClinicalIndexJJ:
                                 z_path,
                                 paretic_gait_path,
                                 non_paretic_gait_path,
-                                metadata:Bag,
+                                metadata: Bag,
                                 default_path,
-                                start_time):
+                                start_time,
+                                report_start_time,
+                                report_duration):
         report_save_path = default_path + "/report/data/" + \
                            metadata.test_label + "/" + metadata.session_type
 
-        y_data = pd.read_csv(y_path, header=0)
-        z_data = pd.read_csv(z_path, header=0)
+        clearance_file_path = report_save_path + \
+                              "/process_data/inference_data/clearance.csv"
 
-        y_time = y_data["Time"]
-        y_time -= start_time
-        left_y = y_data["data_0"]
-        right_y = y_data["data_7"]
-
-        left_y = pd.DataFrame({"time":y_time, "value":left_y})
-        right_y = pd.DataFrame({"time":y_time, "value":right_y})
+        df_clearance_ = pd.read_csv(clearance_file_path,
+                                    names=["t",
+                                           "Left toe",
+                                           "Left heel",
+                                           "Right toe",
+                                           "Right heel"],
+                                    header=None)
+        df_toe_left = pd.DataFrame(
+            {"time": df_clearance_["t"], "value": df_clearance_["Left toe"]})
+        df_heel_left = pd.DataFrame(
+            {"time": df_clearance_["t"], "value": df_clearance_["Left heel"]})
+        df_toe_right = pd.DataFrame(
+            {"time": df_clearance_["t"], "value": df_clearance_["Right toe"]})
+        df_heel_right = pd.DataFrame(
+            {"time": df_clearance_["t"], "value": df_clearance_["Right heel"]})
 
         paretic_side = metadata.paretic_side
 
         if paretic_side == Side.LEFT:
-            paretic_data = left_y
-            non_paretic_data = right_y
+            df_toe_paretic = df_toe_left
+            df_heel_paretic = df_heel_left
+            df_toe_nonparetic = df_toe_right
+            df_heel_nonparetic = df_heel_right
         else:
-            paretic_data = right_y
-            non_paretic_data = left_y
+            df_toe_paretic = df_toe_right
+            df_heel_paretic = df_heel_right
+            df_toe_nonparetic = df_toe_left
+            df_heel_nonparetic = df_heel_left
 
         ignore_cycle = (metadata.ignore_cycle[0], metadata.ignore_cycle[1])
-        max_, impulse_, stance_ = DataProcess.data_process(
-            paretic_data,
-            non_paretic_data,
+        max_toe, impulse_toe, stance_ = DataProcess.data_process(
+            df_toe_paretic,
+            df_toe_nonparetic,
             paretic_gait_path,
             non_paretic_gait_path,
             save_path=report_save_path,
-            data_label="mm",
+            data_label="Clearance [mm]",
             title_label="Toe Clearance",
             ignore_cycle=ignore_cycle,
             start_time=start_time,
-            max_flag=True)
+            max_flag=True,
+            report_start_time=report_start_time,
+            report_duration=report_duration
+        )
 
-        return max_
+        max_heel, impulse_heel, stance_ = DataProcess.data_process(
+            df_heel_paretic,
+            df_heel_nonparetic,
+            paretic_gait_path,
+            non_paretic_gait_path,
+            save_path=report_save_path,
+            data_label="Clearance [mm]",
+            title_label="Heel Clearance",
+            ignore_cycle=ignore_cycle,
+            start_time=start_time,
+            max_flag=True,
+            report_start_time=report_start_time,
+            report_duration=report_duration
+        )
+
+        return max_toe
 
         #
         # collection_paretic_toe_clearance, gait_phase_paretic = \
