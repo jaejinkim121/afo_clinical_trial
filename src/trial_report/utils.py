@@ -688,7 +688,8 @@ class DataProcess:
             impulse_flag=False,
             stance_flag=False,
             report_start_time=None,
-            report_duration=None
+            report_duration=None,
+            idx_gait_event_ignore=None
     ):
 
         collection_paretic, collection_non_paretic,\
@@ -711,11 +712,17 @@ class DataProcess:
                 collection_paretic, collection_non_paretic,
                 df_paretic_gait, df_non_paretic_gait
             )
-        idx_paretic_ignore, idx_non_paretic_ignore,\
-            stance_time_paretic, stance_time_non_paretic =\
-            get_index_outlier(
-                df_paretic_gait, df_non_paretic_gait
-            )
+
+        ####################################################
+        ## Disabled Picker
+        # idx_paretic_ignore, idx_non_paretic_ignore,\
+        #     stance_time_paretic, stance_time_non_paretic =\
+        #     get_index_outlier(
+        #         df_paretic_gait, df_non_paretic_gait
+        #     )
+        idx_paretic_ignore = []
+        idx_non_paretic_ignore = []
+        #####################################################
 
         DataProcess.graph_both_cycle_data(
             collection_paretic, collection_non_paretic,
