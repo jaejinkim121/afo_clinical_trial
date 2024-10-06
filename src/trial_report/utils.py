@@ -67,7 +67,7 @@ def get_index_outlier(df_gait_paretic, df_gait_non_paretic):
     #     picker_paretic.selected_idx.append(ic_last_idx_paretic)
     # if ic_last_idx_non_paretic:
     #     picker_non_paretic.selected_idx.append(ic_last_idx_non_paretic)
-    return _, _, time_diff_paretic, time_diff_non_paretic
+    return [],[], time_diff_paretic, time_diff_non_paretic
     # return picker_paretic.selected_idx, picker_non_paretic.selected_idx,\
     #     time_diff_paretic, time_diff_non_paretic
 
@@ -962,14 +962,33 @@ class DataProcess:
         axs[1].hist(array_non_paretic_sub, weights=weights_non_paretic_sub, bins=15, color='blue', alpha=0.2)
 
         axs[0].set_xlim(left=-100, right=400)
-        axs[0].set_title(plot_title + " - paretic")
+        axs[0].set_title("Clearance - Toe")
         axs[0].set_xlabel("Clearance [mm]")
         axs[0].set_ylabel("Frequency")
         axs[1].set_xlim(left=-100, right=400)
-        axs[1].set_title(plot_title + " - non paretic")
+        axs[1].set_title("Clearance - Heel")
         axs[1].set_xlabel("Clearance [mm]")
         create_folder(report_save_path+"/graph")
-        fig.savefig(report_save_path + "/graph/" + plot_title + ".png")
+        fig.savefig(report_save_path + "/graph/" + "clearance_toe_heel.png")
+
+        fig, axs = plt.subplots(1, 2, sharey='all', tight_layout=True)
+        axs[0].hist(array_paretic, weights=weights_paretic, bins=15,
+                    color='red', alpha=0.2)
+        axs[0].hist(array_paretic_sub, weights=weights_paretic_sub, bins=15,
+                    color='red', histtype='step')
+        axs[1].hist(array_non_paretic, weights=weights_non_paretic, bins=15,
+                    color='blue', alpha=0.2)
+        axs[1].hist(array_non_paretic_sub, weights=weights_non_paretic_sub,
+                    bins=15, color='blue', histtype='step')
+
+        axs[0].set_xlim(left=-100, right=400)
+        axs[0].set_title("Clearance - Paretic")
+        axs[0].set_xlabel("Clearance [mm]")
+        axs[0].set_ylabel("Frequency")
+        axs[1].set_xlim(left=-100, right=400)
+        axs[1].set_title("Clearance - Non-paretic")
+        axs[1].set_xlabel("Clearance [mm]")
+        fig.savefig(report_save_path + "/graph/" + "clearance_pnp.png")
 
 
 class Picker:
