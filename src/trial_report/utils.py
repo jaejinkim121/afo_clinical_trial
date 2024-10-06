@@ -368,11 +368,8 @@ class DataProcess:
         for tic, tfo in zip(paretic_ic, paretic_fo):
             time_diff.append(tfo - tic)
         time_diff = np.array(time_diff)
-        time_diff_crop = time_diff[
-            np.where(np.logical_and(0.2 < time_diff, time_diff < 1.5))
-        ]
-        mean_stance_time_paretic = np.mean(time_diff_crop)
-        std_stance_time_paretic = np.std(time_diff_crop)
+        mean_stance_time_paretic = np.mean(time_diff)
+        std_stance_time_paretic = np.std(time_diff)
         mean_stance_percent_paretic = mean_stance_time_paretic / mean_cycle
         std_stance_percent_paretic = std_stance_time_paretic / mean_cycle
 
@@ -385,11 +382,8 @@ class DataProcess:
         for tic, tfo in zip(nonparetic_ic, nonparetic_fo):
             time_diff.append(tfo - tic)
         time_diff = np.array(time_diff)
-        time_diff_crop = time_diff[
-            np.where(np.logical_and(0.2 < time_diff, time_diff < 1.5))
-        ]
-        mean_stance_time_nonparetic = np.mean(time_diff_crop)
-        std_stance_time_nonparetic = np.std(time_diff_crop)
+        mean_stance_time_nonparetic = np.mean(time_diff)
+        std_stance_time_nonparetic = np.std(time_diff)
         mean_stance_percent_nonparetic = \
             mean_stance_time_nonparetic / mean_cycle
         std_stance_percent_nonparetic = \
@@ -449,7 +443,8 @@ class DataProcess:
             ignore_cycle=(None, None),
             start_time=0.0,
             report_start_time=None,
-            report_duration=None
+            report_duration=None,
+            idx_gait_event_filter=None
     ):
         if type(paretic_data) != pd.DataFrame:
             df_paretic = \
@@ -468,6 +463,13 @@ class DataProcess:
             non_paretic_gait_path)
         df_paretic_gait.iloc[:, 0] -= start_time
         df_non_paretic_gait.iloc[:, 0] -= start_time
+
+        if idx_gait_event_filter is not None:
+            df_paretic_gait.drop(idx_gait_event_filter[0], inplace=True)
+            df_paretic_gait.reset_index(drop=True, inplace=True)
+            df_non_paretic_gait.drop(idx_gait_event_filter[1], inplace=True)
+            df_non_paretic_gait.reset_index(drop=True, inplace=True)
+
         if report_start_time is not None:
             df_paretic_gait = df_paretic_gait[
                 (df_paretic_gait.time >= report_start_time) &
@@ -689,7 +691,7 @@ class DataProcess:
             stance_flag=False,
             report_start_time=None,
             report_duration=None,
-            idx_gait_event_ignore=None
+            idx_gait_event_filter=None
     ):
 
         collection_paretic, collection_non_paretic,\
@@ -700,7 +702,8 @@ class DataProcess:
                 ignore_cycle=ignore_cycle,
                 start_time=start_time,
                 report_start_time=report_start_time,
-                report_duration=report_duration
+                report_duration=report_duration,
+                idx_gait_event_filter=idx_gait_event_filter
                 )
 
         df_paretic_gait = \

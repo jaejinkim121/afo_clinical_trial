@@ -16,7 +16,8 @@ class ClinicalIndexJJ:
                                 default_path,
                                 start_time,
                                 report_start_time,
-                                report_duration):
+                                report_duration,
+                                current_gait_event_filter=None):
         report_save_path = default_path + "/report/data/" + \
                            metadata.test_label + "/" + metadata.session_type
 
@@ -65,7 +66,8 @@ class ClinicalIndexJJ:
             start_time=start_time,
             max_flag=True,
             report_start_time=report_start_time,
-            report_duration=report_duration
+            report_duration=report_duration,
+            idx_gait_event_filter=current_gait_event_filter
         )
 
         max_heel, impulse_heel, stance_ = DataProcess.data_process(
@@ -80,7 +82,8 @@ class ClinicalIndexJJ:
             start_time=start_time,
             max_flag=True,
             report_start_time=report_start_time,
-            report_duration=report_duration
+            report_duration=report_duration,
+            idx_gait_event_filter=current_gait_event_filter
         )
 
         return max_toe
