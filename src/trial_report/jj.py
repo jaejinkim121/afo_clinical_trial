@@ -73,7 +73,9 @@ class ClinicalIndexJJ:
             clearance_flag=True,
             report_start_time=report_start_time,
             report_duration=report_duration,
-            idx_gait_event_filter=current_gait_event_filter
+            idx_gait_event_filter=current_gait_event_filter,
+            df_sub_paretic=df_heel_paretic,
+            df_sub_non_paretic=df_heel_nonparetic
         )
 
         max_heel, impulse_heel, stance_ = DataProcess.data_process(
@@ -87,7 +89,6 @@ class ClinicalIndexJJ:
             ignore_cycle=ignore_cycle,
             start_time=start_time,
             max_flag=True,
-            clearance_flag=True,
             report_start_time=report_start_time,
             report_duration=report_duration,
             idx_gait_event_filter=current_gait_event_filter
