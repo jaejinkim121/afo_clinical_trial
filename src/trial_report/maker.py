@@ -707,7 +707,9 @@ class ReportMaker:
                 paretic_gait_path, nonparetic_gait_path,
                 metadata_,
                 self._path_default,
-                start_time
+                start_time,
+                report_start_time,
+                report_duration
             )
 
         gait_speed_imu_data = [1, 1, 1]
