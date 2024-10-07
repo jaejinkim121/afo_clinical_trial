@@ -2045,12 +2045,12 @@ class GRF_predictor:
             self.left_time = self.left_time[:-self.grf_input_length]
             self.left_vout = self.left_vout[:-self.grf_input_length, :]
             self.left_force = self.left_force[:-self.grf_input_length, :]
-            self.left_grf = self.left_grf[self.grf_input_length:, :]
+            self.left_grf = self.left_grf[self.grf_input_length:]
 
             self.right_time = self.right_time[:-self.grf_input_length]
             self.right_vout = self.right_vout[:-self.grf_input_length, :]
             self.right_force = self.right_force[:-self.grf_input_length, :]
-            self.right_grf = self.right_grf[self.grf_input_length:, :]
+            self.right_grf = self.right_grf[self.grf_input_length:]
 
         elif self.grf_model_path[-11:-8] == 'SVR':  # SVR_
             # preprocessing
