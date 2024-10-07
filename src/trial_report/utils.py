@@ -9,7 +9,7 @@ import os
 from bagpy import bagreader
 
 
-SAVE_EACH_CYCLE_DATA = False
+SAVE_EACH_CYCLE_DATA = True
 
 
 # Create Directory
@@ -473,9 +473,9 @@ class DataProcess:
 
         if idx_gait_event_filter is not None:
             df_paretic_gait.drop(idx_gait_event_filter[0], inplace=True)
-            df_paretic_gait.reset_index(drop=True, inplace=True)
+            # df_paretic_gait.reset_index(drop=True, inplace=True)
             df_non_paretic_gait.drop(idx_gait_event_filter[1], inplace=True)
-            df_non_paretic_gait.reset_index(drop=True, inplace=True)
+            # df_non_paretic_gait.reset_index(drop=True, inplace=True)
 
         if report_start_time is not None:
             df_paretic_gait = df_paretic_gait[
@@ -803,7 +803,7 @@ class DataProcess:
         ####################################################
         ## Disabled Picker
         idx_paretic_ignore, idx_non_paretic_ignore, \
-        stance_time_paretic, stance_time_non_paretic = \
+            stance_time_paretic, stance_time_non_paretic = \
             get_index_outlier(
                 df_paretic_gait, df_non_paretic_gait
             )
@@ -930,16 +930,18 @@ class DataProcess:
                     continue
                 if idx_non_paretic in idx_non_paretic_ignore:
                     continue
-                stance_time_paretic_ignored.append(
-                    stance_time_paretic[idx_paretic]
-                )
-                stance_time_non_paretic_ignored.append(
-                    stance_time_non_paretic[idx_non_paretic])
-
-            stance_paretic_mean = np.mean(stance_time_paretic_ignored)
-            stance_paretic_stdev = np.std(stance_time_paretic_ignored)
-            stance_non_paretic_mean = np.mean(stance_time_non_paretic_ignored)
-            stance_non_paretic_stdev = np.std(stance_time_non_paretic_ignored)
+                # try:
+                #     stance_time_paretic_ignored.append(
+                #         stance_time_paretic[idx_paretic]
+                #     )
+                #     stance_time_non_paretic_ignored.append(
+                #         stance_time_non_paretic[idx_non_paretic])
+                # except IndexError:
+                #     print("Warning : At stance cropping step, list index out of range")
+            stance_paretic_mean = np.mean(stance_time_paretic)
+            stance_paretic_stdev = np.std(stance_time_paretic)
+            stance_non_paretic_mean = np.mean(stance_time_non_paretic)
+            stance_non_paretic_stdev = np.std(stance_time_non_paretic)
             save_each_cycle_bar_plot(
                 stance_time_paretic, stance_time_non_paretic,
                 stance_paretic_mean, stance_non_paretic_mean,
@@ -948,15 +950,17 @@ class DataProcess:
                 front_label=front_label,
                 back_label=back_label
             )
-            save_each_cycle_bar_plot(
-                stance_time_paretic_ignored, stance_time_non_paretic_ignored,
-                stance_paretic_mean, stance_non_paretic_mean,
-                'Stance Time [s]', "Stance Time Ignored"
-                                   "",
-                save_path,
-                front_label=front_label,
-                back_label=back_label
-            )
+
+            # save_each_cycle_bar_plot(
+            #     stance_time_paretic_ignored, stance_time_non_paretic_ignored,
+            #     stance_paretic_mean, stance_non_paretic_mean,
+            #     'stance time [s]', "Stance_Time_ignored"
+            #                        "",
+            #     save_path,
+            #     front_label=front_label,
+            #     back_label=back_label
+            # )
+
             stance_symmetry = 1 - \
                               abs(stance_paretic_mean - stance_non_paretic_mean) \
                               / (stance_paretic_mean + stance_non_paretic_mean)
