@@ -59,17 +59,17 @@ def get_index_outlier(df_gait_paretic, df_gait_non_paretic):
         time_diff_paretic.append(tfo - tic)
     for tic, tfo in zip(nonparetic_ic, nonparetic_fo):
         time_diff_non_paretic.append(tfo - tic)
-
-    picker_paretic = Picker(time_diff_paretic)
-    picker_non_paretic = Picker(time_diff_non_paretic)
-
-    if ic_last_idx_paretic:
-        picker_paretic.selected_idx.append(ic_last_idx_paretic)
-    if ic_last_idx_non_paretic:
-        picker_non_paretic.selected_idx.append(ic_last_idx_non_paretic)
-
-    return picker_paretic.selected_idx, picker_non_paretic.selected_idx,\
-        time_diff_paretic, time_diff_non_paretic
+    #
+    # picker_paretic = Picker(time_diff_paretic)
+    # picker_non_paretic = Picker(time_diff_non_paretic)
+    #
+    # if ic_last_idx_paretic:
+    #     picker_paretic.selected_idx.append(ic_last_idx_paretic)
+    # if ic_last_idx_non_paretic:
+    #     picker_non_paretic.selected_idx.append(ic_last_idx_non_paretic)
+    return [],[], time_diff_paretic, time_diff_non_paretic
+    # return picker_paretic.selected_idx, picker_non_paretic.selected_idx,\
+    #     time_diff_paretic, time_diff_non_paretic
 
 
 def get_torque_info(path, start_time):
@@ -368,11 +368,8 @@ class DataProcess:
         for tic, tfo in zip(paretic_ic, paretic_fo):
             time_diff.append(tfo - tic)
         time_diff = np.array(time_diff)
-        time_diff_crop = time_diff[
-            np.where(np.logical_and(0.2 < time_diff, time_diff < 1.5))
-        ]
-        mean_stance_time_paretic = np.mean(time_diff_crop)
-        std_stance_time_paretic = np.std(time_diff_crop)
+        mean_stance_time_paretic = np.mean(time_diff)
+        std_stance_time_paretic = np.std(time_diff)
         mean_stance_percent_paretic = mean_stance_time_paretic / mean_cycle
         std_stance_percent_paretic = std_stance_time_paretic / mean_cycle
 
@@ -385,11 +382,8 @@ class DataProcess:
         for tic, tfo in zip(nonparetic_ic, nonparetic_fo):
             time_diff.append(tfo - tic)
         time_diff = np.array(time_diff)
-        time_diff_crop = time_diff[
-            np.where(np.logical_and(0.2 < time_diff, time_diff < 1.5))
-        ]
-        mean_stance_time_nonparetic = np.mean(time_diff_crop)
-        std_stance_time_nonparetic = np.std(time_diff_crop)
+        mean_stance_time_nonparetic = np.mean(time_diff)
+        std_stance_time_nonparetic = np.std(time_diff)
         mean_stance_percent_nonparetic = \
             mean_stance_time_nonparetic / mean_cycle
         std_stance_percent_nonparetic = \
@@ -449,7 +443,8 @@ class DataProcess:
             ignore_cycle=(None, None),
             start_time=0.0,
             report_start_time=None,
-            report_duration=None
+            report_duration=None,
+            idx_gait_event_filter=None
     ):
         if type(paretic_data) != pd.DataFrame:
             df_paretic = \
@@ -468,6 +463,13 @@ class DataProcess:
             non_paretic_gait_path)
         df_paretic_gait.iloc[:, 0] -= start_time
         df_non_paretic_gait.iloc[:, 0] -= start_time
+
+        if idx_gait_event_filter is not None:
+            df_paretic_gait.drop(idx_gait_event_filter[0], inplace=True)
+            df_paretic_gait.reset_index(drop=True, inplace=True)
+            df_non_paretic_gait.drop(idx_gait_event_filter[1], inplace=True)
+            df_non_paretic_gait.reset_index(drop=True, inplace=True)
+
         if report_start_time is not None:
             df_paretic_gait = df_paretic_gait[
                 (df_paretic_gait.time >= report_start_time) &
@@ -687,8 +689,12 @@ class DataProcess:
             max_flag=True,
             impulse_flag=False,
             stance_flag=False,
+            clearance_flag=False,
             report_start_time=None,
-            report_duration=None
+            report_duration=None,
+            idx_gait_event_filter=None,
+            df_sub_paretic=None,
+            df_sub_non_paretic=None
     ):
 
         collection_paretic, collection_non_paretic,\
@@ -699,7 +705,8 @@ class DataProcess:
                 ignore_cycle=ignore_cycle,
                 start_time=start_time,
                 report_start_time=report_start_time,
-                report_duration=report_duration
+                report_duration=report_duration,
+                idx_gait_event_filter=idx_gait_event_filter
                 )
 
         df_paretic_gait = \
@@ -711,11 +718,73 @@ class DataProcess:
                 collection_paretic, collection_non_paretic,
                 df_paretic_gait, df_non_paretic_gait
             )
+
+        ####################################################
+        ## Clearance histogram drawing
+        ## Flag should be True only for clearance
+        if clearance_flag:
+            paretic_swing = []
+            paretic_swing_sub = []
+            non_paretic_swing = []
+            non_paretic_swing_sub = []
+            # 1. Get data only for swing
+            for i in range(len(df_paretic_gait) - 1):
+                if df_paretic_gait.iloc[i, 1] == 1:
+                    continue
+                else:
+                    tmp = paretic_data["value"][
+                        (paretic_data["time"] >= df_paretic_gait.iloc[i, 0]) &
+                        (paretic_data["time"] < df_paretic_gait.iloc[i + 1, 0])
+                        ]
+                    tmp = tmp.to_list()
+                    paretic_swing += tmp
+                    tmp = df_sub_paretic["value"][
+                        (df_sub_paretic["time"] >= df_paretic_gait.iloc[i, 0]) &
+                        (df_sub_paretic["time"] < df_paretic_gait.iloc[i + 1, 0])
+                        ]
+                    tmp = tmp.to_list()
+                    paretic_swing_sub += tmp
+
+            for i in range(len(df_non_paretic_gait) - 1):
+                if df_non_paretic_gait.iloc[i, 1] == 1:
+                    continue
+                else:
+                    tmp = non_paretic_data["value"][
+                        (non_paretic_data["time"] >= df_non_paretic_gait.iloc[i, 0]) &
+                        (non_paretic_data["time"] < df_non_paretic_gait.iloc[i + 1, 0])
+                        ]
+                    tmp = tmp.to_list()
+                    non_paretic_swing += tmp
+                    tmp = df_sub_non_paretic["value"][
+                        (df_sub_non_paretic["time"] >= df_non_paretic_gait.iloc[i, 0]) &
+                        (df_sub_non_paretic["time"] < df_non_paretic_gait.iloc[i + 1, 0])
+                        ]
+                    tmp = tmp.to_list()
+                    non_paretic_swing_sub += tmp
+
+
+            # 2. Draw Histogram
+            DataProcess.draw_histogram(
+                paretic_swing,
+                non_paretic_swing,
+                paretic_swing_sub,
+                non_paretic_swing_sub,
+                save_path,
+                title_label
+            )
+        ####################################################
+
+
+        ####################################################
+        ## Disabled Picker
         idx_paretic_ignore, idx_non_paretic_ignore,\
             stance_time_paretic, stance_time_non_paretic =\
             get_index_outlier(
                 df_paretic_gait, df_non_paretic_gait
             )
+        idx_paretic_ignore = []
+        idx_non_paretic_ignore = []
+        #####################################################
 
         DataProcess.graph_both_cycle_data(
             collection_paretic, collection_non_paretic,
@@ -866,6 +935,60 @@ class DataProcess:
                 stance_non_paretic_mean, stance_non_paretic_stdev,
                 stance_symmetry
                 ]
+
+    @staticmethod
+    def draw_histogram(paretic_swing,
+                       non_paretic_swing,
+                       paretic_swing_sub,
+                       non_paretic_swing_sub,
+                       report_save_path,
+                       plot_title):
+        array_paretic = np.array(paretic_swing)
+        array_non_paretic = np.array(non_paretic_swing)
+        array_paretic_sub = np.array(paretic_swing_sub)
+        array_non_paretic_sub = np.array(non_paretic_swing_sub)
+
+        weights_paretic = \
+            np.ones_like(array_paretic) / len(array_paretic)
+        weights_non_paretic = \
+            np.ones_like(array_non_paretic) / len(array_non_paretic)
+        weights_paretic_sub = np.ones_like(array_paretic_sub) / len(array_paretic_sub)
+        weights_non_paretic_sub = np.ones_like(array_non_paretic_sub) / len(array_non_paretic_sub)
+
+        fig, axs = plt.subplots(1, 2, sharey='all', tight_layout=True)
+        axs[0].hist(array_paretic, weights=weights_paretic, bins=15, color='red', alpha=0.2)
+        axs[0].hist(array_non_paretic, weights=weights_non_paretic, bins=15, color='blue', alpha=0.2)
+        axs[1].hist(array_paretic_sub, weights=weights_paretic_sub, bins=15, color='red', alpha=0.2)
+        axs[1].hist(array_non_paretic_sub, weights=weights_non_paretic_sub, bins=15, color='blue', alpha=0.2)
+
+        axs[0].set_xlim(left=-100, right=400)
+        axs[0].set_title("Clearance - Toe")
+        axs[0].set_xlabel("Clearance [mm]")
+        axs[0].set_ylabel("Frequency")
+        axs[1].set_xlim(left=-100, right=400)
+        axs[1].set_title("Clearance - Heel")
+        axs[1].set_xlabel("Clearance [mm]")
+        create_folder(report_save_path+"/graph")
+        fig.savefig(report_save_path + "/graph/" + "clearance_toe_heel.png")
+
+        fig, axs = plt.subplots(1, 2, sharey='all', tight_layout=True)
+        axs[0].hist(array_paretic, weights=weights_paretic, bins=15,
+                    color='red', alpha=0.2)
+        axs[0].hist(array_paretic_sub, weights=weights_paretic_sub, bins=15,
+                    color='red', histtype='step')
+        axs[1].hist(array_non_paretic, weights=weights_non_paretic, bins=15,
+                    color='blue', alpha=0.2)
+        axs[1].hist(array_non_paretic_sub, weights=weights_non_paretic_sub,
+                    bins=15, color='blue', histtype='step')
+
+        axs[0].set_xlim(left=-100, right=400)
+        axs[0].set_title("Clearance - Paretic")
+        axs[0].set_xlabel("Clearance [mm]")
+        axs[0].set_ylabel("Frequency")
+        axs[1].set_xlim(left=-100, right=400)
+        axs[1].set_title("Clearance - Non-paretic")
+        axs[1].set_xlabel("Clearance [mm]")
+        fig.savefig(report_save_path + "/graph/" + "clearance_pnp.png")
 
 
 class Picker:

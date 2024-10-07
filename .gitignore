@@ -4,12 +4,11 @@ bag/
 .idea/
 test.pdf
 .spyproject/
-**/process_data/*.csv
 statistics.csv
 graph/
 *.pdf
 dummy/
-
+**/process_data/*.csv
 
 graph_BAR/
 graph_RAW/
@@ -17,5 +16,5 @@ data/RH-*/
 *.zip
 */data_231013/
 */data/SNU-23-01/
-
+*/data/RH-04-01/
 
