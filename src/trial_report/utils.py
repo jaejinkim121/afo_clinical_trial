@@ -172,7 +172,7 @@ def save_each_cycle_timeseries_data(
 
 def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
                              mean_paretic, mean_non_paretic,
-                             data_label, title_label, save_path):
+                             data_label, title_label, save_path, y_lim=None):
     # 2 array input
     # path assign
     graph_save_path = save_path + "/graph/"
@@ -196,7 +196,11 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
     plt.axhline(y=mean_non_paretic, color=(0, 0, 1, 0.3), linewidth=2.5)
     plt.xlabel("Gait cycle number", fontsize=30)
     plt.ylabel(data_label, fontsize=30)
-    plt.title(title_label, fontsize=45)
+    plt.title(title_label +
+              f"\n[P: {mean_paretic:.1f}, NP: {mean_non_paretic:.1f}]",
+              fontsize=45)
+    if y_lim is not None:
+        plt.ylim([y_lim[0], y_lim[1]])
     plt.legend(loc='best', fontsize=25)
     plt.xticks(fontsize=25)
     plt.yticks(fontsize=25)
@@ -613,7 +617,7 @@ class DataProcess:
                               data_gait_paretic, data_gait_nonparetic,
                               idx_paretic_ignore, idx_non_paretic_ignore,
                               data_label, title_graph, save_path,
-                              x_num=101):
+                              x_num=101, y_lim=None):
         collection_data_paretic_sel = \
             copy.deepcopy(collection_data_paretic)
         collection_data_nonparetic_sel = \
@@ -699,6 +703,9 @@ class DataProcess:
 
         axs[0].set_xlim(0, xlim_upper)
         axs[1].set_xlim(0, xlim_upper)
+        if y_lim is not None:
+            axs[0].set_ylim(bottom=y_lim[0], top=y_lim[1])
+            axs[1].set_ylim(bottom=y_lim[0], top=y_lim[1])
         create_folder(save_path)
         fig.tight_layout()
         fig.savefig(save_path + title_graph + ".png")
@@ -723,7 +730,12 @@ class DataProcess:
             report_duration=None,
             idx_gait_event_filter=None,
             df_sub_paretic=None,
-            df_sub_non_paretic=None
+            df_sub_non_paretic=None,
+            y_lim=None,
+            hist_y_lim=None,
+            max_y_lim=None,
+            impulse_y_lim=None,
+            stance_y_lim=None
     ):
 
         collection_paretic, collection_non_paretic, \
@@ -800,6 +812,7 @@ class DataProcess:
                 non_paretic_swing_sub,
                 save_path,
                 title_label,
+                y_lim=hist_y_lim
             )
         ####################################################
 
@@ -820,7 +833,7 @@ class DataProcess:
             idx_paretic_ignore, idx_non_paretic_ignore,
             data_label, title_label,
             save_path=save_path + '/graph/',
-            x_num=101
+            x_num=101, y_lim=y_lim
         )
         ###
         # Statistics Processing
@@ -869,7 +882,7 @@ class DataProcess:
             save_each_cycle_bar_plot(
                 np_p_max, np_np_max, max_paretic_mean, max_non_paretic_mean,
                 data_label, title_label + " Maximum",
-                save_path
+                save_path, y_lim=max_y_lim
             )
         impulse_paretic_mean = 0
         impulse_paretic_stdev = 0
@@ -909,7 +922,7 @@ class DataProcess:
                 np_p_impulse, np_np_impulse,
                 impulse_paretic_mean, impulse_non_paretic_mean,
                 data_label, title_label + " Impulse",
-                save_path
+                save_path, y_lim=impulse_y_lim
             )
         stance_paretic_mean = 0
         stance_paretic_stdev = 0
@@ -942,7 +955,7 @@ class DataProcess:
                 stance_time_paretic, stance_time_non_paretic,
                 stance_paretic_mean, stance_non_paretic_mean,
                 'Stance Time [s]', title_label + "Stance Time",
-                save_path
+                save_path, y_lim=stance_y_lim
             )
 
             # save_each_cycle_bar_plot(
@@ -977,7 +990,7 @@ class DataProcess:
                        paretic_swing_sub,
                        non_paretic_swing_sub,
                        report_save_path,
-                       plot_title):
+                       plot_title, y_lim=None):
         array_paretic = np.array(paretic_swing)
         array_non_paretic = np.array(non_paretic_swing)
         array_paretic_sub = np.array(paretic_swing_sub)
@@ -1006,6 +1019,9 @@ class DataProcess:
         axs[1].set_title("Heel")
         axs[1].set_xlabel("Clearance [mm]")
         axs[1].legend()
+        if y_lim is not None:
+            axs[0].set_ylim(bottom=y_lim[0], top=y_lim[1])
+            axs[1].set_ylim(bottom=y_lim[0], top=y_lim[1])
         create_folder(report_save_path+"/graph")
         fig.savefig(report_save_path + "/graph/" + plot_title + " toe heel.png")
 
@@ -1030,6 +1046,9 @@ class DataProcess:
         axs[1].set_title("Non-paretic")
         axs[1].set_xlabel("Clearance [mm]")
         axs[1].legend()
+        if y_lim is not None:
+            axs[0].set_ylim(bottom=y_lim[0], top=y_lim[1])
+            axs[1].set_ylim(bottom=y_lim[0], top=y_lim[1])
         fig.savefig(report_save_path + "/graph/" + plot_title + " pnp.png")
 
 

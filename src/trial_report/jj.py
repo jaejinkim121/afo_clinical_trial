@@ -79,7 +79,9 @@ class ClinicalIndexJJ:
             report_duration=report_duration,
             idx_gait_event_filter=current_gait_event_filter,
             df_sub_paretic=df_heel_paretic,
-            df_sub_non_paretic=df_heel_nonparetic
+            df_sub_non_paretic=df_heel_nonparetic,
+            y_lim=[-50.0, 300.0],
+            hist_y_lim=[0.0, 0.8],
         )
 
         max_heel, impulse_heel, stance_ = DataProcess.data_process(
@@ -95,7 +97,9 @@ class ClinicalIndexJJ:
             max_flag=True,
             report_start_time=report_start_time,
             report_duration=report_duration,
-            idx_gait_event_filter=current_gait_event_filter
+            idx_gait_event_filter=current_gait_event_filter,
+            y_lim=[-50.0, 220.0],
+            hist_y_lim=[0.0, 0.8],
         )
 
         return max_toe
