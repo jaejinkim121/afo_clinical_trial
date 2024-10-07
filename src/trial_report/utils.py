@@ -817,7 +817,6 @@ class DataProcess:
         idx_paretic_ignore = []
         idx_non_paretic_ignore = []
         #####################################################
-
         DataProcess.graph_both_cycle_data(
             collection_paretic, collection_non_paretic,
             df_paretic_gait, df_non_paretic_gait,
@@ -915,7 +914,6 @@ class DataProcess:
                 data_label, title_label + " Impulse",
                 save_path
             )
-
         stance_paretic_mean = 0
         stance_paretic_stdev = 0
         stance_non_paretic_mean = 0
@@ -963,7 +961,6 @@ class DataProcess:
             stance_symmetry = 1 - \
                               abs(stance_paretic_mean - stance_non_paretic_mean) \
                               / (stance_paretic_mean + stance_non_paretic_mean)
-
         return [max_paretic_mean, max_paretic_stdev,
                 max_non_paretic_mean, max_non_paretic_stdev,
                 max_symmetry
