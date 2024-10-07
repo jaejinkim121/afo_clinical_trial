@@ -964,38 +964,45 @@ class DataProcess:
         weights_non_paretic_sub = np.ones_like(array_non_paretic_sub) / len(array_non_paretic_sub)
 
         fig, axs = plt.subplots(1, 2, sharey='all', tight_layout=True)
-        axs[0].hist(array_paretic, weights=weights_paretic, bins=15, color='red', alpha=0.2)
-        axs[0].hist(array_non_paretic, weights=weights_non_paretic, bins=15, color='blue', alpha=0.2)
-        axs[1].hist(array_paretic_sub, weights=weights_paretic_sub, bins=15, color='red', alpha=0.2)
-        axs[1].hist(array_non_paretic_sub, weights=weights_non_paretic_sub, bins=15, color='blue', alpha=0.2)
+        plt.suptitle(plot_title + " - Clearance")
+        axs[0].hist(array_paretic, weights=weights_paretic, bins=10, color='red', alpha=0.2, label='p')
+        axs[0].hist(array_non_paretic, weights=weights_non_paretic, bins=10, color='blue', alpha=0.2, label='np')
+        axs[1].hist(array_paretic_sub, weights=weights_paretic_sub, bins=10, color='red', alpha=0.2, label='p')
+        axs[1].hist(array_non_paretic_sub, weights=weights_non_paretic_sub, bins=10, color='blue', alpha=0.2, label='np')
 
         axs[0].set_xlim(left=-100, right=400)
-        axs[0].set_title("Clearance - Toe")
+        axs[0].set_title("Toe")
         axs[0].set_xlabel("Clearance [mm]")
         axs[0].set_ylabel("Frequency")
+        axs[0].legend()
         axs[1].set_xlim(left=-100, right=400)
-        axs[1].set_title("Clearance - Heel")
+        axs[1].set_title("Heel")
         axs[1].set_xlabel("Clearance [mm]")
+        axs[1].legend()
         create_folder(report_save_path+"/graph")
         fig.savefig(report_save_path + "/graph/" + "clearance_toe_heel.png")
 
         fig, axs = plt.subplots(1, 2, sharey='all', tight_layout=True)
-        axs[0].hist(array_paretic, weights=weights_paretic, bins=15,
-                    color='red', alpha=0.2)
-        axs[0].hist(array_paretic_sub, weights=weights_paretic_sub, bins=15,
-                    color='red', histtype='step')
-        axs[1].hist(array_non_paretic, weights=weights_non_paretic, bins=15,
-                    color='blue', alpha=0.2)
+        plt.suptitle(plot_title + " - Clearance")
+        axs[0].hist(array_paretic, weights=weights_paretic, bins=10,
+                    color='red', alpha=0.2, label='Toe')
+        axs[0].hist(array_paretic_sub, weights=weights_paretic_sub, bins=10,
+                    color='red', histtype='step', label='Heel')
+
+        axs[1].hist(array_non_paretic, weights=weights_non_paretic, bins=10,
+                    color='blue', alpha=0.2, label='Toe')
         axs[1].hist(array_non_paretic_sub, weights=weights_non_paretic_sub,
-                    bins=15, color='blue', histtype='step')
+                    bins=10, color='blue', histtype='step', label='Heel')
 
         axs[0].set_xlim(left=-100, right=400)
-        axs[0].set_title("Clearance - Paretic")
+        axs[0].set_title("Paretic")
         axs[0].set_xlabel("Clearance [mm]")
         axs[0].set_ylabel("Frequency")
+        axs[0].legend()
         axs[1].set_xlim(left=-100, right=400)
-        axs[1].set_title("Clearance - Non-paretic")
+        axs[1].set_title("Non-paretic")
         axs[1].set_xlabel("Clearance [mm]")
+        axs[1].legend()
         fig.savefig(report_save_path + "/graph/" + "clearance_pnp.png")
 
 
