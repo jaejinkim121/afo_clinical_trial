@@ -8,6 +8,7 @@ import copy
 import random
 from scipy import signal
 from bagpy import bagreader
+import json
 
 from tqdm import tqdm
 import torch
@@ -24,6 +25,14 @@ def butter_lowpass(cutoff, nyq_freq, order):
     return b, a
 
 
+def butter_bandpass(lowcut, highcut, nyq_freq, order):
+    low = float(lowcut) / nyq_freq
+    high = float(highcut) / nyq_freq
+    b, a = signal.butter(order, [low, high], btype="band")
+
+    return b, a
+
+
 def butter_lowpass_filter(data, cutoff_freq, nyq_freq, order):
     b, a = butter_lowpass(cutoff_freq, nyq_freq, order)
     y = signal.filtfilt(b, a, data)
@@ -31,7 +40,14 @@ def butter_lowpass_filter(data, cutoff_freq, nyq_freq, order):
     return y
 
 
-def z_score_normalization(data):
+def butter_bandpass_filter(data, low_freq, high_freq, nyq_freq, order):
+    b, a = butter_bandpass(low_freq, high_freq, nyq_freq, order)
+    y = signal.filtfilt(b, a, data)
+
+    return y
+
+
+def z_score_normalization_previous(data):
     normalized = []
 
     for value in data:
@@ -41,11 +57,149 @@ def z_score_normalization(data):
     return normalized
 
 
+def z_score_normalization(time_data, vout_data, force_data, force_idx):
+    time_data = pd.DataFrame(time_data)
+    vout_data = pd.DataFrame(vout_data)
+    force_data = pd.DataFrame(force_data)
+    time_data.reset_index(drop=True, inplace=True)
+    vout_data.reset_index(drop=True, inplace=True)
+    force_data.reset_index(drop=True, inplace=True)
+
+    for _ in np.arange(20):
+        min_value = min(force_data.iloc[:, force_idx].values)
+        np_data = np.array(force_data.iloc[:, force_idx])
+        norm_index = np.where(np_data == min_value)[0]
+        time_data = time_data.drop(norm_index)
+        vout_data = vout_data.drop(norm_index)
+        force_data = force_data.drop(norm_index)
+        time_data.reset_index(drop=True, inplace=True)
+        vout_data.reset_index(drop=True, inplace=True)
+        force_data.reset_index(drop=True, inplace=True)
+    for _ in np.arange(20):
+        max_value = max(force_data.iloc[:, force_idx].values)
+        np_data = np.array(force_data.iloc[:, force_idx])
+        norm_index = np.where(np_data == max_value)[0]
+        time_data = time_data.drop(norm_index)
+        vout_data = vout_data.drop(norm_index)
+        force_data = force_data.drop(norm_index)
+        time_data.reset_index(drop=True, inplace=True)
+        vout_data.reset_index(drop=True, inplace=True)
+        force_data.reset_index(drop=True, inplace=True)
+
+    # mean, std calculation
+    mean_value = np.mean(force_data.iloc[:, force_idx])
+    std_value = np.std(force_data.iloc[:, force_idx])
+
+    np_data = np.array(force_data.iloc[:, force_idx])
+    norm_index = np.where(np_data != mean_value)[0]
+    force_data.iloc[:, force_idx] -= mean_value
+    force_data.iloc[norm_index, force_idx] /= std_value
+
+    fig = plt.figure()
+    plt.plot(force_data.iloc[:, force_idx])
+    plt.title(force_idx)
+    # plt.close()
+
+    return time_data, vout_data, force_data
+
+
 def calculate_derivative(x, y):
     f_d = np.gradient(np.array(y), np.array(x))
     f_dd = np.gradient(f_d, np.array(x))
 
     return f_d, f_dd
+
+
+def min_max_normalization(time_data, vout_data, force_data, force_idx):
+    time_data = pd.DataFrame(time_data)
+    vout_data = pd.DataFrame(vout_data)
+    force_data = pd.DataFrame(force_data)
+    time_data.reset_index(drop=True, inplace=True)
+    vout_data.reset_index(drop=True, inplace=True)
+    force_data.reset_index(drop=True, inplace=True)
+
+    for _ in np.arange(20):
+        min_value = min(force_data.iloc[:, force_idx].values)
+        np_data = np.array(force_data.iloc[:, force_idx])
+        norm_index = np.where(np_data == min_value)[0]
+        time_data = time_data.drop(norm_index)
+        vout_data = vout_data.drop(norm_index)
+        force_data = force_data.drop(norm_index)
+        time_data.reset_index(drop=True, inplace=True)
+        vout_data.reset_index(drop=True, inplace=True)
+        force_data.reset_index(drop=True, inplace=True)
+    for _ in np.arange(20):
+        max_value = max(force_data.iloc[:, force_idx].values)
+        np_data = np.array(force_data.iloc[:, force_idx])
+        norm_index = np.where(np_data == max_value)[0]
+        time_data = time_data.drop(norm_index)
+        vout_data = vout_data.drop(norm_index)
+        force_data = force_data.drop(norm_index)
+        time_data.reset_index(drop=True, inplace=True)
+        vout_data.reset_index(drop=True, inplace=True)
+        force_data.reset_index(drop=True, inplace=True)
+
+    # rank option!!!!
+    # min_rank = force_data.iloc[:, force_idx].rank(
+    #     method='dense', ascending=True)
+    # max_rank = force_data.iloc[:, force_idx].rank(
+    #     method='dense', ascending=False)
+
+    # min_idx = np.where(np.array(min_rank) == 100.0)[0][0]
+    # max_idx = np.where(np.array(max_rank) == 100.0)[0][0]
+
+    # print(min_idx)
+    # print(max_idx)
+
+    # min_value = force_data.iloc[min_idx, force_idx]
+    # max_value = force_data.iloc[max_idx, force_idx]
+    # print(min_value)
+    # print(max_value)
+    # interval = float(abs(max_value - min_value))
+
+    # mean +- 2std option!!!!
+    mean_value = np.mean(force_data.iloc[:, force_idx])
+    std_value = np.std(force_data.iloc[:, force_idx])
+    min_ref_value = mean_value - 2.0 * std_value
+    max_ref_value = mean_value + 2.0 * std_value
+
+    min_df = abs(force_data.iloc[:, force_idx] - min_ref_value)
+    max_df = abs(force_data.iloc[:, force_idx] - max_ref_value)
+
+    min_rank = min_df.rank(method='dense', ascending=True)
+    max_rank = max_df.rank(method='dense', ascending=True)
+
+    min_idx = np.where(np.array(min_rank) == 1.0)[0][0]
+    max_idx = np.where(np.array(max_rank) == 1.0)[0][0]
+
+    print(min_idx)
+    print(max_idx)
+
+    min_value = force_data.iloc[min_idx, force_idx]
+    max_value = force_data.iloc[max_idx, force_idx]
+    print(min_value)
+    print(max_value)
+    interval = float(abs(max_value - min_value))
+
+    # np_data = np.array(force_data.iloc[:, force_idx])
+    # # delete upper max
+    # upper_index = np.where(np_data > max_value)[0]
+    # force_data.iloc[upper_index, force_idx] = max_value
+    # # delete lower min
+    # lower_index = np.where(np_data < min_value)[0]
+    # force_data.iloc[lower_index, force_idx] = min_value
+
+    force_data.iloc[:, force_idx] -= min_value
+    np_data = np.array(force_data.iloc[:, force_idx])
+    norm_index = np.where(np_data != min_value)[0]
+    force_data.iloc[norm_index, force_idx] /= interval
+
+    fig = plt.figure()
+    plt.plot(force_data.iloc[:, force_idx])
+    plt.title(force_idx)
+    # plt.close()
+
+    return time_data, vout_data, force_data
 
 
 # Function for folder path reading
@@ -284,13 +438,14 @@ class weighted_RMSE_Loss(nn.Module):
 
 # Dimension: Batch * input length * 1
 class forceDataset(Dataset):
-    def __init__(self, input_length=20,
+    def __init__(self, input_length=20, forecast_length=1,
                  data_dir="D:/OneDrive/AFO/AFO_FSR_DATA/CHAR_240426_280PL/" +
                  "Calibration/280Left_1/force_conversion_test50.csv"):
         data = pd.read_csv(data_dir, delimiter=",")[["vout", "force"]]
         data["idx"] = data.index
         self.data = np.array(data[["idx", "vout", "force"]])
         self.input_length = input_length
+        self.forecast_length = forecast_length
 
     def __len__(self):
         return len(self.data)
@@ -301,7 +456,7 @@ class forceDataset(Dataset):
     def force(self):
         return self.data[:, 2]
 
-    def transform(self, x, idx, col_idx):
+    def x_transform(self, x, idx, col_idx):
         if (int(idx) + 1) < self.input_length:
             x = np.append(self.data[0, col_idx] *
                           np.ones((1, self.input_length - int(idx) - 1)),
@@ -311,13 +466,23 @@ class forceDataset(Dataset):
                           col_idx]
         return x
 
+    def y_transform(self, y, idx, col_idx):
+        if (int(idx) + 1) < self.forecast_length:
+            y = np.append(self.data[0, col_idx] *
+                          np.ones((1, self.forecast_length - int(idx) - 1)),
+                          self.data[0:int(idx) + 1, col_idx])
+        else:
+            y = self.data[int(idx) + 1 - self.forecast_length:int(idx) + 1,
+                          col_idx]
+        return y
+
     def collate_fn(self, dataset):
         batch_x, batch_y = [], []
         for (idx, x, y) in dataset:
-            x = self.transform(x, idx, 1)
+            x = self.x_transform(x, idx, 1)
             x = torch.from_numpy(x)
             x = x.unsqueeze(1)
-            y = self.transform(y, idx, 2)
+            y = self.y_transform(y, idx, 2)
             y = torch.from_numpy(y)
             y = y.unsqueeze(1)
             batch_x.append(x)
@@ -330,12 +495,13 @@ class forceDataset(Dataset):
 # Dimension: Batch * input length * sensor_num(= 6)
 class grfDataset(Dataset):
 
-    def __init__(self, data, input_length=20):
+    def __init__(self, data, input_length=20, forecast_length=1):
         data = data.loc[:, ["f1", "f2", "f3", "f4", "f5", "f6", "GRF"]]
         data["idx"] = data.index
         self.data = np.array(data[
             ["idx", "f1", "f2", "f3", "f4", "f5", "f6", "GRF"]])
         self.input_length = input_length
+        self.forecast_length = forecast_length
 
     def __len__(self):
         return len(self.data)
@@ -368,19 +534,19 @@ class grfDataset(Dataset):
         else:
             x = self.data[int(idx) + 1 - self.input_length:int(idx) + 1, 1:-1]
         # label
-        if (int(idx) + 1) < self.input_length:
+        if (int(idx) + 1) < self.forecast_length:
             y = np.append(self.data[0, -1] *
-                          np.ones((1, self.input_length - int(idx) - 1)),
+                          np.ones((1, self.forecast_length - int(idx) - 1)),
                           self.data[0:int(idx) + 1, -1])
         else:
-            y = self.data[int(idx) + 1 - self.input_length:int(idx) + 1, -1]
+            y = self.data[int(idx) + 1 - self.forecast_length:int(idx) + 1, -1]
         return x, y
 
     def collate_fn(self, dataset):
         batch_x, batch_y = [], []
         for each_data in dataset:
             x, y = self.transform(each_data)
-            # s(= 16), 6
+            # s(= 20), 6
             x = torch.from_numpy(x)
             # f, 1
             y = torch.from_numpy(y)
@@ -932,6 +1098,21 @@ class GRF_predictor:
         self.force_filter = int(force_filter)
         self.force_norm = int(force_norm)
         self.grf_filter = int(grf_filter)
+        # force model
+        # if self.calib_model_path[-1] == "/":  # LSTM
+        self.calib_model_name = "LSTM"
+        self.calib_dict_name = self.calib_model_path[-19:-1]
+        # else:
+            # self.calib_model_name = "piecewise_linear"
+            # self.json_path = self.calib_model_path
+            # with open(self.json_path, 'r') as json_file:
+            #     self.model_dict = json.load(json_file)
+            #     json_file.close()
+            # self.breakpoints = 2
+            # # 35
+            # # piecewise_linear_info_30N_ver2.json
+            # self.calib_dict_name = self.json_path[-54:-39]
+        ###########################################################
         # sample save path:
         # D://OneDrive - SNU/범부처-DESKTOP-2JL44HH/C_임상_2023/
         # 2023-08-16/report_RAW/2MWT_BARE_CueOFF_90m/
@@ -1103,7 +1284,8 @@ class GRF_predictor:
     def grf_initialization(self):
         # Data process
         self.vout_data_read()
-        self.force_model_load()
+        if self.calib_model_name == "LSTM":
+            self.force_model_load()
         self.calib_total_prediction()
         self.force_filtering()
         self.grf_model_load()
@@ -1123,14 +1305,24 @@ class GRF_predictor:
             self.save_path + 'RAW_VOLTAGE_RIGHT.csv',
             sep=",", header=True, index=False
         )
+        # self.left_force.to_csv(
+        #     self.save_path + 'RAW_FORCE_%s_LEFT.csv' %
+        #     self.calib_model_path[-19:-1],  # CHAR_230815_280_LP
+        #     sep=",", header=True, index=False
+        # )
+        # self.right_force.to_csv(
+        #     self.save_path + 'RAW_FORCE_%s_RIGHT.csv' %
+        #     self.calib_model_path[-19:-1],  # CHAR_230815_280_LP
+        #     sep=",", header=True, index=False
+        # )
         self.left_force.to_csv(
             self.save_path + 'RAW_FORCE_%s_LEFT.csv' %
-            self.calib_model_path[-19:-1],  # CHAR_230815_280_LP
+            self.calib_dict_name,  # CHAR_230815_280
             sep=",", header=True, index=False
         )
         self.right_force.to_csv(
             self.save_path + 'RAW_FORCE_%s_RIGHT.csv' %
-            self.calib_model_path[-19:-1],  # CHAR_230815_280_LP
+            self.calib_dict_name,  # CHAR_230815_280
             sep=",", header=True, index=False
         )
         # GRF_241001/BiLSTM_GRF.pt
@@ -1258,9 +1450,36 @@ class GRF_predictor:
 
         return x
 
+    def force_transform_piecewise_linear(self, num, sensor_dir="L"):
+        if sensor_dir == "L":
+            # left_data
+            input_data = self.left_vout
+        else:
+            input_data = self.right_vout
+        x = input_data[len(input_data) - 1, (num - 1)]
+
+        return x
+
+    def piecewise_linear(self, idx, input):
+        # idx: 1~6
+        y = 0.0
+        y += self.model_dict[self.calib_dict_name][self.calib_dir]["constant"][str(idx)]
+        y += self.model_dict[self.calib_dict_name][self.calib_dir]["alpha"][str(idx)][0] * input
+        for b_int in np.arange(1, self.breakpoints + 1):
+            y += self.model_dict[self.calib_dict_name][self.calib_dir]["alpha"][str(idx)][b_int] *\
+                np.maximum(input -
+                           self.model_dict[self.calib_dict_name][self.calib_dir]["breakpoint"][str(idx)][b_int-1], 0.0)
+        if y < 0:
+            y = 0.0
+
+        return y
+
     def calib_one_prediction(self, idx, sensor_dir="L"):
-        # LSTM model
-        num_ind = 4
+        if self.calib_model_name == "LSTM":
+            # LSTM model
+            num_ind = 4
+        else:  # piecewise linear
+            num_ind = 1
         if sensor_dir == "L":
             # left_data
             # left_data indexing
@@ -1272,26 +1491,47 @@ class GRF_predictor:
                 self.left_vout = self.left_data[:][1:]
                 self.left_vout = np.array(self.left_vout)
             # left_data prediction
-            _, left_name_list = folder_path_name(
-                self.calib_model_path, "include", "Left")
-            left_name_list = [
-                name for name in left_name_list
-                if int(name[-num_ind]) <= self.sensor_num
-            ]
-            left_name_list = sorted(left_name_list,
-                                    key=lambda x: int(x[-num_ind]),
-                                    reverse=False)
+            if self.calib_model_name == "LSTM":
+                # LSTM model
+                _, left_name_list = folder_path_name(
+                    self.calib_model_path, "include", "Left")
+                left_name_list = [
+                    name for name in left_name_list
+                    if int(name[-num_ind]) <= self.sensor_num
+                ]
+                left_name_list = sorted(left_name_list,
+                                        key=lambda x: int(x[-num_ind]),
+                                        reverse=False)
+            else:  # piecewise linear
+                left_name_list = [
+                    self.calib_dict_name[-3:] + "Left_1",
+                    self.calib_dict_name[-3:] + "Left_2",
+                    self.calib_dict_name[-3:] + "Left_3",
+                    self.calib_dict_name[-3:] + "Left_4",
+                    self.calib_dict_name[-3:] + "Left_5",
+                    self.calib_dict_name[-3:] + "Left_6"
+                    ]
+                self.calib_dir = "Left"
             left_output = np.array([])
 
             for name in left_name_list:
-                model = self.left_model[int(name[-num_ind]) - 1]
-                model.eval()
-                with torch.no_grad():
-                    x = self.force_transform_LSTM(int(name[-num_ind]),
-                                                  str(sensor_dir))
+                if self.calib_model_name == "LSTM":
+                    # LSTM model
+                    model = self.left_model[int(name[-num_ind]) - 1]
+                    model.eval()
+                    with torch.no_grad():
+                        x = self.force_transform_LSTM(int(name[-num_ind]),
+                                                      str(sensor_dir))
+                        left_output = np.append(
+                            left_output,
+                            model.predict(input=x, forecast_len=1))
+                else:  # piecewise linear
+                    x = self.force_transform_piecewise_linear(
+                        int(name[-num_ind]), str(sensor_dir))
                     left_output = np.append(
                         left_output,
-                        model.predict(input=x, forecast_len=1))
+                        self.piecewise_linear(int(name[-num_ind]), x)
+                        )
 
             return np.expand_dims(left_output, axis=0)
         else:
@@ -1305,26 +1545,47 @@ class GRF_predictor:
                 self.right_vout = self.right_data[:][1:]
                 self.right_vout = np.array(self.right_vout)
             # right_data prediction
-            _, right_name_list = folder_path_name(
-                self.calib_model_path, "include", "Right")
-            right_name_list = [
-                name for name in right_name_list
-                if int(name[-num_ind]) <= self.sensor_num
-            ]
-            right_name_list = sorted(right_name_list,
-                                     key=lambda x: int(x[-num_ind]),
-                                     reverse=False)
+            if self.calib_model_name == "LSTM":
+                # LSTM model
+                _, right_name_list = folder_path_name(
+                    self.calib_model_path, "include", "Right")
+                right_name_list = [
+                    name for name in right_name_list
+                    if int(name[-num_ind]) <= self.sensor_num
+                ]
+                right_name_list = sorted(right_name_list,
+                                         key=lambda x: int(x[-num_ind]),
+                                         reverse=False)
+            else:  # piecewise linear
+                right_name_list = [
+                    self.calib_dict_name[-3:] + "right_1",
+                    self.calib_dict_name[-3:] + "right_2",
+                    self.calib_dict_name[-3:] + "right_3",
+                    self.calib_dict_name[-3:] + "right_4",
+                    self.calib_dict_name[-3:] + "right_5",
+                    self.calib_dict_name[-3:] + "right_6"
+                    ]
+                self.calib_dir = "ight"
             right_output = np.array([])
 
             for name in right_name_list:
-                model = self.right_model[int(name[-num_ind]) - 1]
-                model.eval()
-                with torch.no_grad():
-                    x = self.force_transform_LSTM(int(name[-num_ind]),
-                                                  str(sensor_dir))
+                if self.calib_model_name == "LSTM":
+                    # LSTM model
+                    model = self.right_model[int(name[-num_ind]) - 1]
+                    model.eval()
+                    with torch.no_grad():
+                        x = self.force_transform_LSTM(int(name[-num_ind]),
+                                                      str(sensor_dir))
+                        right_output = np.append(
+                            right_output,
+                            model.predict(input=x, forecast_len=1))
+                else:  # piecewise linear
+                    x = self.force_transform_piecewise_linear(
+                        int(name[-num_ind]), str(sensor_dir))
                     right_output = np.append(
                         right_output,
-                        model.predict(input=x, forecast_len=1))
+                        self.piecewise_linear(int(name[-num_ind]), x)
+                        )
 
             return np.expand_dims(right_output, axis=0)
 
@@ -1344,15 +1605,6 @@ class GRF_predictor:
                 self.right_force,
                 self.calib_one_prediction(
                     idx=right_idx, sensor_dir="R"), axis=0)
-
-        # LSTM model case
-        self.left_time = self.left_time[:-self.force_input_length]
-        self.left_vout = self.left_vout[:-self.force_input_length][:]
-        self.left_force = self.left_force[self.force_input_length:][:]
-
-        self.right_time = self.right_time[:-self.force_input_length]
-        self.right_vout = self.right_vout[:-self.force_input_length][:]
-        self.right_force = self.right_force[self.force_input_length:][:]
 
     def force_filtering(self):
         if self.force_filter == int(1):
@@ -1386,10 +1638,40 @@ class GRF_predictor:
             # Normalization by z-score normalization
             if self.force_norm == int(1):
                 for i in np.arange(self.sensor_num):
-                    self.left_force[:, i] = z_score_normalization(
+                    self.left_force[:, i] = z_score_normalization_previous(
                         self.left_force[:, i])
-                    self.right_force[:, i] = z_score_normalization(
+                    self.right_force[:, i] = z_score_normalization_previous(
                         self.right_force[:, i])
+            # Normalization by min-max normalization
+            # if self.force_norm == int(1):
+            #     for i in np.arange(self.sensor_num):
+            #         self.left_time, self.left_vout, self.left_force =\
+            #             z_score_normalization(
+            #                 self.left_time, self.left_vout, self.left_force, i
+            #                 )
+            #         self.right_time, self.right_vout, self.right_force =\
+            #             z_score_normalization(
+            #                 self.right_time, self.right_vout,
+            #                 self.right_force, i
+            #                 )
+
+            if len(self.left_vout) != len(self.left_force):
+                self.left_time = self.left_time[:len(self.left_vout)]
+                self.left_vout = self.left_vout[:len(self.left_vout), :]
+                self.left_force = self.left_force[:len(self.left_vout), :]
+            if len(self.right_vout) != len(self.right_force):
+                self.right_time = self.right_time[:len(self.right_vout)]
+                self.right_vout = self.right_vout[:len(self.right_vout), :]
+                self.right_force = self.right_force[:len(self.right_vout), :]
+
+        if self.calib_model_name == "LSTM":
+            self.left_time = self.left_time[:-self.force_input_length]
+            self.left_vout = self.left_vout[:-self.force_input_length, :]
+            self.left_force = self.left_force[self.force_input_length:, :]
+
+            self.right_time = self.right_time[:-self.force_input_length]
+            self.right_vout = self.right_vout[:-self.force_input_length, :]
+            self.right_force = self.right_force[self.force_input_length:, :]
 
     # def Gait_detection_data_read(self):
     #     # stance = 1, swing = 2
@@ -1748,25 +2030,27 @@ class GRF_predictor:
                 right_output *= (self.body_weight * 9.807)
                 self.right_grf = np.append(
                     self.right_grf, right_output, axis=0)
-            # LSTM post processing
-            self.left_time = self.left_time[:-self.grf_input_length]
-            self.left_vout = self.left_vout[:-self.grf_input_length][:]
-            self.left_force = self.left_force[:-self.grf_input_length, :]
-            self.left_grf = self.left_grf[self.grf_input_length:]
 
+            # post processing
             self.left_time = self.left_time[:len(self.left_vout)]
             self.left_force = self.left_force[:len(self.left_vout), :]
             self.left_grf = self.left_grf[:len(self.left_vout)]
 
-            self.right_time = self.right_time[:-self.grf_input_length]
-            self.right_vout = self.right_vout[:-self.grf_input_length][:]
-            self.right_force = self.right_force[
-                :-self.grf_input_length, :]
-            self.right_grf = self.right_grf[self.grf_input_length:]
-
             self.right_time = self.right_time[:len(self.right_vout)]
             self.right_force = self.right_force[:len(self.right_vout), :]
             self.right_grf = self.right_grf[:len(self.right_vout)]
+
+            # 미루기
+            self.left_time = self.left_time[:-self.grf_input_length]
+            self.left_vout = self.left_vout[:-self.grf_input_length, :]
+            self.left_force = self.left_force[:-self.grf_input_length, :]
+            self.left_grf = self.left_grf[self.grf_input_length:, :]
+
+            self.right_time = self.right_time[:-self.grf_input_length]
+            self.right_vout = self.right_vout[:-self.grf_input_length, :]
+            self.right_force = self.right_force[:-self.grf_input_length, :]
+            self.right_grf = self.right_grf[self.grf_input_length:, :]
+
         elif self.grf_model_path[-11:-8] == 'SVR':  # SVR_
             # preprocessing
             self.SVR_GRF_transform()

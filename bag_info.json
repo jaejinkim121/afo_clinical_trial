@@ -842,7 +842,7 @@
 		"bag": "log_2024-08-12-15-25-57.bag",
 		"test_date": "240812",
 		"test_label": "RH-08-01",
-		"model_cell": "CHAR_240812_280_RP",
+		"model_cell": "CHAR_240812_280_LP",
 		"model_grf": "GRF_241001/BiLSTM_GRF.pt",
 		"name": "LHS",
 		"body_weight": 65.7,
@@ -866,7 +866,7 @@
 		"bag": "log_2024-08-12-15-46-35.bag",
 		"test_date": "240812",
 		"test_label": "RH-08-01",
-		"model_cell": "CHAR_240812_280_RP",
+		"model_cell": "CHAR_240812_280_LP",
 		"model_grf": "GRF_241001/BiLSTM_GRF.pt",
 		"name": "LHS",
 		"body_weight": 65.7,
@@ -890,7 +890,7 @@
 		"bag": "log_2024-08-12-15-52-57.bag",
 		"test_date": "240812",
 		"test_label": "RH-08-01",
-		"model_cell": "CHAR_240812_280_RP",
+		"model_cell": "CHAR_240812_280_LP",
 		"model_grf": "GRF_241001/BiLSTM_GRF.pt",
 		"name": "LHS",
 		"body_weight": 65.7,
@@ -914,7 +914,7 @@
 		"bag": "log_2024-08-12-16-33-02.bag",
 		"test_date": "240812",
 		"test_label": "RH-08-01",
-		"model_cell": "CHAR_240812_280_RP",
+		"model_cell": "CHAR_240812_280_LP",
 		"model_grf": "GRF_241001/BiLSTM_GRF.pt",
 		"name": "LHS",
 		"body_weight": 65.7,
@@ -923,7 +923,7 @@
 		"session_type": "2MWT_BARE_CUE_OFF",
 		"date_calibration": "240812",
 		"distance": 11.21,
-		"time": 11.21,
+		"time": 120.0,
 		"bpm": [
 			null,
 			null
@@ -938,7 +938,7 @@
 		"bag": "log_2024-08-12-16-37-14.bag",
 		"test_date": "240812",
 		"test_label": "RH-08-01",
-		"model_cell": "CHAR_240812_280_RP",
+		"model_cell": "CHAR_240812_280_LP",
 		"model_grf": "GRF_241001/BiLSTM_GRF.pt",
 		"name": "LHS",
 		"body_weight": 65.7,
@@ -947,7 +947,7 @@
 		"session_type": "2MWT_BARE_CUE_ON",
 		"date_calibration": "240812",
 		"distance": 24.071,
-		"time": 24.071,
+		"time": 120.0,
 		"bpm": [
 			null,
 			null
@@ -962,7 +962,7 @@
 		"bag": "log_2024-08-14-11-26-48.bag",
 		"test_date": "240814",
 		"test_label": "RH-08-01",
-		"model_cell": "CHAR_240812_280_RP",
+		"model_cell": "CHAR_240812_280_LP",
 		"model_grf": "GRF_241001/BiLSTM_GRF.pt",
 		"name": "LHS",
 		"body_weight": 65.7,
@@ -986,7 +986,7 @@
 		"bag": "log_2024-08-14-11-19-39.bag",
 		"test_date": "240814",
 		"test_label": "RH-08-01",
-		"model_cell": "CHAR_240812_280_RP",
+		"model_cell": "CHAR_240812_280_LP",
 		"model_grf": "GRF_241001/BiLSTM_GRF.pt",
 		"name": "LHS",
 		"body_weight": 65.7,
@@ -1010,7 +1010,7 @@
 		"bag": "log_2024-08-14-11-34-32.bag",
 		"test_date": "240814",
 		"test_label": "RH-08-01",
-		"model_cell": "CHAR_240812_280_RP",
+		"model_cell": "CHAR_240812_280_LP",
 		"model_grf": "GRF_241001/BiLSTM_GRF.pt",
 		"name": "LHS",
 		"body_weight": 65.7,
@@ -1034,7 +1034,7 @@
 		"bag": "log_2024-08-14-11-42-33.bag",
 		"test_date": "240814",
 		"test_label": "RH-08-01",
-		"model_cell": "CHAR_240812_280_RP",
+		"model_cell": "CHAR_240812_280_LP",
 		"model_grf": "GRF_241001/BiLSTM_GRF.pt",
 		"name": "LHS",
 		"body_weight": 65.7,
@@ -1058,7 +1058,7 @@
 		"bag": "log_2024-08-14-11-56-49.bag",
 		"test_date": "240814",
 		"test_label": "RH-08-01",
-		"model_cell": "CHAR_240812_280_RP",
+		"model_cell": "CHAR_240812_280_LP",
 		"model_grf": "GRF_241001/BiLSTM_GRF.pt",
 		"name": "LHS",
 		"body_weight": 65.7,
@@ -1067,7 +1067,7 @@
 		"session_type": "2MWT_OFF_CUE_OFF",
 		"date_calibration": "240812",
 		"distance": 24.18,
-		"time": 24.18,
+		"time": 120.0,
 		"bpm": [
 			null,
 			null
@@ -1082,7 +1082,7 @@
 		"bag": "log_2024-08-14-12-08-57.bag",
 		"test_date": "240814",
 		"test_label": "RH-08-01",
-		"model_cell": "CHAR_240812_280_RP",
+		"model_cell": "CHAR_240812_280_LP",
 		"model_grf": "GRF_241001/BiLSTM_GRF.pt",
 		"name": "LHS",
 		"body_weight": 65.7,
@@ -1091,7 +1091,7 @@
 		"session_type": "2MWT_OFF_CUE_ON",
 		"date_calibration": "240812",
 		"distance": 25.85,
-		"time": 25.85,
+		"time": 120.0,
 		"bpm": [
 			null,
 			null
@@ -1106,7 +1106,7 @@
 		"bag": "log_2024-08-14-12-21-10.bag",
 		"test_date": "240814",
 		"test_label": "RH-08-01",
-		"model_cell": "CHAR_240812_280_RP",
+		"model_cell": "CHAR_240812_280_LP",
 		"model_grf": "GRF_241001/BiLSTM_GRF.pt",
 		"name": "LHS",
 		"body_weight": 65.7,
@@ -1115,7 +1115,7 @@
 		"session_type": "2MWT_ON_CUE_OFF",
 		"date_calibration": "240812",
 		"distance": 25.34,
-		"time": 25.34,
+		"time": 120.0,
 		"bpm": [
 			null,
 			null
@@ -1130,7 +1130,7 @@
 		"bag": "log_2024-08-14-12-33-52.bag",
 		"test_date": "240814",
 		"test_label": "RH-08-01",
-		"model_cell": "CHAR_240812_280_RP",
+		"model_cell": "CHAR_240812_280_LP",
 		"model_grf": "GRF_241001/BiLSTM_GRF.pt",
 		"name": "LHS",
 		"body_weight": 65.7,
@@ -1139,7 +1139,7 @@
 		"session_type": "2MWT_ON_CUE_ON",
 		"date_calibration": "240812",
 		"distance": 23.58,
-		"time": 23.58,
+		"time": 120.0,
 		"bpm": [
 			null,
 			null
@@ -1210,8 +1210,8 @@
 		"paretic_side": "LEFT",
 		"session_type": "2MWT_BARE_CUE_OFF",
 		"date_calibration": "240812",
-		"distance": 1.0,
-		"time": 1.0,
+		"distance": 103.98,
+		"time": 120.0,
 		"bpm": [
 			null,
 			null
@@ -1234,8 +1234,8 @@
 		"paretic_side": "LEFT",
 		"session_type": "2MWT_BARE_CUE_ON",
 		"date_calibration": "240812",
-		"distance": 1.0,
-		"time": 1.0,
+		"distance": 89.09,
+		"time": 120.0,
 		"bpm": [
 			null,
 			null
@@ -1258,8 +1258,8 @@
 		"paretic_side": "LEFT",
 		"session_type": "2MWT_OFF_CUE_OFF",
 		"date_calibration": "240812",
-		"distance": 1.0,
-		"time": 1.0,
+		"distance": 90.78,
+		"time": 120.0,
 		"bpm": [
 			null,
 			null
@@ -1282,8 +1282,8 @@
 		"paretic_side": "LEFT",
 		"session_type": "2MWT_OFF_CUE_ON",
 		"date_calibration": "240812",
-		"distance": 1.0,
-		"time": 1.0,
+		"distance": 98.72,
+		"time": 120.0,
 		"bpm": [
 			null,
 			null
@@ -1306,8 +1306,8 @@
 		"paretic_side": "LEFT",
 		"session_type": "2MWT_OFF_CUE_ON",
 		"date_calibration": "240812",
-		"distance": 1.0,
-		"time": 1.0,
+		"distance": 84.19,
+		"time": 120.0,
 		"bpm": [
 			null,
 			null
@@ -1330,8 +1330,8 @@
 		"paretic_side": "LEFT",
 		"session_type": "2MWT_OFF_CUE_ON",
 		"date_calibration": "240812",
-		"distance": 1.0,
-		"time": 1.0,
+		"distance": 90.78,
+		"time": 120.0,
 		"bpm": [
 			null,
 			null
@@ -1354,8 +1354,8 @@
 		"paretic_side": "LEFT",
 		"session_type": "2MWT_ON_CUE_OFF",
 		"date_calibration": "240812",
-		"distance": 1.0,
-		"time": 1.0,
+		"distance": 105.01,
+		"time": 120.0,
 		"bpm": [
 			null,
 			null
@@ -1378,8 +1378,8 @@
 		"paretic_side": "LEFT",
 		"session_type": "2MWT_ON_CUE_ON",
 		"date_calibration": "240812",
-		"distance": 1.0,
-		"time": 1.0,
+		"distance": 122.21,
+		"time": 120.0,
 		"bpm": [
 			null,
 			null

@@ -42,7 +42,8 @@ class ClinicalAnalysis:
             right_path=right_path,
             paretic_path=paretic_path,
             nonparetic_path=non_paretic_path,
-            calib_model_path=model_path_cell,
+            calib_model_path=model_path_cell +
+            "piecewise_linear_info_30N_ver2.json",
             grf_model_path=model_path_grf,
             save_path=inference_data_save_path,
             size=sole_size,
