@@ -26,7 +26,7 @@ class ClinicalIndexJJ:
                            metadata.test_label + "/" + metadata.session_type
 
         clearance_file_path = report_save_path + \
-                              "/process_data/inference_data/clearance.csv"
+                              "/process_data/inference_data/clearance_zero.csv"
 
         df_clearance_ = pd.read_csv(clearance_file_path,
                                     names=["t",
@@ -35,7 +35,7 @@ class ClinicalIndexJJ:
                                            "Right toe",
                                            "Right heel"],
                                     header=None)
-        torso_height = 800
+        torso_height = 0
         df_toe_left = pd.DataFrame(
             {"time": df_clearance_["t"],
              "value": df_clearance_["Left toe"] + torso_height})
