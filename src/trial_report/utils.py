@@ -373,11 +373,8 @@ class DataProcess:
             time_diff.append(nonparetic_ic[idx_np] - tic)
 
         time_diff = np.array(time_diff)
-        time_diff_crop = time_diff[
-            np.where(np.logical_and(0.1 < time_diff, time_diff < 1.5))
-        ]
-        mean_ic_diff = np.mean(time_diff_crop) / mean_cycle
-        std_ic_diff = np.std(time_diff_crop) / mean_cycle
+        mean_ic_diff = np.mean(time_diff) / mean_cycle
+        std_ic_diff = np.std(time_diff) / mean_cycle
 
         if paretic_ic[0] > paretic_fo[0]:
             paretic_fo = paretic_fo[1:]
