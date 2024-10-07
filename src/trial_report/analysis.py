@@ -90,7 +90,7 @@ class ClinicalAnalysis:
                 save_label=save_label
             )
 
-        max_array, impulse_, stance_array = DataProcess.data_process(
+        max_array, impulse_, stance_ = DataProcess.data_process(
             paretic_data,
             non_paretic_data,
             paretic_path,
@@ -102,7 +102,7 @@ class ClinicalAnalysis:
             start_time=start_time,
             max_flag=True,
             impulse_flag=False,
-            stance_flag=True,
+            stance_flag=False,
             report_start_time=report_start_time,
             report_duration=report_duration,
             idx_gait_event_filter=gait_event_filter
@@ -122,6 +122,25 @@ class ClinicalAnalysis:
             max_flag=False,
             impulse_flag=True,
             stance_flag=False,
+            report_start_time=report_start_time,
+            report_duration=report_duration,
+            idx_gait_event_filter=gait_event_filter
+            # grf_flag=True
+        )
+        
+        max_, impulse_, stance_array = DataProcess.data_process(
+            paretic_data,
+            non_paretic_data,
+            paretic_path,
+            non_paretic_path,
+            save_path=report_save_path,
+            data_label="vGRF [N]",
+            title_label=save_label,
+            ignore_cycle=ignore_cycle,
+            start_time=start_time,
+            max_flag=False,
+            impulse_flag=False,
+            stance_flag=True,
             report_start_time=report_start_time,
             report_duration=report_duration,
             idx_gait_event_filter=gait_event_filter

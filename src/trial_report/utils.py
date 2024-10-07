@@ -109,6 +109,11 @@ def save_each_cycle_timeseries_data(
     extra_collection_data = collection_data[1:]
 
     for cycle_num, main_data in enumerate(main_collection_data):
+        try:
+            start_time = main_data[0, 0]
+        except IndexError:
+            print("At plot each cycle data - empty collection data error")
+            continue
         start_time = main_data[0, 0]
         end_time = main_data[len(main_data) - 1, 0]
         # indexing gait dataframe
@@ -941,7 +946,7 @@ class DataProcess:
             save_each_cycle_bar_plot(
                 stance_time_paretic, stance_time_non_paretic,
                 stance_paretic_mean, stance_non_paretic_mean,
-                'Stance Time [s]', title_label + " Stance Time",
+                'Stance Time [s]', title_label + "Stance Time",
                 save_path
             )
 
@@ -992,7 +997,7 @@ class DataProcess:
         weights_non_paretic_sub = np.ones_like(array_non_paretic_sub) / len(array_non_paretic_sub)
 
         fig, axs = plt.subplots(1, 2, sharey='all', tight_layout=True)
-        plt.suptitle(plot_title + " - Clearance")
+        plt.suptitle(plot_title)
         axs[0].hist(array_paretic, weights=weights_paretic, bins=10, color='red', alpha=0.2, label='p')
         axs[0].hist(array_non_paretic, weights=weights_non_paretic, bins=10, color='blue', alpha=0.2, label='np')
         axs[1].hist(array_paretic_sub, weights=weights_paretic_sub, bins=10, color='red', alpha=0.2, label='p')
@@ -1008,10 +1013,10 @@ class DataProcess:
         axs[1].set_xlabel("Clearance [mm]")
         axs[1].legend()
         create_folder(report_save_path+"/graph")
-        fig.savefig(report_save_path + "/graph/" + "clearance_toe_heel.png")
+        fig.savefig(report_save_path + "/graph/" + plot_title + " toe heel.png")
 
         fig, axs = plt.subplots(1, 2, sharey='all', tight_layout=True)
-        plt.suptitle(plot_title + " - Clearance")
+        plt.suptitle(plot_title)
         axs[0].hist(array_paretic, weights=weights_paretic, bins=10,
                     color='red', alpha=0.2, label='Toe')
         axs[0].hist(array_paretic_sub, weights=weights_paretic_sub, bins=10,
@@ -1031,7 +1036,7 @@ class DataProcess:
         axs[1].set_title("Non-paretic")
         axs[1].set_xlabel("Clearance [mm]")
         axs[1].legend()
-        fig.savefig(report_save_path + "/graph/" + "clearance_pnp.png")
+        fig.savefig(report_save_path + "/graph/" + plot_title + " pnp.png")
 
 
 class Picker:

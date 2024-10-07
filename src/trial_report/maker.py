@@ -541,6 +541,7 @@ class ReportMaker:
             save_label = "RH03-Day1(1)-10-Bare-CueX-"
             # report_start_time = 110.36
             # report_duration = 14.51
+            # save_label = "RH03-Day1(2)-10-Bare-CueX-"
         elif bag_name == "log_2024-09-11-12-18-45.bag":
             report_start_time = 25.77
             report_duration = 14.51
@@ -563,12 +564,14 @@ class ReportMaker:
             save_label = "RH03-Day1(1)-10-Off-CueX-"
             # report_start_time = 79.44
             # report_duration = 14.17
+            # save_label = "RH03-Day1(2)-10-Off-CueX-"
         elif bag_name == "log_2024-09-11-13-03-34.bag":
             report_start_time = 32.84
             report_duration = 17.12
             save_label = "RH03-Day1(1)-10-Off-CueO-"
             # report_start_time = 76.28
             # report_duration = 14.61
+            # save_label = "RH03-Day1(2)-10-Off-CueO-"
         elif bag_name == "log_2024-09-11-13-10-28.bag":
             report_start_time = 30.1
             report_duration = 120.0
@@ -633,22 +636,27 @@ class ReportMaker:
             save_label = "RH02-Day1(1)-10-Bare-CueX-"
             # report_start_time = 107.5
             # report_duration = 50.5
+            # save_label = "RH02-Day1(2)-10-Bare-CueX-"
             # report_start_time = 208.5
             # report_duration = 49.5
+            # save_label = "RH02-Day1(1)-10-Bare-CueO-"
             # report_start_time = 296.0
             # report_duration = 50.0
+            # save_label = "RH02-Day1(2)-10-Bare-CueO-"
         elif bag_name == "log_2024-08-12-15-46-35.bag":
             report_start_time = 161.0
             report_duration = 49.0
             save_label = "RH02-Day1(1)-10-Off-CueX-"
             # report_start_time = 246.0
             # report_duration = 50.0
+            # save_label = "RH02-Day1(2)-10-Off-CueX-"
         elif bag_name == "log_2024-08-12-15-52-57.bag":
             report_start_time = 17.0
             report_duration = 43.0
             save_label = "RH02-Day1(1)-10-Off-CueO-"
             # report_start_time = 111.5
             # report_duration = 51.0
+            # save_label = "RH02-Day1(2)-10-Off-CueO-"
         # RH02, Day2
         elif bag_name == "log_2024-08-14-12-33-52.bag":
             report_start_time = 60.0
@@ -672,24 +680,28 @@ class ReportMaker:
             save_label = "RH02-Day2(1)-10-Off-CueX-"
             # report_start_time = 102.5
             # report_duration = 52.0
+            # save_label = "RH02-Day2(2)-10-Off-CueX-"
         elif bag_name == "log_2024-08-14-11-26-48.bag":
             report_start_time = 35.0
             report_duration = 52.0
             save_label = "RH02-Day2(1)-10-Off-CueO-"
             # report_start_time = 141.5
             # report_duration = 49.5
+            # save_label = "RH02-Day2(2)-10-Off-CueO-"
         elif bag_name == "log_2024-08-14-11-34-32.bag":
             report_start_time = 58.5
             report_duration = 49.5
             save_label = "RH02-Day2(1)-10-On-CueX-"
             # report_start_time = 133.0
             # report_duration = 49.0
+            # save_label = "RH02-Day2(2)-10-On-CueX-"
         elif bag_name == "log_2024-08-14-11-42-33.bag":
             report_start_time = 76.0
             report_duration = 45.0
             save_label = "RH02-Day2(1)-10-On-CueO-"
             # report_start_time = 194.0
             # report_duration = 50.0
+            # save_label = "RH02-Day2(2)-10-On-CueO-"
         else:
             report_start_time = None
             report_duration = None
@@ -826,7 +838,8 @@ class ReportMaker:
         pd_statistics.loc["grf_impulse"] = grf_impulse_data
         pd_statistics.loc["stance_time"] = stance_time_data
         pd_statistics.to_csv(
-            save_path + 'statistics.csv', sep=",", header=True, index=True
+            save_path + save_label + 'statistics.csv',
+            sep=",", header=True, index=True
             )
 
         data_analysis = ClinicalDataset(
@@ -840,7 +853,7 @@ class ReportMaker:
             metadata=metadata_
         )
 
-        make_report(self._path_default, data_analysis)
+        make_report(self._path_default, save_label, data_analysis)
         print("Complete report making")
 
     def exit_program(self):

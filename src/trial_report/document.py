@@ -14,7 +14,7 @@ def num_array_to_string_array(num_array):
     return array_return
 
 
-def make_report(path, data_report: ClinicalDataset):
+def make_report(path, save_label, data_report: ClinicalDataset):
     # Document Formatting
     story = []
     path_base = \
@@ -23,7 +23,7 @@ def make_report(path, data_report: ClinicalDataset):
             data_report.metadata.test_label,
             data_report.metadata.session_type
         )
-    pdf_path = path_base + 'report.pdf'
+    pdf_path = path_base + save_label + 'report.pdf'
     image_path_base = path_base + "graph/"
 
     doc = SimpleDocTemplate(
@@ -179,14 +179,14 @@ def make_report(path, data_report: ClinicalDataset):
     text_sub3 = limb_length
     table_sub3 = Table(text_sub3)
 
-    image_path_grf_impulse = image_path_base + "GRF_impulse_along_cycle.png"
-    image_path_grf_max = image_path_base + "GRF_max_along_cycle.png"
-    image_path_grf_mean_cycle = image_path_base + "GRF_mean_cycle.png"
+    image_path_grf_impulse = image_path_base + save_label + "vGRF Impulse.png"
+    image_path_grf_max = image_path_base + save_label + "vGRF Maximum.png"
+    image_path_grf_mean_cycle = image_path_base + save_label + "vGRF.png"
     image_path_stance_time = \
-        image_path_base + "Stance_Time_ignored_along_cycle.png"
-    image_path_toe_mean_cycle = image_path_base + "Toe Clearance_mean_cycle.png"
-    image_path_toe_max = image_path_base + "Toe Clearance_max_along_cycle.png"
-    image_path_stride = image_path_base + "Stride_along_cycle.png"
+        image_path_base + save_label + "Stance Time.png"
+    image_path_toe_mean_cycle = image_path_base + save_label + "Toe Clearance.png"
+    image_path_toe_max = image_path_base + save_label + "Toe Clearance Maximum.png"
+    # image_path_stride = image_path_base + save_label + "Stride_along_cycle.png"
 
     chart_style = TableStyle(
         [
