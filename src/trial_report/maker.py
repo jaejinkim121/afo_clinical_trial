@@ -538,121 +538,99 @@ class ReportMaker:
         if bag_name == "log_2024-09-11-12-16-22.bag":
             report_start_time = 61.39
             report_duration = 14.86
-            front_label = "RH03-Day1(1)-"
-            back_label = "-10-Bare-CueX"
+            save_label = "RH03-Day1(1)-10-Bare-CueX-"
             # report_start_time = 110.36
             # report_duration = 14.51
         elif bag_name == "log_2024-09-11-12-18-45.bag":
             report_start_time = 25.77
             report_duration = 14.51
-            front_label = "RH03-Day1(1)-"
-            back_label = "-10-Bare-CueO"
+            save_label = "RH03-Day1(1)-10-Bare-CueO-"
         elif bag_name == "log_2024-09-11-12-19-48.bag":
             report_start_time = 17.85
             report_duration = 14.22
-            front_label = "RH03-Day1(2)-"
-            back_label = "-10-Bare-CueO"
+            save_label = "RH03-Day1(2)-10-Bare-CueO-"
         elif bag_name == "log_2024-09-11-12-34-12.bag":
             report_start_time = 40.3
             report_duration = 120.0
-            front_label = "RH03-Day1(1)-"
-            back_label = "-2-Bare-CueX"
+            save_label = "RH03-Day1(1)-2-Bare-CueX-"
         elif bag_name == "log_2024-09-11-12-43-37.bag":
             report_start_time = 110.58
             report_duration = 120.0
-            front_label = "RH03-Day1(1)-"
-            back_label = "-2-Bare-CueO"
+            save_label = "RH03-Day1(1)-2-Bare-CueO-"
         elif bag_name == "log_2024-09-11-13-01-43.bag":
             report_start_time = 42.43
             report_duration = 15.12
-            front_label = "RH03-Day1(1)-"
-            back_label = "-10-Off-CueX"
+            save_label = "RH03-Day1(1)-10-Off-CueX-"
             # report_start_time = 79.44
             # report_duration = 14.17
         elif bag_name == "log_2024-09-11-13-03-34.bag":
             report_start_time = 32.84
             report_duration = 17.12
-            front_label = "RH03-Day1(1)-"
-            back_label = "-10-Off-CueO"
+            save_label = "RH03-Day1(1)-10-Off-CueO-"
             # report_start_time = 76.28
             # report_duration = 14.61
         elif bag_name == "log_2024-09-11-13-10-28.bag":
             report_start_time = 30.1
             report_duration = 120.0
-            front_label = "RH03-Day1(1)-"
-            back_label = "-2-Off-CueX"
+            save_label = "RH03-Day1(1)-2-Off-CueX-"
         elif bag_name == "log_2024-09-11-13-17-54.bag":
             report_start_time = 32.63
             report_duration = 120.0
-            front_label = "RH03-Day1(1)-"
-            back_label = "-2-Off-CueO"
+            save_label = "RH03-Day1(1)-2-Off-CueO-"
         # RH03, Day2
         elif bag_name == "log_2024-09-12-11-45-05.bag":
             report_start_time = 41.76
             report_duration = 16.01
-            front_label = "RH03-Day2(1)-"
-            back_label = "-10-Off-CueO"
+            save_label = "RH03-Day2(1)-10-Off-CueO-"
         elif bag_name == "log_2024-09-12-11-46-18.bag":
             report_start_time = 14.47
             report_duration = 14.5
-            front_label = "RH03-Day2(2)-"
-            back_label = "-10-Off-CueO"
+            save_label = "RH03-Day2(2)-10-Off-CueO-"
         elif bag_name == "log_2024-09-12-11-51-35.bag":
             report_start_time = 34.59
             report_duration = 120.0
-            front_label = "RH03-Day2(1)-"
-            back_label = "-2-Off-CueO"
+            save_label = "RH03-Day2(1)-2-Off-CueO-"
         elif bag_name == "log_2024-09-12-11-59-43.bag":
             report_start_time = 14.32
             report_duration = 120.0
-            front_label = "RH03-Day2(2)-"
-            back_label = "-2-Off-CueO"
+            save_label = "RH03-Day2(2)-2-Off-CueO-"
         elif bag_name == "log_2024-09-12-12-07-15.bag":
             report_start_time = 28.33
             report_duration = 15.66
-            front_label = "RH03-Day2(1)-"
-            back_label = "-10-On-CueX"
+            save_label = "RH03-Day2(1)-10-On-CueX-"
         elif bag_name == "log_2024-09-12-12-08-16.bag":
             report_start_time = 16.17
             report_duration = 13.79
-            front_label = "RH03-Day2(2)-"
-            back_label = "-10-On-CueX"
+            save_label = "RH03-Day2(2)-10-On-CueX-"
         elif bag_name == "log_2024-09-12-12-09-02.bag":
             report_start_time = 14.7
             report_duration = 13.35
-            front_label = "RH03-Day2(1)-"
-            back_label = "-10-On-CueO"
+            save_label = "RH03-Day2(1)-10-On-CueO-"
         elif bag_name == "log_2024-09-12-12-09-46.bag":
             report_start_time = 14.32
             report_duration = 13.81
-            front_label = "RH03-Day2(2)-"
-            back_label = "-10-On-CueO"
+            save_label = "RH03-Day2(2)-10-On-CueO-"
         elif bag_name == "log_2024-09-12-12-15-28.bag":
             report_start_time = 20.0
             report_duration = 120.0
-            front_label = "RH03-Day2(1)-"
-            back_label = "-2-On-CueX"
+            save_label = "RH03-Day2(1)-2-On-CueX-"
         elif bag_name == "log_2024-09-12-12-23-23.bag":
             report_start_time = 20.1
             report_duration = 120.0
-            front_label = "RH03-Day2(1)-"
-            back_label = "-2-On-CueO"
+            save_label = "RH03-Day2(1)-2-On-CueO-"
         # RH02, Day1
         elif bag_name == "log_2024-08-12-16-37-14.bag":
             report_start_time = 60.5
             report_duration = 120.0
-            front_label = "RH02-Day1(1)-"
-            back_label = "-2-Bare-CueO"
+            save_label = "RH02-Day1(1)-2-Bare-CueO-"
         elif bag_name == "log_2024-08-12-16-33-02.bag":
             report_start_time = 80.7
             report_duration = 120.0
-            front_label = "RH02-Day1(1)-"
-            back_label = "-2-Bare-CueX"
+            save_label = "RH02-Day1(1)-2-Bare-CueX-"
         elif bag_name == "log_2024-08-12-15-25-57.bag":
             report_start_time = 33.5
             report_duration = 49.5
-            front_label = "RH02-Day1(1)-"
-            back_label = "-10-Bare-CueX"
+            save_label = "RH02-Day1(1)-10-Bare-CueX-"
             # report_start_time = 107.5
             # report_duration = 50.5
             # report_start_time = 208.5
@@ -662,71 +640,60 @@ class ReportMaker:
         elif bag_name == "log_2024-08-12-15-46-35.bag":
             report_start_time = 161.0
             report_duration = 49.0
-            front_label = "RH02-Day1(1)-"
-            back_label = "-10-Off-CueX"
+            save_label = "RH02-Day1(1)-10-Off-CueX-"
             # report_start_time = 246.0
             # report_duration = 50.0
         elif bag_name == "log_2024-08-12-15-52-57.bag":
             report_start_time = 17.0
             report_duration = 43.0
-            front_label = "RH02-Day1(1)-"
-            back_label = "-10-Off-CueO"
+            save_label = "RH02-Day1(1)-10-Off-CueO-"
             # report_start_time = 111.5
             # report_duration = 51.0
         # RH02, Day2
         elif bag_name == "log_2024-08-14-12-33-52.bag":
             report_start_time = 60.0
             report_duration = 120.0
-            front_label = "RH02-Day2(1)-"
-            back_label = "-2-On-CueO"
+            save_label = "RH02-Day2(1)-2-On-CueO-"
         elif bag_name == "log_2024-08-14-12-21-10.bag":
             report_start_time = 65.5
             report_duration = 120.0
-            front_label = "RH02-Day2(1)-"
-            back_label = "-2-On-CueX"
+            save_label = "RH02-Day2(1)-2-On-CueX-"
         elif bag_name == "log_2024-08-14-12-08-57.bag":
             report_start_time = 44.5
             report_duration = 120.0
-            front_label = "RH02-Day2(1)-"
-            back_label = "-2-Off-CueO"
+            save_label = "RH02-Day2(1)-2-Off-CueO-"
         elif bag_name == "log_2024-08-14-11-56-49.bag":
             report_start_time = 40.0
             report_duration = 120.0
-            front_label = "RH02-Day2(1)-"
-            back_label = "-2-Off-CueX"
+            save_label = "RH02-Day2(1)-2-Off-CueX-"
         elif bag_name == "log_2024-08-14-11-19-39.bag":
             report_start_time = 33.0
             report_duration = 50.0
-            front_label = "RH02-Day2(1)-"
-            back_label = "-10-Off-CueX"
+            save_label = "RH02-Day2(1)-10-Off-CueX-"
             # report_start_time = 102.5
             # report_duration = 52.0
         elif bag_name == "log_2024-08-14-11-26-48.bag":
             report_start_time = 35.0
             report_duration = 52.0
-            front_label = "RH02-Day2(1)-"
-            back_label = "-10-Off-CueO"
+            save_label = "RH02-Day2(1)-10-Off-CueO-"
             # report_start_time = 141.5
             # report_duration = 49.5
         elif bag_name == "log_2024-08-14-11-34-32.bag":
             report_start_time = 58.5
             report_duration = 49.5
-            front_label = "RH02-Day2(1)-"
-            back_label = "-10-On-CueX"
+            save_label = "RH02-Day2(1)-10-On-CueX-"
             # report_start_time = 133.0
             # report_duration = 49.0
         elif bag_name == "log_2024-08-14-11-42-33.bag":
             report_start_time = 76.0
             report_duration = 45.0
-            front_label = "RH02-Day2(1)-"
-            back_label = "-10-On-CueO"
+            save_label = "RH02-Day2(1)-10-On-CueO-"
             # report_start_time = 194.0
             # report_duration = 50.0
         else:
             report_start_time = None
             report_duration = None
-            front_label = None
-            back_label = None
+            save_label = None
         # To filter specific topics with interests
         TOPIC_MH = (
             "/afo_sensor/soleSensor_left",
@@ -822,8 +789,7 @@ class ReportMaker:
                 report_start_time,
                 report_duration,
                 current_gait_event_filter,
-                front_label,
-                back_label
+                save_label=save_label
             )
 
         gait_speed_imu_data = [1, 1, 1]
@@ -846,8 +812,7 @@ class ReportMaker:
                 paretic_path=paretic_gait_path,
                 non_paretic_path=nonparetic_gait_path,
                 save_each_cycle_flag=True,
-                front_label=front_label,
-                back_label=back_label
+                save_label=save_label
                 )
 
         # Save statistics.csv

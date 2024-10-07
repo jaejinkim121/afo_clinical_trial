@@ -21,8 +21,7 @@ class ClinicalIndexJJ:
                                 report_start_time,
                                 report_duration,
                                 current_gait_event_filter=None,
-                                front_label=None,
-                                back_label=None):
+                                save_label=None):
         report_save_path = default_path + "/report/data/" + \
                            metadata.test_label + "/" + metadata.session_type
 
@@ -71,7 +70,7 @@ class ClinicalIndexJJ:
             non_paretic_gait_path,
             save_path=report_save_path,
             data_label="Clearance [mm]",
-            title_label="Toe Clearance",
+            title_label=save_label+"Toe Clearance",
             ignore_cycle=ignore_cycle,
             start_time=start_time,
             max_flag=True,
@@ -80,9 +79,7 @@ class ClinicalIndexJJ:
             report_duration=report_duration,
             idx_gait_event_filter=current_gait_event_filter,
             df_sub_paretic=df_heel_paretic,
-            df_sub_non_paretic=df_heel_nonparetic,
-            front_label=front_label,
-            back_label=back_label
+            df_sub_non_paretic=df_heel_nonparetic
         )
 
         max_heel, impulse_heel, stance_ = DataProcess.data_process(
@@ -92,15 +89,13 @@ class ClinicalIndexJJ:
             non_paretic_gait_path,
             save_path=report_save_path,
             data_label="Clearance [mm]",
-            title_label="Heel Clearance",
+            title_label=save_label+"Heel Clearance",
             ignore_cycle=ignore_cycle,
             start_time=start_time,
             max_flag=True,
             report_start_time=report_start_time,
             report_duration=report_duration,
-            idx_gait_event_filter=current_gait_event_filter,
-            front_label=front_label,
-            back_label=back_label
+            idx_gait_event_filter=current_gait_event_filter
         )
 
         return max_toe

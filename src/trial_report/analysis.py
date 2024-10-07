@@ -21,8 +21,7 @@ class ClinicalAnalysis:
             paretic_path,
             non_paretic_path,
             save_each_cycle_flag=False,
-            front_label=None,
-            back_label=None
+            save_label=None
             ):
         # parameter assign
         model_path_cell = default_path + "/model/" +\
@@ -88,8 +87,7 @@ class ClinicalAnalysis:
                 report_start_time=report_start_time,
                 report_duration=report_duration,
                 idx_gait_event_filter=gait_event_filter,
-                front_label=front_label,
-                back_label=back_label
+                save_label=save_label
             )
 
         max_array, impulse_, stance_array = DataProcess.data_process(
@@ -99,7 +97,7 @@ class ClinicalAnalysis:
             non_paretic_path,
             save_path=report_save_path,
             data_label="vGRF [N]",
-            title_label="Vertical GRF",
+            title_label=save_label+"vGRF",
             ignore_cycle=ignore_cycle,
             start_time=start_time,
             max_flag=True,
@@ -107,9 +105,7 @@ class ClinicalAnalysis:
             stance_flag=True,
             report_start_time=report_start_time,
             report_duration=report_duration,
-            idx_gait_event_filter=gait_event_filter,
-            front_label=front_label,
-            back_label=back_label
+            idx_gait_event_filter=gait_event_filter
             # grf_flag=True
         )
         
@@ -120,7 +116,7 @@ class ClinicalAnalysis:
             non_paretic_path,
             save_path=report_save_path,
             data_label="vGRF Impulse [N sec]",
-            title_label="Vertical GRF",
+            title_label=save_label+"vGRF",
             ignore_cycle=ignore_cycle,
             start_time=start_time,
             max_flag=False,
@@ -128,9 +124,7 @@ class ClinicalAnalysis:
             stance_flag=False,
             report_start_time=report_start_time,
             report_duration=report_duration,
-            idx_gait_event_filter=gait_event_filter,
-            front_label=front_label,
-            back_label=back_label
+            idx_gait_event_filter=gait_event_filter
             # grf_flag=True
         )
 

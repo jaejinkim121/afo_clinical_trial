@@ -101,7 +101,7 @@ def get_torque_info(path, start_time):
 def save_each_cycle_timeseries_data(
         collection_data, df_gait,
         data_label, unit_label, title_label, color, save_path,
-        front_label=None, back_label=None
+        save_label=None
         ):
     create_folder(save_path)
 
@@ -131,7 +131,8 @@ def save_each_cycle_timeseries_data(
             print("At plot each cycle data - foot off timing index error")
 
         ax1.set_ylabel(data_label[0] + '' + unit_label[0], fontsize=20)
-        ax1.set_title(title_label[0] + '_' + str(cycle_num), fontsize=20)
+        ax1.set_title(save_label + title_label[0] + ' Cycle' + str(cycle_num),
+                      fontsize=20)
         ax1.tick_params(axis='both', labelsize=15)
         ax1.legend(loc="best")
 
@@ -152,21 +153,21 @@ def save_each_cycle_timeseries_data(
             print("At plot each cycle data - foot off timing index error")
         ax2.set_xlabel("Time [s]", fontsize=20)
         ax2.set_ylabel(data_label[1] + '' + unit_label[1], fontsize=20)
-        ax2.set_title(title_label[1] + '_' + str(cycle_num), fontsize=20)
+        ax2.set_title(save_label + title_label[1] + ' Cycle' + str(cycle_num),
+                      fontsize=20)
         ax2.tick_params(axis='both', labelsize=15)
         ax2.legend(loc="best")
         fig.savefig(
-            save_path + front_label +
+            save_path + save_label +
             title_label[0] + ' ' + title_label[1] + ' Cycle' +
-            str(cycle_num) + back_label + '.png'
+            str(cycle_num) + '.png'
             )
         plt.close(fig)
 
 
 def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
                              mean_paretic, mean_non_paretic,
-                             data_label, title_label, save_path,
-                             front_label=None, back_label=None):
+                             data_label, title_label, save_path):
     # 2 array input
     # path assign
     graph_save_path = save_path + "/graph/"
@@ -196,8 +197,7 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
     plt.yticks(fontsize=25)
     create_folder(graph_save_path)
     fig.tight_layout()
-    fig.savefig(graph_save_path + front_label + title_label +
-                ' along cycle' + back_label + '.png')
+    fig.savefig(graph_save_path + save_label + title_label + '.png')
     # df saving
     df_data = pd.DataFrame()
     df_data = pd.concat(
@@ -206,7 +206,7 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
     df_data = pd.concat(
         [df_data, pd.Series(np_non_paretic, name='non-paretic side')], axis=0
         )
-    df_data.to_csv(data_save_path + title_label + '_along_cycle.csv',
+    df_data.to_csv(data_save_path + title_label + '.csv',
                    sep=",", header=True)
     plt.close(fig)
 
@@ -526,8 +526,7 @@ class DataProcess:
             report_start_time=None,
             report_duration=None,
             idx_gait_event_filter=None,
-            front_label=None,
-            back_label=None
+            save_label=save_label
     ):
         total_collection_paretic = []
         total_collection_non_paretic = []
@@ -579,8 +578,7 @@ class DataProcess:
             title_label=title_label,
             color='red',
             save_path=save_path + '/graph/each_cycle/paretic/',
-            front_label=front_label,
-            back_label=back_label)
+            save_label=save_label)
 
         save_each_cycle_timeseries_data(
             total_collection_non_paretic,
@@ -590,8 +588,7 @@ class DataProcess:
             title_label=title_label,
             color='blue',
             save_path=save_path + '/graph/each_cycle/non_paretic/',
-            front_label=front_label,
-            back_label=back_label)
+            save_label=save_label)
 
     @staticmethod
     def graph_averaged_data(collection_data, title_graph, data_label,
@@ -614,7 +611,7 @@ class DataProcess:
                               data_gait_paretic, data_gait_nonparetic,
                               idx_paretic_ignore, idx_non_paretic_ignore,
                               data_label, title_graph, save_path,
-                              x_num=101, front_label=None, back_label=None):
+                              x_num=101):
         collection_data_paretic_sel = \
             copy.deepcopy(collection_data_paretic)
         collection_data_nonparetic_sel = \
@@ -702,8 +699,7 @@ class DataProcess:
         axs[1].set_xlim(0, xlim_upper)
         create_folder(save_path)
         fig.tight_layout()
-        fig.savefig(save_path + front_label +
-                    '%s mean cycle' % title_graph + back_label + ".png")
+        fig.savefig(save_path + title_graph + ".png")
         plt.close(fig)
 
     @staticmethod
@@ -725,9 +721,7 @@ class DataProcess:
             report_duration=None,
             idx_gait_event_filter=None,
             df_sub_paretic=None,
-            df_sub_non_paretic=None,
-            front_label=None,
-            back_label=None
+            df_sub_non_paretic=None
     ):
 
         collection_paretic, collection_non_paretic, \
@@ -825,9 +819,7 @@ class DataProcess:
             idx_paretic_ignore, idx_non_paretic_ignore,
             data_label, title_label,
             save_path=save_path + '/graph/',
-            x_num=101,
-            front_label=front_label,
-            back_label=back_label
+            x_num=101
         )
         ###
         # Statistics Processing
@@ -876,9 +868,7 @@ class DataProcess:
             save_each_cycle_bar_plot(
                 np_p_max, np_np_max, max_paretic_mean, max_non_paretic_mean,
                 data_label, title_label + " Maximum",
-                save_path,
-                front_label=front_label,
-                back_label=back_label
+                save_path
             )
         impulse_paretic_mean = 0
         impulse_paretic_stdev = 0
@@ -918,9 +908,7 @@ class DataProcess:
                 np_p_impulse, np_np_impulse,
                 impulse_paretic_mean, impulse_non_paretic_mean,
                 data_label, title_label + " Impulse",
-                save_path,
-                front_label=front_label,
-                back_label=back_label
+                save_path
             )
 
         stance_paretic_mean = 0
@@ -954,9 +942,7 @@ class DataProcess:
                 stance_time_paretic, stance_time_non_paretic,
                 stance_paretic_mean, stance_non_paretic_mean,
                 'Stance Time [s]', "Stance Time",
-                save_path,
-                front_label=front_label,
-                back_label=back_label
+                save_path
             )
 
             # save_each_cycle_bar_plot(
