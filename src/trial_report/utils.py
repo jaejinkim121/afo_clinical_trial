@@ -116,16 +116,20 @@ def save_each_cycle_timeseries_data(
             (df_gait.iloc[:, 0] >= start_time) &
             (df_gait.iloc[:, 0] <= end_time)
             ]
-        foot_off_timing = DataProcess.get_foot_off_time(df_gait_cycle)[0]
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 12))
         ax1.plot(main_data[:, 0], main_data[:, 1],
                  color=color, label=data_label[0]
                  )
-        ax1.vlines(foot_off_timing,
-                   0, np.max(main_data[:, 1]), color='black',
-                   linewidth=2
-                   )
+        try:
+            foot_off_timing = DataProcess.get_foot_off_time(df_gait_cycle)[0]
+            ax1.vlines(foot_off_timing,
+                       0, np.max(main_data[:, 1]), color='black',
+                       linewidth=2
+                       )
+        except IndexError:
+            print("At plot each cycle data - foot off timing index error")
+
         ax1.set_ylabel(data_label[0] + '' + unit_label[0], fontsize=20)
         ax1.set_title(title_label[0] + '_' + str(cycle_num), fontsize=20)
         ax1.tick_params(axis='both', labelsize=15)
@@ -140,8 +144,12 @@ def save_each_cycle_timeseries_data(
                 )
             if extra_data_max <= np.max(extra_dataset[cycle_num][:, 1]):
                 extra_data_max = np.max(extra_dataset[cycle_num][:, 1])
-        ax1.vlines(foot_off_timing, 0, extra_data_max,
-                   color='black', linewidth=2)
+        try:
+            foot_off_timing = DataProcess.get_foot_off_time(df_gait_cycle)[0]
+            ax1.vlines(foot_off_timing, 0, extra_data_max,
+                       color='black', linewidth=2)
+        except IndexError:
+            print("At plot each cycle data - foot off timing index error")
         ax2.set_xlabel("Time [s]", fontsize=20)
         ax2.set_ylabel(data_label[1] + '' + unit_label[1], fontsize=20)
         ax2.set_title(title_label[1] + '_' + str(cycle_num), fontsize=20)
