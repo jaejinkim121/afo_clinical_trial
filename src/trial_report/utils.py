@@ -803,7 +803,7 @@ class DataProcess:
                 paretic_swing_sub,
                 non_paretic_swing_sub,
                 save_path,
-                title_label
+                title_label,
             )
         ####################################################
 
