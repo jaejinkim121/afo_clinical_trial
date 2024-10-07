@@ -1,3 +1,7 @@
+# from src.trial_report.utils import *
+# from src.trial_report.define import *
+# from src.trial_report.mh import GRF_predictor
+
 from utils import *
 from define import *
 from mh import GRF_predictor
@@ -16,7 +20,9 @@ class ClinicalAnalysis:
             right_path,
             paretic_path,
             non_paretic_path,
-            save_each_cycle_flag=False
+            save_each_cycle_flag=False,
+            front_label=None,
+            back_label=None
             ):
         # parameter assign
         model_path_cell = default_path + "/model/" +\
@@ -76,27 +82,55 @@ class ClinicalAnalysis:
                 save_path=report_save_path,
                 data_label=("grf", "force"),
                 unit_label=("[N]", "[N]"),
-                title_label=("GRF", "Force"),
+                title_label=("vGRF", "Force"),
                 ignore_cycle=ignore_cycle,
-                start_time=start_time
+                start_time=start_time,
+                report_start_time=report_start_time,
+                report_duration=report_duration,
+                idx_gait_event_filter=gait_event_filter,
+                front_label=front_label,
+                back_label=back_label
             )
 
-        max_array, impulse_array, stance_array = DataProcess.data_process(
+        max_array, impulse_, stance_array = DataProcess.data_process(
             paretic_data,
             non_paretic_data,
             paretic_path,
             non_paretic_path,
             save_path=report_save_path,
-            data_label="N",
-            title_label="GRF",
+            data_label="vGRF [N]",
+            title_label="Vertical GRF",
             ignore_cycle=ignore_cycle,
             start_time=start_time,
             max_flag=True,
-            impulse_flag=True,
+            impulse_flag=False,
             stance_flag=True,
             report_start_time=report_start_time,
             report_duration=report_duration,
-            idx_gait_event_filter=gait_event_filter
+            idx_gait_event_filter=gait_event_filter,
+            front_label=front_label,
+            back_label=back_label
+            # grf_flag=True
+        )
+        
+        max_, impulse_array, stance_ = DataProcess.data_process(
+            paretic_data,
+            non_paretic_data,
+            paretic_path,
+            non_paretic_path,
+            save_path=report_save_path,
+            data_label="vGRF Impulse [N sec]",
+            title_label="Vertical GRF",
+            ignore_cycle=ignore_cycle,
+            start_time=start_time,
+            max_flag=False,
+            impulse_flag=True,
+            stance_flag=False,
+            report_start_time=report_start_time,
+            report_duration=report_duration,
+            idx_gait_event_filter=gait_event_filter,
+            front_label=front_label,
+            back_label=back_label
             # grf_flag=True
         )
 

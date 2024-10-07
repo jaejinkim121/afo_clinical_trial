@@ -1,8 +1,11 @@
 import pandas as pd
 import numpy as np
 import csv
-from utils import DataProcess
 import matplotlib.pyplot as plt
+# from src.trial_report.utils import DataProcess
+# from src.trial_report.define import Bag, Side
+
+from utils import DataProcess
 from define import Bag, Side
 
 
@@ -17,7 +20,9 @@ class ClinicalIndexJJ:
                                 start_time,
                                 report_start_time,
                                 report_duration,
-                                current_gait_event_filter=None):
+                                current_gait_event_filter=None,
+                                front_label=None,
+                                back_label=None):
         report_save_path = default_path + "/report/data/" + \
                            metadata.test_label + "/" + metadata.session_type
 
@@ -75,7 +80,9 @@ class ClinicalIndexJJ:
             report_duration=report_duration,
             idx_gait_event_filter=current_gait_event_filter,
             df_sub_paretic=df_heel_paretic,
-            df_sub_non_paretic=df_heel_nonparetic
+            df_sub_non_paretic=df_heel_nonparetic,
+            front_label=front_label,
+            back_label=back_label
         )
 
         max_heel, impulse_heel, stance_ = DataProcess.data_process(
@@ -91,7 +98,9 @@ class ClinicalIndexJJ:
             max_flag=True,
             report_start_time=report_start_time,
             report_duration=report_duration,
-            idx_gait_event_filter=current_gait_event_filter
+            idx_gait_event_filter=current_gait_event_filter,
+            front_label=front_label,
+            back_label=back_label
         )
 
         return max_toe
