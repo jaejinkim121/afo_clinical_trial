@@ -154,6 +154,7 @@ def save_each_cycle_timeseries_data(
 
 
 def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
+                             mean_paretic, mean_non_paretic,
                              data_label, title_label, save_path):
     # 2 array input
     # path assign
@@ -174,6 +175,8 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
         np.arange(1, len(np_non_paretic) + 1), np_non_paretic,
         color='blue', label='non-paretic side'
         )
+    plt.axhline(y=mean_paretic, color=(1, 0, 0, 0.3), linewidth=2.5)
+    plt.axhline(y=mean_non_paretic, color=(0, 0, 1, 0.3), linewidth=2.5)
     plt.xlabel("Gait cycle number", fontsize=30)
     plt.ylabel(data_label, fontsize=30)
     plt.title(title_label, fontsize=45)
@@ -636,7 +639,7 @@ class DataProcess:
         axs[0].set_title(title_graph, fontsize=45)
         axs[0].xaxis.set_tick_params(labelsize=25)
         axs[0].yaxis.set_tick_params(labelsize=25)
-
+        axs[0].grid(True)
         axs[1].axis('off')
         axs[1].barh(
             np.arange(2),
@@ -697,8 +700,8 @@ class DataProcess:
             df_sub_non_paretic=None
     ):
 
-        collection_paretic, collection_non_paretic,\
-            df_paretic_gait, df_non_paretic_gait =\
+        collection_paretic, collection_non_paretic, \
+        df_paretic_gait, df_non_paretic_gait = \
             DataProcess.get_gait_phase_collection_data(
                 paretic_data, non_paretic_data,
                 paretic_gait_path, non_paretic_gait_path,
@@ -707,7 +710,7 @@ class DataProcess:
                 report_start_time=report_start_time,
                 report_duration=report_duration,
                 idx_gait_event_filter=idx_gait_event_filter
-                )
+            )
 
         df_paretic_gait = \
             get_ignored_cycle(df_paretic_gait, ignore_cycle, True)
@@ -777,8 +780,8 @@ class DataProcess:
 
         ####################################################
         ## Disabled Picker
-        idx_paretic_ignore, idx_non_paretic_ignore,\
-            stance_time_paretic, stance_time_non_paretic =\
+        idx_paretic_ignore, idx_non_paretic_ignore, \
+        stance_time_paretic, stance_time_non_paretic = \
             get_index_outlier(
                 df_paretic_gait, df_non_paretic_gait
             )
@@ -831,18 +834,18 @@ class DataProcess:
 
             np_p_max = np.array(max_paretic)
             np_np_max = np.array(max_non_paretic)
-            save_each_cycle_bar_plot(
-                np_p_max, np_np_max,
-                data_label + '[N]', title_label + "_max",
-                save_path
-            )
             max_paretic_mean = np.mean(np_p_max)
             max_paretic_stdev = np.std(np_p_max)
             max_non_paretic_mean = np.mean(np_np_max)
             max_non_paretic_stdev = np.std(np_np_max)
-            max_symmetry = 1 -\
-                abs(max_paretic_mean - max_non_paretic_mean)\
-                / (max_paretic_mean + max_non_paretic_mean)
+            max_symmetry = 1 - \
+                           abs(max_paretic_mean - max_non_paretic_mean) \
+                           / (max_paretic_mean + max_non_paretic_mean)
+            save_each_cycle_bar_plot(
+                np_p_max, np_np_max, max_paretic_mean, max_non_paretic_mean,
+                data_label + '[N]', title_label + "_max",
+                save_path
+            )
         impulse_paretic_mean = 0
         impulse_paretic_stdev = 0
         impulse_non_paretic_mean = 0
@@ -870,18 +873,19 @@ class DataProcess:
 
             np_p_impulse = np.array(impulse_paretic)
             np_np_impulse = np.array(impulse_non_paretic)
-            save_each_cycle_bar_plot(
-                np_p_impulse, np_np_impulse,
-                data_label + '[N sec]', title_label + "_impulse",
-                save_path
-            )
             impulse_paretic_mean = np.mean(np_p_impulse)
             impulse_paretic_stdev = np.std(np_p_impulse)
             impulse_non_paretic_mean = np.mean(np_np_impulse)
             impulse_non_paretic_stdev = np.std(np_np_impulse)
-            impulse_symmetry = 1 -\
-                abs(impulse_paretic_mean - impulse_non_paretic_mean)\
-                / (impulse_paretic_mean + impulse_non_paretic_mean)
+            impulse_symmetry = 1 - \
+                               abs(impulse_paretic_mean - impulse_non_paretic_mean) \
+                               / (impulse_paretic_mean + impulse_non_paretic_mean)
+            save_each_cycle_bar_plot(
+                np_p_impulse, np_np_impulse,
+                impulse_paretic_mean, impulse_non_paretic_mean,
+                data_label + '[N sec]', title_label + "_impulse",
+                save_path
+            )
 
         stance_paretic_mean = 0
         stance_paretic_stdev = 0
@@ -904,24 +908,26 @@ class DataProcess:
                 stance_time_non_paretic_ignored.append(
                     stance_time_non_paretic[idx_non_paretic])
 
+            stance_paretic_mean = np.mean(stance_time_paretic_ignored)
+            stance_paretic_stdev = np.std(stance_time_paretic_ignored)
+            stance_non_paretic_mean = np.mean(stance_time_non_paretic_ignored)
+            stance_non_paretic_stdev = np.std(stance_time_non_paretic_ignored)
             save_each_cycle_bar_plot(
                 stance_time_paretic, stance_time_non_paretic,
+                stance_paretic_mean, stance_non_paretic_mean,
                 'stance time [s]', "Stance_Time",
                 save_path
             )
             save_each_cycle_bar_plot(
                 stance_time_paretic_ignored, stance_time_non_paretic_ignored,
+                stance_paretic_mean, stance_non_paretic_mean,
                 'stance time [s]', "Stance_Time_ignored"
                                    "",
                 save_path
             )
-            stance_paretic_mean = np.mean(stance_time_paretic_ignored)
-            stance_paretic_stdev = np.std(stance_time_paretic_ignored)
-            stance_non_paretic_mean = np.mean(stance_time_non_paretic_ignored)
-            stance_non_paretic_stdev = np.std(stance_time_non_paretic_ignored)
-            stance_symmetry = 1 -\
-                abs(stance_paretic_mean - stance_non_paretic_mean)\
-                / (stance_paretic_mean + stance_non_paretic_mean)
+            stance_symmetry = 1 - \
+                              abs(stance_paretic_mean - stance_non_paretic_mean) \
+                              / (stance_paretic_mean + stance_non_paretic_mean)
 
         return [max_paretic_mean, max_paretic_stdev,
                 max_non_paretic_mean, max_non_paretic_stdev,
