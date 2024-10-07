@@ -11,6 +11,7 @@ class ClinicalAnalysis:
             start_time,
             report_start_time,
             report_duration,
+            gait_event_filter,
             left_path,
             right_path,
             paretic_path,
@@ -34,6 +35,8 @@ class ClinicalAnalysis:
         create_folder(inference_data_save_path)
         #####################################################################
         # GRF class assign
+        #  +
+        # "piecewise_linear_info_30N_ver2.json"
         grf_class = GRF_predictor(
             start_time=start_time,
             report_start=report_start_time,
@@ -42,8 +45,7 @@ class ClinicalAnalysis:
             right_path=right_path,
             paretic_path=paretic_path,
             nonparetic_path=non_paretic_path,
-            calib_model_path=model_path_cell +
-            "piecewise_linear_info_30N_ver2.json",
+            calib_model_path=model_path_cell,
             grf_model_path=model_path_grf,
             save_path=inference_data_save_path,
             size=sole_size,
@@ -94,6 +96,7 @@ class ClinicalAnalysis:
             stance_flag=True,
             report_start_time=report_start_time,
             report_duration=report_duration,
+            idx_gait_event_filter=gait_event_filter
             # grf_flag=True
         )
 

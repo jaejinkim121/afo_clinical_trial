@@ -1100,6 +1100,7 @@ class GRF_predictor:
         self.grf_filter = int(grf_filter)
         # force model
         # if self.calib_model_path[-1] == "/":  # LSTM
+        print(self.calib_model_path)
         self.calib_model_name = "LSTM"
         self.calib_dict_name = self.calib_model_path[-19:-1]
         # else:

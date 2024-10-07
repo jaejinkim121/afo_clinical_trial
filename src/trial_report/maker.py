@@ -766,6 +766,7 @@ class ReportMaker:
                 start_time=start_time,
                 report_start_time=report_start_time,
                 report_duration=report_duration,
+                gait_event_filter=current_gait_event_filter,
                 left_path=left_sole_path,
                 right_path=right_sole_path,
                 paretic_path=paretic_gait_path,
