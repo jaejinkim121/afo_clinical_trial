@@ -197,7 +197,7 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
     plt.yticks(fontsize=25)
     create_folder(graph_save_path)
     fig.tight_layout()
-    fig.savefig(graph_save_path + save_label + title_label + '.png')
+    fig.savefig(graph_save_path + title_label + '.png')
     # df saving
     df_data = pd.DataFrame()
     df_data = pd.concat(
@@ -526,7 +526,7 @@ class DataProcess:
             report_start_time=None,
             report_duration=None,
             idx_gait_event_filter=None,
-            save_label=save_label
+            save_label=None
     ):
         total_collection_paretic = []
         total_collection_non_paretic = []
@@ -941,7 +941,7 @@ class DataProcess:
             save_each_cycle_bar_plot(
                 stance_time_paretic, stance_time_non_paretic,
                 stance_paretic_mean, stance_non_paretic_mean,
-                'Stance Time [s]', "Stance Time",
+                'Stance Time [s]', title_label + " Stance Time",
                 save_path
             )
 
