@@ -9,7 +9,7 @@ import os
 from bagpy import bagreader
 
 
-SAVE_EACH_CYCLE_DATA = False
+SAVE_EACH_CYCLE_DATA = True
 
 
 # Create Directory
@@ -100,7 +100,8 @@ def get_torque_info(path, start_time):
 
 def save_each_cycle_timeseries_data(
         collection_data, df_gait,
-        data_label, unit_label, title_label, color, save_path
+        data_label, unit_label, title_label, color, save_path,
+        front_label=None, back_label=None
         ):
     create_folder(save_path)
 
@@ -147,15 +148,17 @@ def save_each_cycle_timeseries_data(
         ax2.tick_params(axis='both', labelsize=15)
         ax2.legend(loc="best")
         fig.savefig(
-            save_path + title_label[0] + '_' + title_label[1] + '_' +
-            str(cycle_num) + '.png'
+            save_path + front_label +
+            title_label[0] + ' ' + title_label[1] + ' Cycle' +
+            str(cycle_num) + back_label + '.png'
             )
         plt.close(fig)
 
 
 def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
                              mean_paretic, mean_non_paretic,
-                             data_label, title_label, save_path):
+                             data_label, title_label, save_path,
+                             front_label=None, back_label=None):
     # 2 array input
     # path assign
     graph_save_path = save_path + "/graph/"
@@ -185,7 +188,8 @@ def save_each_cycle_bar_plot(data_paretic, data_non_paretic,
     plt.yticks(fontsize=25)
     create_folder(graph_save_path)
     fig.tight_layout()
-    fig.savefig(graph_save_path + title_label + '_along_cycle.png')
+    fig.savefig(graph_save_path + front_label + title_label +
+                ' along cycle' + back_label + '.png')
     # df saving
     df_data = pd.DataFrame()
     df_data = pd.concat(
@@ -510,7 +514,12 @@ class DataProcess:
             unit_label=("[N]", None),
             title_label=("data", None),
             ignore_cycle=(None, None),
-            start_time=0.0
+            start_time=0.0,
+            report_start_time=None,
+            report_duration=None,
+            idx_gait_event_filter=None,
+            front_label=None,
+            back_label=None
     ):
         total_collection_paretic = []
         total_collection_non_paretic = []
@@ -522,7 +531,10 @@ class DataProcess:
                 paretic_data, non_paretic_data,
                 paretic_gait_path, non_paretic_gait_path,
                 ignore_cycle=ignore_cycle,
-                start_time=start_time
+                start_time=start_time,
+                report_start_time=report_start_time,
+                report_duration=report_duration,
+                idx_gait_event_filter=idx_gait_event_filter
                 )
         total_collection_paretic.append(main_collection_paretic)
         total_collection_non_paretic.append(main_collection_non_paretic)
@@ -543,7 +555,10 @@ class DataProcess:
                     paretic_extra_df, non_paretic_extra_df,
                     paretic_gait_path, non_paretic_gait_path,
                     ignore_cycle=ignore_cycle,
-                    start_time=start_time
+                    start_time=start_time,
+                    report_start_time=report_start_time,
+                    report_duration=report_duration,
+                    idx_gait_event_filter=idx_gait_event_filter
                     )
             total_collection_paretic.append(extra_collection_paretic)
             total_collection_non_paretic.append(extra_collection_non_paretic)
@@ -555,7 +570,9 @@ class DataProcess:
             unit_label=unit_label,
             title_label=title_label,
             color='red',
-            save_path=save_path + '/graph/each_cycle/paretic/')
+            save_path=save_path + '/graph/each_cycle/paretic/',
+            front_label=front_label,
+            back_label=back_label)
 
         save_each_cycle_timeseries_data(
             total_collection_non_paretic,
@@ -564,7 +581,9 @@ class DataProcess:
             unit_label=unit_label,
             title_label=title_label,
             color='blue',
-            save_path=save_path + '/graph/each_cycle/non_paretic/')
+            save_path=save_path + '/graph/each_cycle/non_paretic/',
+            front_label=front_label,
+            back_label=back_label)
 
     @staticmethod
     def graph_averaged_data(collection_data, title_graph, data_label,
@@ -587,7 +606,7 @@ class DataProcess:
                               data_gait_paretic, data_gait_nonparetic,
                               idx_paretic_ignore, idx_non_paretic_ignore,
                               data_label, title_graph, save_path,
-                              x_num=101):
+                              x_num=101, front_label=None, back_label=None):
         collection_data_paretic_sel = \
             copy.deepcopy(collection_data_paretic)
         collection_data_nonparetic_sel = \
@@ -675,7 +694,8 @@ class DataProcess:
         axs[1].set_xlim(0, xlim_upper)
         create_folder(save_path)
         fig.tight_layout()
-        fig.savefig(save_path + '%s_mean_cycle.png' % title_graph)
+        fig.savefig(save_path + front_label +
+                    '%s mean cycle' % title_graph + back_label + ".png")
         plt.close(fig)
 
     @staticmethod
@@ -697,7 +717,9 @@ class DataProcess:
             report_duration=None,
             idx_gait_event_filter=None,
             df_sub_paretic=None,
-            df_sub_non_paretic=None
+            df_sub_non_paretic=None,
+            front_label=None,
+            back_label=None
     ):
 
         collection_paretic, collection_non_paretic, \
@@ -793,9 +815,11 @@ class DataProcess:
             collection_paretic, collection_non_paretic,
             df_paretic_gait, df_non_paretic_gait,
             idx_paretic_ignore, idx_non_paretic_ignore,
-            data_label + '[N]', title_label,
+            data_label, title_label,
             save_path=save_path + '/graph/',
-            x_num=101
+            x_num=101,
+            front_label=front_label,
+            back_label=back_label
         )
         ###
         # Statistics Processing
@@ -843,8 +867,10 @@ class DataProcess:
                            / (max_paretic_mean + max_non_paretic_mean)
             save_each_cycle_bar_plot(
                 np_p_max, np_np_max, max_paretic_mean, max_non_paretic_mean,
-                data_label + '[N]', title_label + "_max",
-                save_path
+                data_label, title_label + " Maximum",
+                save_path,
+                front_label=front_label,
+                back_label=back_label
             )
         impulse_paretic_mean = 0
         impulse_paretic_stdev = 0
@@ -883,8 +909,10 @@ class DataProcess:
             save_each_cycle_bar_plot(
                 np_p_impulse, np_np_impulse,
                 impulse_paretic_mean, impulse_non_paretic_mean,
-                data_label + '[N sec]', title_label + "_impulse",
-                save_path
+                data_label, title_label + " Impulse",
+                save_path,
+                front_label=front_label,
+                back_label=back_label
             )
 
         stance_paretic_mean = 0
@@ -917,16 +945,22 @@ class DataProcess:
             save_each_cycle_bar_plot(
                 stance_time_paretic, stance_time_non_paretic,
                 stance_paretic_mean, stance_non_paretic_mean,
-                'stance time [s]', "Stance_Time",
-                save_path
+                'Stance Time [s]', "Stance Time",
+                save_path,
+                front_label=front_label,
+                back_label=back_label
             )
+
             # save_each_cycle_bar_plot(
             #     stance_time_paretic_ignored, stance_time_non_paretic_ignored,
             #     stance_paretic_mean, stance_non_paretic_mean,
             #     'stance time [s]', "Stance_Time_ignored"
             #                        "",
-            #     save_path
+            #     save_path,
+            #     front_label=front_label,
+            #     back_label=back_label
             # )
+
             stance_symmetry = 1 - \
                               abs(stance_paretic_mean - stance_non_paretic_mean) \
                               / (stance_paretic_mean + stance_non_paretic_mean)

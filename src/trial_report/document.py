@@ -3,6 +3,7 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.pagesizes import A4
 import numpy as np
+# from src.trial_report.define import ClinicalDataset, Session
 from define import ClinicalDataset, Session
 
 def num_array_to_string_array(num_array):
